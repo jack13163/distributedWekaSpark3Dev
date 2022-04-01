@@ -67,7 +67,7 @@ This package provides Spark wrappers for the classes in distributedWekaBase. Inc
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.1</version>
+            <version>1.0</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -92,11 +92,11 @@ This package provides Spark wrappers for the classes in distributedWekaBase. Inc
   </profiles>
 
   <dependencies>
-    <dependency>
-      <groupId>nz.ac.waikato.cms.weka</groupId>
-      <artifactId>weka-dev</artifactId>
-      <version>[3.9.4,)</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>nz.ac.waikato.cms.weka</groupId>-->
+<!--      <artifactId>weka-dev</artifactId>-->
+<!--      <version>[3.9.4,)</version>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
@@ -230,8 +230,8 @@ This package provides Spark wrappers for the classes in distributedWekaBase. Inc
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.0.2</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
 
