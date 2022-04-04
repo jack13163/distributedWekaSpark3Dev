@@ -24,14 +24,19 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 
 /**
  * <!-- globalinfo-start --> Discretizes numeric attributes using equal
- * frequency binning and forces the number of bins to be equal to the square root of
- * the number of values of the numeric attribute.<br/>
+ * frequency binning, where the number of bins is equal to the square root of
+ * the number of non-missing values.<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
@@ -70,7 +75,7 @@ import weka.core.TechnicalInformation.Type;
  * 
  * <pre>
  * -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to discretize. First and last are valid indexes.
+ *  Specifies list of columns to Discretize. First and last are valid indexes.
  *  (default: first-last)
  * </pre>
  * 
@@ -87,10 +92,10 @@ import weka.core.TechnicalInformation.Type;
  * <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 10215 $
  */
 public class PKIDiscretize extends Discretize implements
-  TechnicalInformationHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6153101248977702675L;
@@ -123,14 +128,14 @@ public class PKIDiscretize extends Discretize implements
     Instances toFilter = getInputFormat();
 
     // Find number of instances for attribute where not missing
-    double sum = 0;
-    for (Instance inst : toFilter) {
-      if (!inst.isMissing(index)) {
-        sum += inst.weight();
+    int numOfInstances = toFilter.numInstances();
+    for (int i = 0; i < toFilter.numInstances(); i++) {
+      if (toFilter.instance(i).isMissing(index)) {
+        numOfInstances--;
       }
     }
 
-    m_NumBins = (int) Math.sqrt(sum);
+    m_NumBins = (int) (Math.sqrt(numOfInstances));
 
     if (m_NumBins > 0) {
       calculateCutPointsByEqualFrequencyBinning(index);
@@ -153,7 +158,7 @@ public class PKIDiscretize extends Discretize implements
       "unset-class-temporarily", 1, "-unset-class-temporarily"));
 
     result.addElement(new Option(
-      "\tSpecifies list of columns to discretize. First"
+      "\tSpecifies list of columns to Discretize. First"
         + " and last are valid indexes.\n" + "\t(default: first-last)", "R", 1,
       "-R <col1,col2-col4,...>"));
 
@@ -182,7 +187,7 @@ public class PKIDiscretize extends Discretize implements
    * 
    * <pre>
    * -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of columns to discretize. First and last are valid indexes.
+   *  Specifies list of columns to Discretize. First and last are valid indexes.
    *  (default: first-last)
    * </pre>
    * 
@@ -257,10 +262,9 @@ public class PKIDiscretize extends Discretize implements
   @Override
   public String globalInfo() {
 
-    return "Discretizes numeric attributes using equal" +
-            " frequency binning and forces the number of bins to be equal to the square root of" +
-            " the number of values of the numeric attribute.\n\n" +
-            "For more information, see:\n\n"
+    return "Discretizes numeric attributes using equal frequency binning,"
+      + " where the number of bins is equal to the square root of the"
+      + " number of non-missing values.\n\n" + "For more information, see:\n\n"
       + getTechnicalInformation().toString();
   }
 
@@ -396,7 +400,7 @@ public class PKIDiscretize extends Discretize implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**

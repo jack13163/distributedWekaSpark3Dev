@@ -58,7 +58,7 @@ import java.util.Vector;
  * configure, datasets, and perform ML analysis.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15294 $
+ * @version $Revision: 13476 $
  */
 public class Explorer extends JPanel {
 
@@ -69,7 +69,7 @@ public class Explorer extends JPanel {
    * Interface for classes that listen for filter changes.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15294 $
+   * @version $Revision: 13476 $
    */
   public static interface CapabilitiesFilterChangeListener extends
     EventListener {
@@ -86,7 +86,7 @@ public class Explorer extends JPanel {
    * This event can be fired in case the capabilities filter got changed
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15294 $
+   * @version $Revision: 13476 $
    */
   public static class CapabilitiesFilterChangeEvent extends ChangeEvent {
 
@@ -121,7 +121,7 @@ public class Explorer extends JPanel {
    * A common interface for panels to be displayed in the Explorer
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15294 $
+   * @version $Revision: 13476 $
    */
   public static interface ExplorerPanel {
 
@@ -166,7 +166,7 @@ public class Explorer extends JPanel {
    * A common interface for panels in the explorer that can handle logs
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15294 $
+   * @version $Revision: 13476 $
    */
   public static interface LogHandler {
 
@@ -278,14 +278,6 @@ public class Explorer extends JPanel {
     setLayout(new BorderLayout());
     add(m_TabbedPane, BorderLayout.CENTER);
     add(m_LogPanel, BorderLayout.SOUTH);
-  }
-
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it terminates the associated LogPanel.
-   */
-  public void terminate() {
-
-    m_LogPanel.terminate();
   }
 
   /**

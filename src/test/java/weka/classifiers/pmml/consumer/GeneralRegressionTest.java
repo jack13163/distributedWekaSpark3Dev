@@ -48,7 +48,7 @@ public class GeneralRegressionTest extends AbstractPMMLClassifierTest {
 
   public static Test suite() {
     return new TestSuite(
-      GeneralRegressionTest.class);
+      weka.classifiers.pmml.consumer.GeneralRegressionTest.class);
   }
 
   public static void main(String[] args) {

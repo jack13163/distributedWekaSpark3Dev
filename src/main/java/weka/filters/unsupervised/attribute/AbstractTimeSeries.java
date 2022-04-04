@@ -24,7 +24,13 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.Range;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -60,10 +66,10 @@ import weka.filters.UnsupervisedFilter;
  * <p>
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 10215 $
  */
 public abstract class AbstractTimeSeries extends Filter implements
-  UnsupervisedFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  UnsupervisedFilter, OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -3795656792078022357L;

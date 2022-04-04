@@ -124,7 +124,7 @@ public class KOML implements RevisionHandler {
     // get Deserializer
     komlClass = Class.forName("fr.dyade.koala.xml.koml.KOMLDeserializer");
     komlClassArgs = new Class[2];
-    komlClassArgs[0] = InputStream.class;
+    komlClassArgs[0] = java.io.InputStream.class;
     komlClassArgs[1] = Boolean.TYPE;
     komlArgs = new Object[2];
     komlArgs[0] = stream;
@@ -201,7 +201,7 @@ public class KOML implements RevisionHandler {
     // get Deserializer
     komlClass = Class.forName("fr.dyade.koala.xml.koml.KOMLSerializer");
     komlClassArgs = new Class[2];
-    komlClassArgs[0] = OutputStream.class;
+    komlClassArgs[0] = java.io.OutputStream.class;
     komlClassArgs[1] = Boolean.TYPE;
     komlArgs = new Object[2];
     komlArgs[0] = stream;

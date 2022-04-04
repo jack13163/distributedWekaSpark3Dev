@@ -25,8 +25,15 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -34,7 +41,11 @@ import weka.filters.SupervisedFilter;
  * <!-- globalinfo-start --> Changes the order of the classes so that the class
  * values are no longer of in the order specified in the header. The values will
  * be in the order specified by the user -- it could be either in
- * ascending/descending order by the class frequency or in random order.
+ * ascending/descending order by the class frequency or in random order. Note
+ * that this filter currently does not change the header, only the class values
+ * of the instances, so there is not much point in using it in conjunction with
+ * the FilteredClassifier. The value can also be converted back using
+ * 'originalValue(double value)' procedure.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -59,10 +70,10 @@ import weka.filters.SupervisedFilter;
  * 
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class ClassOrder extends Filter implements SupervisedFilter,
-  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -2116226838887628411L;
@@ -111,7 +122,11 @@ public class ClassOrder extends Filter implements SupervisedFilter,
       + "no longer of in the order specified in the header. "
       + "The values will be in the order specified by the user "
       + "-- it could be either in ascending/descending order by the class "
-      + "frequency or in random order.";
+      + "frequency or in random order. Note that this filter currently does not "
+      + "change the header, only the class values of the instances, "
+      + "so there is not much point in using it in conjunction with the "
+      + "FilteredClassifier. The value can also be converted back using "
+      + "'originalValue(double value)' procedure.";
   }
 
   /**
@@ -241,8 +256,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    *         explorer/experimenter gui
    */
   public String classOrderTipText() {
-    return "Specify the class order after the filtering (0: ascending," +
-            "1: descending, or 2: random)";
+    return "Specify the class order after the filtering";
   }
 
   /**
@@ -519,7 +533,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -325,7 +325,7 @@ public class OneR extends AbstractClassifier implements
       System.err
         .println("Cannot build model (only class attribute present in data!), "
           + "using ZeroR model instead!");
-      m_ZeroR = new ZeroR();
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
       m_ZeroR.buildClassifier(data);
       return;
     } else {

@@ -262,7 +262,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     } catch (IOException ex) {
       ex.printStackTrace();
     }
-    GenericObjectEditor.determineClasses();
+    weka.gui.GenericObjectEditor.determineClasses();
 
     try {
       if (System.getProperty("os.name").contains("Mac")) {
@@ -277,9 +277,9 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
             false);
         }
       }
-      final JFrame jf =
-        new JFrame("Weka " + m_kfApp.getApplicationName());
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka " + m_kfApp.getApplicationName());
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
       Image icon =
         Toolkit.getDefaultToolkit().getImage(

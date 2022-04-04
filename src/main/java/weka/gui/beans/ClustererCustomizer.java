@@ -55,7 +55,7 @@ public class ClustererCustomizer
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
   
-  private Clusterer m_dsClusterer;
+  private weka.gui.beans.Clusterer m_dsClusterer;
   
   private PropertySheetPanel m_ClustererEditor = 
     new PropertySheetPanel();
@@ -114,7 +114,7 @@ public class ClustererCustomizer
    * @param object an <code>Object</code> value
    */
   public void setObject(Object object) {
-    m_dsClusterer = (Clusterer)object;
+    m_dsClusterer = (weka.gui.beans.Clusterer)object;
     try {
       m_backup = 
         (weka.clusterers.Clusterer)GenericObjectEditor.makeCopy(m_dsClusterer.getClusterer());

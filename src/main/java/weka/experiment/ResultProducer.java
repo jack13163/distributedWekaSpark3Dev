@@ -63,7 +63,7 @@ public interface ResultProducer extends Serializable {
    * in SplitEvaluators.
    * @param additionalMeasures a list of method names
    */
-  void setAdditionalMeasures(String[] additionalMeasures);
+  void setAdditionalMeasures(String [] additionalMeasures);
 
   /**
    * Prepare to generate results. The ResultProducer should call

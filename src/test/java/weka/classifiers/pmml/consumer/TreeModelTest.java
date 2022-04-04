@@ -47,7 +47,7 @@ public class TreeModelTest extends AbstractPMMLClassifierTest {
   }
 
   public static Test suite() {
-    return new TestSuite(TreeModelTest.class);
+    return new TestSuite(weka.classifiers.pmml.consumer.TreeModelTest.class);
   }
 
   public static void main(String[] args) {

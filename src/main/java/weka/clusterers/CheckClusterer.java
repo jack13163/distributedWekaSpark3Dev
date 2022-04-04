@@ -371,7 +371,7 @@ public class CheckClusterer extends CheckScheme {
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0) {
-      tmpStr = SimpleKMeans.class.getName();
+      tmpStr = weka.clusterers.SimpleKMeans.class.getName();
     }
     setClusterer((Clusterer) forName("weka.clusterers", Clusterer.class,
       tmpStr, Utils.partitionOptions(options)));

@@ -21,19 +21,6 @@
 
 package weka.gui.visualize;
 
-import weka.core.PluginManager;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.WekaFileChooser;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -45,8 +32,21 @@ import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
 
 /**
  * This class extends the component which is handed over in the constructor by a
@@ -58,7 +58,7 @@ import java.util.Properties;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15294 $
+ * @version $Revision: 10222 $
  */
 public class PrintableComponent implements PrintableHandler {
 
@@ -66,19 +66,19 @@ public class PrintableComponent implements PrintableHandler {
   protected JComponent m_Component;
 
   /** the filechooser for saving the panel. */
-  protected WekaFileChooser m_FileChooserPanel;
+  protected static JFileChooser m_FileChooserPanel;
 
   /** the checkbox for the custom dimensions. */
-  protected JCheckBox m_CustomDimensionsCheckBox;
+  protected static JCheckBox m_CustomDimensionsCheckBox;
 
   /** the edit field for the custom width. */
-  protected JTextField m_CustomWidthText;
+  protected static JTextField m_CustomWidthText;
 
   /** the edit field for the custom height. */
-  protected JTextField m_CustomHeightText;
+  protected static JTextField m_CustomHeightText;
 
   /** the checkbox for keeping the aspect ration. */
-  protected JCheckBox m_AspectRatioCheckBox;
+  protected static JCheckBox m_AspectRatioCheckBox;
 
   /** the title of the save dialog. */
   protected String m_SaveDialogTitle = "Save as...";
@@ -253,11 +253,11 @@ public class PrintableComponent implements PrintableHandler {
    * current package
    */
   protected void initFileChooser() {
-    List<String> writerNames;
+    Vector<String> writerNames;
     int i;
     Class<?> cls;
     JComponentWriter writer;
-    JComponent accessory;
+    JPanel accessory;
     JLabel label;
 
     // already initialized?
@@ -265,7 +265,7 @@ public class PrintableComponent implements PrintableHandler {
       return;
     }
 
-    m_FileChooserPanel = new WekaFileChooser();
+    m_FileChooserPanel = new JFileChooser();
     m_FileChooserPanel.resetChoosableFileFilters();
     m_FileChooserPanel.setAcceptAllFileFilterUsed(false);
 
@@ -374,7 +374,7 @@ public class PrintableComponent implements PrintableHandler {
     accessory.add(m_AspectRatioCheckBox);
 
     // determine all available writers and add them to the filechooser
-    writerNames = PluginManager.getPluginNamesOfTypeList(JComponentWriter.class
+    writerNames = GenericObjectEditor.getClassnames(JComponentWriter.class
       .getName());
     Collections.sort(writerNames);
     for (i = 0; i < writerNames.size(); i++) {

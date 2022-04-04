@@ -31,7 +31,7 @@ import weka.core.Utils;
  * Class for handling a naive bayes tree structure used for classification.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 14511 $
+ * @version $Revision: 11006 $
  */
 public class NBTreeClassifierTree extends ClassifierTree {
 
@@ -40,6 +40,32 @@ public class NBTreeClassifierTree extends ClassifierTree {
 
   public NBTreeClassifierTree(ModelSelection toSelectLocModel) {
     super(toSelectLocModel);
+  }
+
+  /**
+   * Returns default capabilities of the classifier tree.
+   * 
+   * @return the capabilities of this classifier tree
+   */
+  @Override
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+
+    return result;
   }
 
   /**
@@ -245,6 +271,6 @@ public class NBTreeClassifierTree extends ClassifierTree {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14511 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 }

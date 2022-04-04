@@ -119,7 +119,7 @@ public class DefaultAssociationRule extends AssociationRule
   };
   
   /** The metric type for this rule */
-  protected METRIC_TYPE m_metricType = METRIC_TYPE.CONFIDENCE;
+  protected DefaultAssociationRule.METRIC_TYPE m_metricType = METRIC_TYPE.CONFIDENCE;
   
   /** The premise of the rule */
   protected Collection<Item> m_premise;
@@ -197,9 +197,9 @@ public class DefaultAssociationRule extends AssociationRule
    */
   public double getNamedMetricValue(String metricName) throws Exception {
     
-    METRIC_TYPE requested = null;
+    DefaultAssociationRule.METRIC_TYPE requested = null;
     
-    for (METRIC_TYPE m : METRIC_TYPE.values()) {
+    for (DefaultAssociationRule.METRIC_TYPE m : METRIC_TYPE.values()) {
       if (TAGS_SELECTION[m.ordinal()].getReadable().equals(metricName)) {
         requested = m;
       }
@@ -285,7 +285,7 @@ public class DefaultAssociationRule extends AssociationRule
     result.append(m_premise.toString() + ": " + m_premiseSupport 
         + " ==> " + m_consequence.toString() + ": " + m_totalSupport 
         + "   ");
-    for (METRIC_TYPE m : METRIC_TYPE.values()) {
+    for (DefaultAssociationRule.METRIC_TYPE m : METRIC_TYPE.values()) {
       if (m.equals(m_metricType)) {
         result.append("<" + 
             m.toStringMetric(m_premiseSupport, m_consequenceSupport, 

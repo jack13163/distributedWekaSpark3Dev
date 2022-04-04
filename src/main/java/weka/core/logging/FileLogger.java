@@ -20,21 +20,21 @@
 
 package weka.core.logging;
 
-import weka.core.ResourceUtils;
-import weka.core.RevisionUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.regex.Matcher;
 
+import weka.core.RevisionUtils;
+import weka.core.WekaPackageManager;
+
 /**
  * A simple file logger, that just logs to a single file. Deletes the file
  * when an object gets instantiated.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14281 $
+ * @version $Revision: 8034 $
  */
 public class FileLogger
   extends ConsoleLogger {
@@ -79,7 +79,7 @@ public class FileLogger
     filename = filename.replaceAll("%t", Matcher.quoteReplacement(System.getProperty("java.io.tmpdir")));
     filename = filename.replaceAll("%h", Matcher.quoteReplacement(System.getProperty("user.home")));
     filename = filename.replaceAll("%c", Matcher.quoteReplacement(System.getProperty("user.dir")));
-    filename = filename.replaceAll("%w", Matcher.quoteReplacement(ResourceUtils.getWekaHome().toString()));
+    filename = filename.replaceAll("%w", Matcher.quoteReplacement(WekaPackageManager.WEKA_HOME.toString()));
     if (System.getProperty("%") != null && System.getProperty("%").length() > 0) {
       filename = filename.replaceAll("%%", Matcher.quoteReplacement(System.getProperty("%")));
     }
@@ -137,6 +137,6 @@ public class FileLogger
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14281 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }

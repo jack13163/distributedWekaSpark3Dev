@@ -25,8 +25,18 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -35,7 +45,7 @@ import weka.filters.UnsupervisedFilter;
  * <!-- globalinfo-start --> Converts all nominal attributes into binary numeric
  * attributes. An attribute with k values is transformed into k binary
  * attributes if the class is nominal (using the one-attribute-per-value
- * approach). Binary attributes are left binary if option '-A' is not given. If
+ * approach). Binary attributes are left binary, if option '-A' is not given.If
  * the class is numeric, you might want to use the supervised version of this
  * filter.
  * <p/>
@@ -66,18 +76,14 @@ import weka.filters.UnsupervisedFilter;
  * -V
  *  Invert matching sense of column indexes.
  * </pre>
- *
- * <pre>-spread-attribute-weight
- *  When generating binary attributes, spread weight of old
- *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
- *
+ * 
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14509 $
+ * @version $Revision: 12037 $
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler, StreamableFilter {
 
   /** for serialization */
   static final long serialVersionUID = -1130642825710549138L;
@@ -93,9 +99,6 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
 
   /** Whether we need to transform at all */
   private boolean m_needToTransform = false;
-
-  /** Whether to spread attribute weight when creating binary attributes */
-  protected boolean m_SpreadAttributeWeight = false;
 
   /** Constructor - initialises the filter */
   public NominalToBinary() {
@@ -114,7 +117,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary if option '-A' is not given. "
+      + "Binary attributes are left binary, if option '-A' is not given."
       + "If the class is numeric, you might want to use the supervised version of "
       + "this filter.";
   }
@@ -211,10 +214,6 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     newVector.addElement(new Option(
             "\tInvert matching sense of column indexes.", "V", 0, "-V"));
 
-    newVector.addElement(new Option("\tWhen generating binary attributes, spread weight of old "
-            + "attribute across new attributes. Do not give each new attribute the old weight.\n\t",
-            "spread-attribute-weight", 0, "-spread-attribute-weight"));
-
     return newVector.elements();
   }
 
@@ -247,11 +246,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * -V
    *  Invert matching sense of column indexes.
    * </pre>
-   *
-   * <pre>-spread-attribute-weight
-   *  When generating binary attributes, spread weight of old
-   *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
-   *
+   * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -275,8 +270,6 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
-
-    setSpreadAttributeWeight(Utils.getFlag("spread-attribute-weight", options));
 
     Utils.checkForRemainingOptions(options);
   }
@@ -307,42 +300,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
       options.add("-V");
     }
 
-    if (getSpreadAttributeWeight()) {
-      options.add("-spread-attribute-weight");
-    }
-
     return options.toArray(new String[0]);
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String spreadAttributeWeightTipText() {
-    return "When generating binary attributes, spread weight of old attribute across new attributes. " +
-            "Do not give each new attribute the old weight.";
-  }
-
-  /**
-   * If true, when generating binary attributes, spread weight of old
-   * attribute across new attributes. Do not give each new attribute the old weight.
-   *
-   * @param p whether weight is spread
-   */
-  public void setSpreadAttributeWeight(boolean p) {
-    m_SpreadAttributeWeight = p;
-  }
-
-  /**
-   * If true, when generating binary attributes, spread weight of old
-   * attribute across new attributes. Do not give each new attribute the old weight.
-   *
-   * @return whether weight is spread
-   */
-  public boolean getSpreadAttributeWeight() {
-    return m_SpreadAttributeWeight;
   }
 
   /**
@@ -382,7 +340,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String transformAllValuesTipText() {
-    return "Whether all nominal values are turned into new attributes, not only if there are more than 2 values.";
+    return "Whether all nominal values are turned into new attributes, not only if there are more than 2.";
   }
 
   /**
@@ -416,8 +374,8 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
   public String invertSelectionTipText() {
 
     return "Set attribute selection mode. If false, only selected"
-      + " (nominal) attributes in the range will be processed; if"
-      + " true, only non-selected attributes will be processed.";
+      + " (numeric) attributes in the range will be discretized; if"
+      + " true, only non-selected attributes will be discretized.";
   }
 
   /**
@@ -520,9 +478,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
             if (att.numValues() == 2) {
               value = "=" + att.value(1);
             }
-            Attribute a = new Attribute(att.name() + value);
-            a.setWeight(att.weight());
-            newAtts.add(a);
+            newAtts.add(new Attribute(att.name() + value));
           } else {
             newAtts.add((Attribute) att.copy());
           }
@@ -537,24 +493,12 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
             attributeName = new StringBuffer(att.name() + "=");
             attributeName.append(att.value(k));
             if (m_Numeric) {
-              Attribute a = new Attribute(attributeName.toString());
-              if (getSpreadAttributeWeight()) {
-                a.setWeight(att.weight() / att.numValues());
-              } else {
-                a.setWeight(att.weight());
-              }
-              newAtts.add(a);
+              newAtts.add(new Attribute(attributeName.toString()));
             } else {
               vals = new ArrayList<String>(2);
               vals.add("f");
               vals.add("t");
-              Attribute a = new Attribute(attributeName.toString(), vals);
-              if (getSpreadAttributeWeight()) {
-                a.setWeight(att.weight() / att.numValues());
-              } else {
-                a.setWeight(att.weight());
-              }
-              newAtts.add(a);
+              newAtts.add(new Attribute(attributeName.toString(), vals));
             }
           }
         }
@@ -628,7 +572,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14509 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

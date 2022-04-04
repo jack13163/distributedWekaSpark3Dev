@@ -107,7 +107,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
   protected double m_missingValueReplacementNumeric;
 
   /** optype overrides (override data dictionary type - NOT SUPPORTED AT PRESENT) */
-  protected Optype m_optypeOverride = Optype.NONE;
+  protected FieldMetaInfo.Optype m_optypeOverride = FieldMetaInfo.Optype.NONE;
 
   /** the index of the field in the mining schema Instances */
   protected int m_index;
@@ -273,7 +273,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
 
     // get the usage type
     String usage = field.getAttribute("usageType");
-    for (Usage u : Usage.values()) {
+    for (MiningFieldMetaInfo.Usage u : Usage.values()) {
       if (u.toString().equals(usage)) {
         m_usageType = u;
         break;
@@ -300,7 +300,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
 
     // outliers
     String outliers = field.getAttribute("outliers");
-    for (Outlier o : Outlier.values()) {
+    for (MiningFieldMetaInfo.Outlier o : Outlier.values()) {
       if (o.toString().equals(outliers)) {
         m_outlierTreatmentMethod = o;
         break;
@@ -339,7 +339,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
     
       // treatment type
       String missingTreatment = field.getAttribute("missingValueTreatment");
-      for (Missing m : Missing.values()) {
+      for (MiningFieldMetaInfo.Missing m : Missing.values()) {
         if (m.toString().equals(missingTreatment)) {
           m_missingValueTreatmentMethod = m;
           break;

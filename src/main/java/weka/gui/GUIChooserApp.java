@@ -36,7 +36,7 @@ import weka.core.WekaPackageClassLoaderManager;
 import weka.core.WekaPackageManager;
 import weka.core.scripting.Groovy;
 import weka.core.scripting.Jython;
-import weka.gui.arffviewer.ArffViewerMainPanel;
+import weka.gui.arffviewer.ArffViewer;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
@@ -54,7 +54,23 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -79,6 +95,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.security.Permission;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -94,7 +111,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15439 $
+ * @version $Revision: 13729 $
  */
 public class GUIChooserApp extends JFrame {
 
@@ -146,19 +163,19 @@ public class GUIChooserApp extends JFrame {
       "weka/gui/images/weka_background.gif"));
 
   /** filechooser for the TreeVisualizer */
-  protected WekaFileChooser m_FileChooserTreeVisualizer = new WekaFileChooser(
+  protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for the GraphVisualizer */
-  protected WekaFileChooser m_FileChooserGraphVisualizer = new WekaFileChooser(
+  protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for Plots */
-  protected WekaFileChooser m_FileChooserPlot = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** filechooser for ROC curves */
-  protected WekaFileChooser m_FileChooserROC = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooserROC = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** the icon for the frames */
@@ -177,47 +194,12 @@ public class GUIChooserApp extends JFrame {
   }
 
   /**
-   * Asks the user whether the window that generated the window evident given as the argument should
-   * really be closed.
+   * Get the singleton instance of the GUIChooser
    *
-   * Popping up the option pane also gets rid of some references that Swing keeps to the window, which
-   * is useful for garbage collection when the user does choose to close the window.
-   *
-   * @param e the event that the window generated
-   *
-   * @return whether the user has agreed to close the window
+   * @return the singleton instance of the GUIChooser
    */
-  public boolean checkWindowShouldBeClosed(WindowEvent e) {
-
-    JFrame frame = (JFrame)e.getSource();
-
-    int result = JOptionPane.showConfirmDialog(
-            frame,
-            "Are you sure you want to close the window?",
-            "Close Window",
-            JOptionPane.YES_NO_OPTION);
-
-    return result == JOptionPane.YES_OPTION;
-  }
-
-  /**
-   * Disposes the given JFrame and removes it from the list of frames maintained by the GUIChooserApp.
-   * Removes the given window listener first, which seems to be necessary for garbage collection on macOS.
-   * Also overwrites the content panel with an empty JPanel, also for garbage collection.
-   * Finally, it calls the garbage collector and calls checkExit().
-   *
-   * @param frame the frame to dispose of
-   * @param adapter the window apapter used for dealing with the closing of the window
-   */
-  public void disposeWindow(JFrame frame, WindowAdapter adapter) {
-
-    frame.removeWindowListener(adapter);
-    frame.setContentPane(new JPanel());
-    frame.setJMenuBar(new JMenuBar());
-    frame.dispose();
-    m_Frames.remove(frame);
-    System.gc();
-    checkExit();
+  public static GUIChooserApp getSingleton() {
+    return m_chooser;
   }
 
   /**
@@ -228,8 +210,6 @@ public class GUIChooserApp extends JFrame {
     super("Weka GUI Chooser");
 
     m_Self = this;
-
-    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
     m_settings = new Settings("weka", GUIChooserDefaults.APP_ID);
     GUIChooserDefaults guiChooserDefaults = new GUIChooserDefaults();
@@ -316,11 +296,6 @@ public class GUIChooserApp extends JFrame {
     jMenuItemProgramLogWindow.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        if (m_Self != null) {
-          m_LogWindow.pack();
-          m_LogWindow.setSize(800, 600);
-          m_LogWindow.setLocationRelativeTo(m_Self);
-        }
         m_LogWindow.setVisible(true);
       }
     });
@@ -336,16 +311,17 @@ public class GUIChooserApp extends JFrame {
       @Override
       public void actionPerformed(ActionEvent e) {
         final MemoryUsagePanel panel = new MemoryUsagePanel();
-        final JFrame frame = Utils.getWekaJFrame("Memory usage", m_Self);
+        final JFrame frame = new JFrame("Memory usage");
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              panel.stopMonitoring();
-              disposeWindow(frame, this);
-            }
+            panel.stopMonitoring();
+            frame.dispose();
+            m_Frames.remove(frame);
+            checkExit();
           }
         });
         frame.pack();
@@ -354,7 +330,6 @@ public class GUIChooserApp extends JFrame {
         if ((l.x != -1) && (l.y != -1)) {
           frame.setLocation(l);
         }
-        frame.setLocationRelativeTo(m_Self);
         frame.setVisible(true);
         Dimension size = frame.getPreferredSize();
         frame.setSize(new Dimension((int) size.getWidth(),
@@ -397,15 +372,8 @@ public class GUIChooserApp extends JFrame {
     jMenuItemProgramExit.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        int result = JOptionPane.showConfirmDialog(
-                m_Self,
-                "Are you sure you want to close this window?",
-                "Close Window",
-                JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-          dispose();
-          checkExit();
-        }
+        dispose();
+        checkExit();
       }
     });
 
@@ -444,7 +412,7 @@ public class GUIChooserApp extends JFrame {
           filenames += filename;
           System.err.println("Loading instances from " + filename);
           try {
-            Reader r = new BufferedReader(new FileReader(filename));
+            Reader r = new java.io.BufferedReader(new FileReader(filename));
             Instances i = new Instances(r);
             i.setClassIndex(i.numAttributes() - 1);
             PlotData2D pd1 = new PlotData2D(i);
@@ -467,20 +435,20 @@ public class GUIChooserApp extends JFrame {
         }
 
         // create frame
-        final JFrame frame = Utils.getWekaJFrame("Plot - " + filenames, m_Self);
+        final JFrame frame = new JFrame("Plot - " + filenames);
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
-            if (checkWindowShouldBeClosed(e)) {
-              disposeWindow(frame, this);
-            }
+            m_Frames.remove(frame);
+            frame.dispose();
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -531,20 +499,20 @@ public class GUIChooserApp extends JFrame {
           return;
         }
 
-        final JFrame frame = Utils.getWekaJFrame("ROC - " + filename, m_Self);
+        final JFrame frame = new JFrame("ROC - " + filename);
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(vmc, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
-            if (checkWindowShouldBeClosed(e)) {
-              disposeWindow(frame, this);
-            }
+            m_Frames.remove(frame);
+            frame.dispose();
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -583,21 +551,21 @@ public class GUIChooserApp extends JFrame {
         }
 
         // create frame
-        final JFrame frame = Utils.getWekaJFrame("TreeVisualizer - " + filename, m_Self);
+        final JFrame frame = new JFrame("TreeVisualizer - " + filename);
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(new TreeVisualizer(null, top, arrange),
           BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
-            if (checkWindowShouldBeClosed(e)) {
-              disposeWindow(frame, this);
-            }
+            m_Frames.remove(frame);
+            frame.dispose();
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -639,20 +607,20 @@ public class GUIChooserApp extends JFrame {
         }
 
         // create frame
-        final JFrame frame = Utils.getWekaJFrame("GraphVisualizer - " + filename, m_Self);
+        final JFrame frame = new JFrame("GraphVisualizer - " + filename);
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
-            if (checkWindowShouldBeClosed(e)) {
-              disposeWindow(frame, this);
-            }
+            m_Frames.remove(frame);
+            frame.dispose();
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -669,25 +637,26 @@ public class GUIChooserApp extends JFrame {
     jMenuItemVisualizationBoundary.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("BoundaryVisualizer", m_Self);
-        frame.getContentPane().setLayout(new BorderLayout());
+        final JFrame frame = new JFrame("BoundaryVisualizer");
+        frame.setIconImage(m_Icon);
+        frame.getContentPane().setLayout(
+                new BorderLayout());
         final BoundaryVisualizer bv = new BoundaryVisualizer();
-        frame.getContentPane().add(bv, BorderLayout.CENTER);
+        frame.getContentPane().add(bv,
+                BorderLayout.CENTER);
         frame.setSize(bv.getMinimumSize());
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              bv.stopPlotting();
-              disposeWindow(frame, this);
-            }
-
+            bv.stopPlotting();
+            frame.dispose();
+            m_Frames.remove(frame);
+            checkExit();
           }
         });
         frame.pack();
-        // frame.setSize(1024, 768);
+        // frame.setSize(800, 600);
         frame.setResizable(false);
-        frame.setLocationRelativeTo(m_Self);
         frame.setVisible(true);
         m_Frames.add(frame);
         // dont' do a System.exit after last window got closed!
@@ -697,7 +666,7 @@ public class GUIChooserApp extends JFrame {
 
     // Extensions
     JMenu jMenuExtensions = new JMenu("Extensions");
-    jMenuExtensions.setMnemonic(KeyEvent.VK_E);
+    jMenuExtensions.setMnemonic(java.awt.event.KeyEvent.VK_E);
     m_jMenuBar.add(jMenuExtensions);
     jMenuExtensions.setVisible(false);
 
@@ -716,7 +685,7 @@ public class GUIChooserApp extends JFrame {
       for (String classname : classnames) {
         try {
           MainMenuExtension ext =
-            (MainMenuExtension) WekaPackageClassLoaderManager.objectForName(classname);
+            (MainMenuExtension) Class.forName(classname).newInstance();
 
           // menuitem in a submenu?
           JMenu submenu = null;
@@ -783,28 +752,29 @@ public class GUIChooserApp extends JFrame {
         Thread temp = new Thread() {
           @Override
           public void run() {
-            final PackageManager pm;
-            pm = new PackageManager();
+            final weka.gui.PackageManager pm;
+            pm = new weka.gui.PackageManager();
             if (!WekaPackageManager.m_noPackageMetaDataAvailable) {
-              final JFrame frame = Utils.getWekaJFrame("Package Manager" + offline, m_Self);
-              frame.getContentPane().setLayout(new BorderLayout());
-              frame.getContentPane().add(pm, BorderLayout.CENTER);
+              final JFrame frame = new JFrame("Package Manager" + offline);
+              frame.setIconImage(m_Icon);
+              frame.getContentPane().setLayout(
+                      new BorderLayout());
+              frame.getContentPane().add(pm,
+                      BorderLayout.CENTER);
               frame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent w) {
-                  if (checkWindowShouldBeClosed(w)) {
-                    disposeWindow(frame, this);
-                  }
+                  frame.dispose();
+                  m_Frames.remove(frame);
+                  checkExit();
                 }
               });
-              frame.pack();
               Dimension screenSize =
                       frame.getToolkit().getScreenSize();
               int width = screenSize.width * 8 / 10;
               int height = screenSize.height * 8 / 10;
               frame.setBounds(width / 8, height / 8, width,
                       height);
-              frame.setLocationRelativeTo(m_Self);
               frame.setVisible(true);
               pm.setInitialSplitPaneDividerLocation();
               m_Frames.add(frame);
@@ -826,24 +796,16 @@ public class GUIChooserApp extends JFrame {
     jMenuItemToolsArffViewer.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("ARFF-Viewer", m_Self);
-        final ArffViewerMainPanel arffViewerMainPanel = new ArffViewerMainPanel(frame);
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(arffViewerMainPanel, BorderLayout.CENTER);
-        frame.setJMenuBar(arffViewerMainPanel.getMenu());
-        frame.addWindowListener(new WindowAdapter() {
+        final ArffViewer av = new ArffViewer();
+        av.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              disposeWindow(frame, this);
-            }
+            m_Frames.remove(av);
+            checkExit();
           }
         });
-        frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
-        frame.setVisible(true);
-        m_Frames.add(frame);
+        av.setVisible(true);
+        m_Frames.add(av);
       }
     });
 
@@ -858,22 +820,21 @@ public class GUIChooserApp extends JFrame {
     jMenuItemToolsSql.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("SqlViewer", m_Self);
-        final SqlViewer sql = new SqlViewer(frame);
+        final SqlViewer sql = new SqlViewer(null);
+        final JFrame frame = new JFrame("SqlViewer");
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(sql, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              sql.saveSize();
-              disposeWindow(frame, this);
-            }
+            sql.saveSize();
+            frame.dispose();
+            m_Frames.remove(frame);
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -890,20 +851,20 @@ public class GUIChooserApp extends JFrame {
       public void actionPerformed(ActionEvent e) {
         final GUI bayesNetGUI = new GUI();
         JMenuBar bayesBar = bayesNetGUI.getMenuBar();
-        final JFrame frame = Utils.getWekaJFrame("Bayes Network Editor", m_Self);
+        final JFrame frame = new JFrame("Bayes Network Editor");
+        frame.setIconImage(m_Icon);
         frame.setJMenuBar(bayesBar);
-        frame.getContentPane().add(bayesNetGUI, BorderLayout.CENTER);
+        frame.getContentPane().add(bayesNetGUI,
+                BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              disposeWindow(frame, this);
-            }
+            frame.dispose();
+            m_Frames.remove(frame);
+            checkExit();
           }
         });
-        frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -972,20 +933,20 @@ public class GUIChooserApp extends JFrame {
 
             // Default to built-in console
             final JythonPanel jythonPanel = new JythonPanel();
-            final JFrame frame = Utils.getWekaJFrame(jythonPanel.getPlainTitle(), m_Self);
+            final JFrame frame = new JFrame(jythonPanel.getPlainTitle());
+            frame.setIconImage(m_Icon);
+            frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             frame.setJMenuBar(jythonPanel.getMenuBar());
-            frame.getContentPane().add(jythonPanel, BorderLayout.CENTER);
+            frame.getContentPane().add(jythonPanel,
+                    BorderLayout.CENTER);
             frame.addWindowListener(new WindowAdapter() {
               @Override
-              public void windowClosing(WindowEvent w) {
-                if (checkWindowShouldBeClosed(w)) {
-                  disposeWindow(frame, this);
-                }
+              public void windowClosed(WindowEvent w) {
+                m_Frames.remove(frame);
+                checkExit();
               }
             });
-            frame.pack();
-            frame.setSize(1024, 768);
-            frame.setLocationRelativeTo(m_Self);
+            frame.setSize(800, 600);
             frame.setVisible(true);
             m_Frames.add(frame);
           }
@@ -1011,7 +972,9 @@ public class GUIChooserApp extends JFrame {
             mItem.addActionListener(new ActionListener() {
               @Override
               public void actionPerformed(ActionEvent e) {
-                final JFrame appFrame = Utils.getWekaJFrame(p.getApplicationName(), m_Self);
+                final JFrame appFrame = new JFrame(p.getApplicationName());
+                appFrame.setIconImage(m_Icon);
+                appFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                 JMenuBar appMenu = p.getMenuBar();
                 if (appMenu != null) {
                   appFrame.setJMenuBar(appMenu);
@@ -1021,15 +984,12 @@ public class GUIChooserApp extends JFrame {
                   BorderLayout.CENTER);
                 appFrame.addWindowListener(new WindowAdapter() {
                   @Override
-                  public void windowClosing(WindowEvent e) {
-                    if (checkWindowShouldBeClosed(e)) {
-                      disposeWindow(appFrame, this);
-                    }
+                  public void windowClosed(WindowEvent e) {
+                    m_Frames.remove(appFrame);
+                    checkExit();
                   }
                 });
-                appFrame.pack();
-                appFrame.setSize(1024, 768);
-                appFrame.setLocationRelativeTo(m_Self);
+                appFrame.setSize(800, 600);
                 appFrame.setVisible(true);
                 m_Frames.add(appFrame);
               }
@@ -1071,7 +1031,7 @@ public class GUIChooserApp extends JFrame {
     jMenuItemHelpHomepage.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("https://www.cs.waikato.ac.nz/~ml/weka/");
+        BrowserHelper.openURL("http://www.cs.waikato.ac.nz/~ml/weka/");
       }
     });
 
@@ -1088,7 +1048,7 @@ public class GUIChooserApp extends JFrame {
     jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("https://waikato.github.io/weka-wiki/");
+        BrowserHelper.openURL("http://weka.wikispaces.com/");
       }
     });
 
@@ -1103,7 +1063,7 @@ public class GUIChooserApp extends JFrame {
     jMenuItemHelpSourceforge.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("https://sourceforge.net/projects/weka/");
+        BrowserHelper.openURL("http://sourceforge.net/projects/weka/");
       }
     });
 
@@ -1118,7 +1078,8 @@ public class GUIChooserApp extends JFrame {
     jMenuItemHelpSysInfo.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("SystemInfo", m_Self);
+        final JFrame frame = new JFrame("SystemInfo");
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
 
         // get info
@@ -1146,14 +1107,13 @@ public class GUIChooserApp extends JFrame {
         frame.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              disposeWindow(frame, this);
-            }
+            frame.dispose();
+            m_Frames.remove(frame);
+            checkExit();
           }
         });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -1171,28 +1131,25 @@ public class GUIChooserApp extends JFrame {
     m_ExperimenterBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("Weka Experiment Environment", m_Self);
+          final JFrame frame = new JFrame("Weka Experiment Environment");
+        frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
-        final Experimenter experimenter = new Experimenter(false);
-        frame.getContentPane().add(experimenter,
-                BorderLayout.CENTER);
+        frame.getContentPane().add(new Experimenter(false),
+            BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
-          @Override
-          public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              experimenter.terminate();
-              disposeWindow(frame, this);
+            @Override
+            public void windowClosing(WindowEvent w) {
+              frame.dispose();
+              m_Frames.remove(frame);
+              checkExit();
             }
-          }
-        });
+          });
         frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
+        frame.setSize(800, 600);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
-    });
-
+      });
 
     m_KnowledgeFlowBut.addActionListener(new ActionListener() {
       @Override
@@ -1205,23 +1162,21 @@ public class GUIChooserApp extends JFrame {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        final JFrame frame = Utils.getWekaJFrame("Weka Workbench", m_Self);
-        WorkbenchApp app = new WorkbenchApp();
+          WorkbenchApp app = new WorkbenchApp();
+          final JFrame frame = new JFrame("Weka Workbench");
+        frame.setIconImage(m_Icon);
         frame.add(app, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
-          @Override
-          public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              app.terminate();
-              disposeWindow(frame, this);
+            @Override
+            public void windowClosing(WindowEvent e) {
+              frame.dispose();
+              m_Frames.remove(frame);
+              checkExit();
             }
-          }
-        });
-
-        app.showMenuBar(frame);
+          });
+          app.showMenuBar(frame);
         frame.pack();
         frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
         frame.setVisible(true);
         m_Frames.add(frame);
       }
@@ -1230,24 +1185,23 @@ public class GUIChooserApp extends JFrame {
     m_SimpleBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final SimpleCLIPanel simpleCLIPanel = new SimpleCLIPanel();
-        final JFrame frame = Utils.getWekaJFrame(simpleCLIPanel.getTitle(), m_Self);
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(simpleCLIPanel, BorderLayout.CENTER);
-        frame.addWindowListener(new WindowAdapter() {
-          @Override
-          public void windowClosing(WindowEvent w) {
-            if (checkWindowShouldBeClosed(w)) {
-              simpleCLIPanel.terminate();
-              disposeWindow(frame, this);
+        try {
+          final JFrame frame = new SimpleCLI();
+          frame.setIconImage(m_Icon);
+
+          frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent w) {
+              frame.dispose();
+              m_Frames.remove(frame);
+              checkExit();
             }
-          }
-        });
-        frame.pack();
-        frame.setSize(1024, 768);
-        frame.setLocationRelativeTo(m_Self);
-        frame.setVisible(true);
-        m_Frames.add(frame);
+          });
+          frame.setVisible(true);
+          m_Frames.add(frame);
+        } catch (Exception ex) {
+          throw new Error("Could not start SimpleCLI!");
+        }
       }
     });
 
@@ -1266,7 +1220,7 @@ public class GUIChooserApp extends JFrame {
      * void windowClosing(WindowEvent w) { m_EnsembleLibraryFrame.dispose();
      * m_EnsembleLibraryFrame = null; m_EnsembleLibraryBut.setEnabled(true);
      * checkExit(); } }); m_EnsembleLibraryFrame.pack();
-     * m_EnsembleLibraryFrame.setSize(1024, 768);
+     * m_EnsembleLibraryFrame.setSize(800, 600);
      * m_EnsembleLibraryFrame.setVisible(true); } } });
      */
 
@@ -1275,10 +1229,8 @@ public class GUIChooserApp extends JFrame {
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent w) {
-        if (checkWindowShouldBeClosed(w)) {
-          dispose();
-          checkExit();
-        }
+        dispose();
+        checkExit();
       }
     });
     pack();
@@ -1314,7 +1266,8 @@ public class GUIChooserApp extends JFrame {
   }
 
   public void showKnowledgeFlow(String fileToLoad) {
-    final JFrame frame = Utils.getWekaJFrame("Weka KnowledgeFlow Environment", m_Self);
+    final JFrame frame = new JFrame("Weka KnowledgeFlow Environment");
+    frame.setIconImage(m_Icon);
     frame.getContentPane().setLayout(new BorderLayout());
     final KnowledgeFlowApp knowledgeFlow = new KnowledgeFlowApp();
     frame.getContentPane().add(knowledgeFlow, BorderLayout.CENTER);
@@ -1322,60 +1275,58 @@ public class GUIChooserApp extends JFrame {
     frame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent w) {
-        if (checkWindowShouldBeClosed(w)) {
 
-          ((MainKFPerspective) knowledgeFlow.getMainPerspective())
-                  .closeAllTabs();
-          ((MainKFPerspective) knowledgeFlow.getMainPerspective())
-                  .addUntitledTab();
+        ((MainKFPerspective) knowledgeFlow.getMainPerspective())
+                .closeAllTabs();
+        ((MainKFPerspective) knowledgeFlow.getMainPerspective())
+                .addUntitledTab();
 
           /*
            * kna.closeAllTabs(); kna.clearLayout(); // add a single "Untitled"
            * tab ready for next // time
            */
-          knowledgeFlow.terminate();
-          disposeWindow(frame, this);
-        }
+        frame.dispose();
+        m_Frames.remove(frame);
+        checkExit();
       }
     });
     frame.pack();
     frame.setSize(1024, 768);
-    frame.setLocationRelativeTo(m_Self);
     frame.setVisible(true);
     m_Frames.add(frame);
   }
 
   public void showExplorer(String fileToLoad) {
-    final JFrame frame = Utils.getWekaJFrame("Weka Explorer", m_Self);
+    final JFrame frame = new JFrame("Weka Explorer");
+    frame.setIconImage(m_Icon);
     frame.getContentPane().setLayout(new BorderLayout());
-    final Explorer expl = new Explorer();
+    Explorer expl = new Explorer();
+
     frame.getContentPane().add(expl, BorderLayout.CENTER);
     frame.addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent w) {
-        if (checkWindowShouldBeClosed(w)) {
-          expl.terminate();
-          disposeWindow(frame, this);
+        @Override
+        public void windowClosing(WindowEvent w) {
+          frame.dispose();
+          m_Frames.remove(frame);
+          checkExit();
         }
-      }
-    });
+      });
     frame.pack();
-    frame.setSize(1024, 768);
-    frame.setLocationRelativeTo(m_Self);
+    frame.setSize(800, 600);
     frame.setVisible(true);
     m_Frames.add(frame);
 
     if (fileToLoad != null) {
       try {
         weka.core.converters.AbstractFileLoader loader =
-                weka.core.converters.ConverterUtils.getLoaderForFile(fileToLoad);
+          weka.core.converters.ConverterUtils.getLoaderForFile(fileToLoad);
         loader.setFile(new File(fileToLoad));
         expl.getPreprocessPanel().setInstancesFromFile(loader);
       } catch (Exception ex) {
         ex.printStackTrace();
       }
     }
-  }
+}
 
   /**
    * insert the menu item in a sorted fashion.
@@ -1465,12 +1416,10 @@ public class GUIChooserApp extends JFrame {
     frame.validate();
 
     // location
-    //int screenHeight = getGraphicsConfiguration().getBounds().height;
-    //int screenWidth = getGraphicsConfiguration().getBounds().width;
-    //frame.setLocation((screenWidth - frame.getBounds().width) / 2,
-    //  (screenHeight - frame.getBounds().height) / 2);
-
-    frame.setLocationRelativeTo(parent);
+    int screenHeight = getGraphicsConfiguration().getBounds().height;
+    int screenWidth = getGraphicsConfiguration().getBounds().width;
+    frame.setLocation((screenWidth - frame.getBounds().width) / 2,
+      (screenHeight - frame.getBounds().height) / 2);
 
     // listener?
     if (listener) {
@@ -1496,7 +1445,7 @@ public class GUIChooserApp extends JFrame {
    * Specialized JFrame class.
    *
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15439 $
+   * @version $Revision: 13729 $
    */
   public static class ChildFrameSDI extends JFrame {
 
@@ -1724,8 +1673,6 @@ public class GUIChooserApp extends JFrame {
       // m_Memory.setEnabled(false);
       // m_chooser = new GUIChooser();
       GUIChooserApp.createSingleton();
-      m_chooser.pack();
-      m_chooser.setSize(500, 350);
       m_chooser.setVisible(true);
 
       if (args != null && args.length > 0) {
@@ -1756,10 +1703,8 @@ public class GUIChooserApp extends JFrame {
               System.gc();
 
               // display error
-              GUIChooserApp.m_LogWindow.pack();
-              GUIChooserApp.m_LogWindow.setSize(1024,768);
-              GUIChooserApp.m_LogWindow.setVisible(true);
-              GUIChooserApp.m_LogWindow.toFront();
+              m_chooser.m_LogWindow.setVisible(true);
+              m_chooser.m_LogWindow.toFront();
               System.err.println("\ndisplayed message:");
               m_Memory.showOutOfMemory();
               System.err.println("\nexiting...");

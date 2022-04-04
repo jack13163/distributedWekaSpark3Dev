@@ -25,8 +25,18 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -56,10 +66,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14817 $
+ * @version $Revision: 12037 $
  */
 public class Remove extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5011337331921522847L;
@@ -206,11 +216,6 @@ public class Remove extends Filter implements UnsupervisedFilter,
     ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     int outputClass = -1;
     m_SelectedAttributes = m_SelectCols.getSelection();
-    if (m_SelectedAttributes.length == instanceInfo.numAttributes()) { // Nothing is being removed
-      setOutputFormat(instanceInfo);
-      initInputLocators(getInputFormat(), m_SelectedAttributes);
-      return true;
-    }
     for (int current : m_SelectedAttributes) {
       if (instanceInfo.classIndex() == current) {
         outputClass = attributes.size();
@@ -250,21 +255,16 @@ public class Remove extends Filter implements UnsupervisedFilter,
     if (getOutputFormat().numAttributes() == 0) {
       return false;
     }
-    Instance inst;
-    if (m_SelectedAttributes.length == getInputFormat().numAttributes()) { // Nothing is being removed
-      inst = (Instance) instance.copy();
-      inst.setDataset(null);
+    double[] vals = new double[getOutputFormat().numAttributes()];
+    for (int i = 0; i < m_SelectedAttributes.length; i++) {
+      int current = m_SelectedAttributes[i];
+      vals[i] = instance.value(current);
+    }
+    Instance inst = null;
+    if (instance instanceof SparseInstance) {
+      inst = new SparseInstance(instance.weight(), vals);
     } else {
-      double[] vals = new double[getOutputFormat().numAttributes()];
-      for (int i = 0; i < m_SelectedAttributes.length; i++) {
-        int current = m_SelectedAttributes[i];
-        vals[i] = instance.value(current);
-      }
-      if (instance instanceof SparseInstance) {
-        inst = new SparseInstance(instance.weight(), vals);
-      } else {
-        inst = new DenseInstance(instance.weight(), vals);
-      }
+      inst = new DenseInstance(instance.weight(), vals);
     }
 
     copyValues(inst, false, instance.dataset(), outputFormatPeek());
@@ -380,7 +380,7 @@ public class Remove extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14817 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

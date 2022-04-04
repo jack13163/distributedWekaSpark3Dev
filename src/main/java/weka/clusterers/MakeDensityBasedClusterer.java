@@ -113,7 +113,7 @@ public class MakeDensityBasedClusterer extends AbstractDensityBasedClusterer
   /** default minimum standard deviation */
   private double m_minStdDev = 1e-6;
   /** The clusterer being wrapped */
-  private Clusterer m_wrappedClusterer = new SimpleKMeans();
+  private Clusterer m_wrappedClusterer = new weka.clusterers.SimpleKMeans();
   /** globally replace missing values */
   private ReplaceMissingValues m_replaceMissing;
 

@@ -23,25 +23,29 @@ package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> A simple instance filter that renames the relation,
- * all attribute names and all nominal attribute values. For
- * exchanging sensitive datasets. Leaves string and relational
- * attributes untouched.
+ * all attribute names and all nominal (and string) attribute values. For
+ * exchanging sensitive datasets. Currently doesn't like string or relational
+ * attributes.
  * <p/>
  * <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class Obfuscate extends Filter implements UnsupervisedFilter,
-  StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter {
 
   /** for serialization */
   static final long serialVersionUID = -343922772462971561L;
@@ -54,8 +58,8 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
     return "A simple instance filter that renames the relation, all attribute names "
-      + "and all nominal attribute values. For exchanging sensitive "
-      + "datasets. Leaves string and relational attributes untouched.";
+      + "and all nominal (and string) attribute values. For exchanging sensitive "
+      + "datasets. Currently doesn't like string or relational attributes.";
   }
 
   /**
@@ -161,7 +165,7 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

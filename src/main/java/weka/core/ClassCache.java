@@ -41,7 +41,7 @@ import java.util.jar.Manifest;
  * A singleton that stores all classes on the classpath.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14790 $
+ * @version $Revision: 13476 $
  */
 public class ClassCache implements RevisionHandler {
 
@@ -49,7 +49,7 @@ public class ClassCache implements RevisionHandler {
    * For filtering classes.
    * 
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 14790 $
+   * @version $Revision: 13476 $
    */
   public static class ClassFileFilter implements FileFilter {
 
@@ -69,7 +69,7 @@ public class ClassCache implements RevisionHandler {
    * For filtering classes.
    * 
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 14790 $
+   * @version $Revision: 13476 $
    */
   public static class DirectoryFilter implements FileFilter {
 
@@ -204,25 +204,21 @@ public class ClassCache implements RevisionHandler {
 
     // check classes
     files = dir.listFiles(new ClassFileFilter());
-    if (files != null) {
-      for (File file : files) {
-        if (prefix == null) {
-          add(file.getName());
-        } else {
-          add(prefix + "." + file.getName());
-        }
+    for (File file : files) {
+      if (prefix == null) {
+        add(file.getName());
+      } else {
+        add(prefix + "." + file.getName());
       }
     }
 
     // descend in directories
     files = dir.listFiles(new DirectoryFilter());
-    if (files != null) {
-      for (File file : files) {
-        if (prefix == null) {
-          initFromDir(file.getName(), file);
-        } else {
-          initFromDir(prefix + "." + file.getName(), file);
-        }
+    for (File file : files) {
+      if (prefix == null) {
+        initFromDir(file.getName(), file);
+      } else {
+        initFromDir(prefix + "." + file.getName(), file);
       }
     }
   }
@@ -442,7 +438,7 @@ public class ClassCache implements RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14790 $");
+    return RevisionUtils.extract("$Revision: 13476 $");
   }
 
   /**

@@ -53,7 +53,7 @@ public interface VisualizePlugin {
    *         visualization is applicable for the input
    */
   public JMenuItem getVisualizeMenuItem(ArrayList<Prediction> preds,
-                                        Attribute classAtt);
+    Attribute classAtt);
 
   /**
    * Get the minimum version of Weka, inclusive, the class is designed to work

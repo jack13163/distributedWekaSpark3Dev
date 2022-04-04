@@ -345,7 +345,7 @@ public class BIFReader extends BayesNet implements TechnicalInformationHandler {
       String sNodeName = ((CharacterData) (nodelist2.get(0).getFirstChild()))
         .getData();
 
-      Attribute att = new Attribute(sNodeName, nomStrings);
+      weka.core.Attribute att = new weka.core.Attribute(sNodeName, nomStrings);
       attInfo.add(att);
 
       valueslist = selectProperty(nodelist.item(iNode));

@@ -36,7 +36,7 @@ import java.beans.PropertyChangeListener;
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 15294 $
+ * @version $Revision: 12928 $
  */
 public class SetupModePanel
   extends JPanel {
@@ -171,17 +171,6 @@ public class SetupModePanel
     if (m_Panels != null) {
       for (AbstractSetupPanel panel : m_Panels)
         panel.removePropertyChangeListener(l);
-    }
-  }
-
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it sets all references
-   * to associated JFrame objects to null.
-   */
-  public void terminate() {
-    if (m_Panels != null) {
-      for (AbstractSetupPanel panel : m_Panels)
-        panel.terminate();
     }
   }
 

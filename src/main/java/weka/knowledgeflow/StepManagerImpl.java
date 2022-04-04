@@ -24,8 +24,6 @@ package weka.knowledgeflow;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.SerializationHelper;
-import weka.core.SerializedObject;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.WekaException;
@@ -65,9 +63,6 @@ public class StepManagerImpl implements StepManager {
 
   /** True if, at the current time, the managed step is busy with processing */
   protected boolean m_stepIsBusy;
-
-  /** True if the step is finished with processing (as far as it can tell) */
-  protected boolean m_stepIsFinished;
 
   /**
    * Set and get arbitrary properties relating to this step/step manager. E.g. a
@@ -404,7 +399,6 @@ public class StepManagerImpl implements StepManager {
     boolean initializedOK = false;
     m_stepIsBusy = false;
     m_stopRequested = false;
-    m_stepIsFinished = false;
     try {
       getManagedStep().stepInit();
       // getManagedStep().init();
@@ -442,16 +436,6 @@ public class StepManagerImpl implements StepManager {
   }
 
   /**
-   * Return true if the current step is finished.
-   *
-   * @return true if the current step is finished
-   */
-  @Override
-  public boolean isStepFinished() {
-    return m_stepIsFinished;
-  }
-
-  /**
    * Set the status of the stop requested flag
    *
    * @param stopRequested true if a stop has been requested
@@ -475,7 +459,6 @@ public class StepManagerImpl implements StepManager {
   @Override
   public void finished() {
     m_stepIsBusy = false;
-    m_stepIsFinished = true;
     if (!isStopRequested()) {
       statusMessage("Finished.");
     }
@@ -928,17 +911,10 @@ public class StepManagerImpl implements StepManager {
 
       List<StepManager> toNotify =
         m_connectedByTypeOutgoing.get(outgoingConnectionName);
-      boolean copyPrimaryPayload =
-        payloadNotThreadSafe(data) && toNotify.size() > 1;
-      boolean first = true;
       if (toNotify != null) {
         for (StepManager s : toNotify) {
           if (!isStopRequested()) {
-            if (!first && copyPrimaryPayload) {
-              copyPrimaryPayload(data);
-            }
             m_executionEnvironment.sendDataToStep((StepManagerImpl) s, data);
-            first = false;
           }
         }
       }
@@ -977,20 +953,13 @@ public class StepManagerImpl implements StepManager {
         List<StepManager> candidates =
           m_connectedByTypeOutgoing.get(d.getConnectionName());
         if (candidates != null) {
-          boolean copyPrimaryPayload =
-            payloadNotThreadSafe(d) && candidates.size() > 1;
-          boolean first = true;
           for (StepManager s : candidates) {
             List<Data> toReceive = stepsToSendTo.get(s);
             if (toReceive == null) {
               toReceive = new ArrayList<Data>();
               stepsToSendTo.put((StepManagerImpl) s, toReceive);
             }
-            if (!first && copyPrimaryPayload) {
-              copyPrimaryPayload(d);
-            }
             toReceive.add(d);
-            first = false;
           }
         }
 
@@ -1207,31 +1176,10 @@ public class StepManagerImpl implements StepManager {
   @Override
   public Instances getIncomingStructureForConnectionType(String connectionName)
     throws WekaException {
-    return getIncomingStructureForConnectionType(connectionName, null);
-  }
-
-  /**
-   * Attempt to retrieve the structure (as a header-only set of instances) for
-   * the named incoming connection type. Assumes that there is only one step
-   * connected with the supplied incoming connection type.
-   *
-   * @param connectionName the type of the incoming connection to get the
-   *          structure for
-   * @param env the Environment to use
-   * @return the structure of the data for the specified incoming connection, or
-   *         null if the structure can't be determined (or represented as an
-   *         Instances object)
-   * @throws WekaException if a problem occurs
-   */
-  @Override
-  public Instances getIncomingStructureForConnectionType(String connectionName,
-    Environment env) throws WekaException {
-
-    Environment toUse = env != null ? env : Environment.getSystemWide();
     if (getIncomingConnectedStepsOfConnectionType(connectionName).size() == 1) {
       return ((StepManagerImpl) getIncomingConnectedStepsOfConnectionType(
         connectionName).get(0)).getManagedStep()
-        .outputStructureForConnectionType(connectionName, toUse);
+        .outputStructureForConnectionType(connectionName);
     }
 
     return null;
@@ -1464,36 +1412,6 @@ public class StepManagerImpl implements StepManager {
     }
 
     return prefix;
-  }
-
-  /**
-   * Returns true if the primary payload of the supplied data object is not
-   * thread safe.
-   *
-   * @param data the data object to check
-   * @return true if the primary payload is not thread safe
-   */
-  protected static boolean payloadNotThreadSafe(Data data) {
-    // not specified or default is payload is thread safe
-    return data.getPayloadElement(
-      StepManager.CON_AUX_DATA_PRIMARY_PAYLOAD_NOT_THREAD_SAFE, false);
-  }
-
-  /**
-   * Replaces the primary payload of the supplied data object with a serialized
-   * copy of itself
-   * 
-   * @param data the data object for which to make a copy of the primary payload
-   * @throws WekaException if a problem occurs
-   */
-  protected static void copyPrimaryPayload(Data data) throws WekaException {
-    Object payload = data.getPrimaryPayload();
-    try {
-      SerializedObject o = new SerializedObject(payload);
-      data.setPayloadElement(data.getConnectionName(), o.getObject());
-    } catch (Exception ex) {
-      throw new WekaException(ex);
-    }
   }
 
   /**

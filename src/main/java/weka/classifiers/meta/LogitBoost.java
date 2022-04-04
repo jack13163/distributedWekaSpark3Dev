@@ -38,7 +38,6 @@ import weka.classifiers.Classifier;
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
-import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
@@ -63,6 +62,8 @@ import weka.core.WeightedInstancesHandler;
  * J. Friedman, T. Hastie, R. Tibshirani (1998). Additive Logistic Regression: a
  * Statistical View of Boosting. Stanford University.<br/>
  * <br/>
+ * Can do efficient internal cross-validation to determine appropriate number of
+ * iterations.
  * <p/>
  * <!-- globalinfo-end -->
  *
@@ -82,17 +83,12 @@ import weka.core.WeightedInstancesHandler;
  *
  * <!-- options-start --> Valid options are:
  * <p/>
- *
+ * 
  * <pre>
  * -Q
  *  Use resampling instead of reweighting for boosting.
  * </pre>
- *
- * <pre>
- * -use-estimated-priors
- *  Use estimated priors rather than uniform ones.
- * </pre>
- *
+ * 
  * <pre>
  * -P &lt;percent&gt;
  *  Percentage of weight mass to base training on.
@@ -181,7 +177,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15021 $
+ * @version $Revision: 13156 $
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler, TechnicalInformationHandler,
@@ -201,9 +197,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /** The number of successfully generated base classifiers. */
   protected int m_NumGenerated;
-
-  /** Number of iterations performed in this session of iterating */
-  protected int m_NumItsPerformed;
 
   /** Weight thresholding. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
@@ -226,9 +219,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /** The value of the shrinkage parameter */
   protected double m_Shrinkage = 1;
 
-  /** Whether to start with class priors estimated from the training data */
-  protected boolean m_UseEstimatedPriors = false;
-
   /** The random number generator used */
   protected Random m_RandomInstance = null;
 
@@ -237,11 +227,8 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    */
   protected double m_Offset = 0.0;
 
-  /** A ZeroR model in case no model can be built from the data */
+  /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
-
-  /** The initial F scores (0 by default) */
-  protected double[] m_InitialFs;
 
   /** The Z max value to use */
   protected double m_zMax = DEFAULT_Z_MAX;
@@ -271,12 +258,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   protected int m_poolSize = 1;
 
   /**
-   * Whether to allow training to continue at a later point after the initial
-   * model is built.
-   */
-  protected boolean m_resume;
-
-  /**
    * Returns a string describing classifier
    * 
    * @return a description suitable for displaying in the explorer/experimenter
@@ -287,7 +268,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     return "Class for performing additive logistic regression. \n"
       + "This class performs classification using a regression scheme as the "
       + "base learner, and can handle multi-class problems.  For more "
-      + "information, see\n\n" + getTechnicalInformation().toString();
+      + "information, see\n\n" + getTechnicalInformation().toString() + "\n\n"
+      + "Can do efficient internal cross-validation to determine "
+      + "appropriate number of iterations.";
   }
 
   /**
@@ -381,10 +364,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     Vector<Option> newVector = new Vector<Option>(5);
 
     newVector.addElement(new Option(
-            "\tUse resampling instead of reweighting for boosting.", "Q", 0, "-Q"));
-    newVector.addElement(new Option(
-            "\tUse estimated priors rather than uniform ones.",
-            "use-estimated-priors", 0, "-use-estimated-priors"));
+      "\tUse resampling instead of reweighting for boosting.", "Q", 0, "-Q"));
     newVector.addElement(new Option(
       "\tPercentage of weight mass to base training on.\n"
         + "\t(default 100, reduce to around 90 speed up)", "P", 1,
@@ -400,8 +380,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
       "O", 1, "-O <int>"));
     newVector.addElement(new Option("\t" + numThreadsTipText() + "\n"
       + "\t(default 1)", "E", 1, "-E <int>"));
-    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
-    "resume", 0, "-resume"));
 
     newVector.addAll(Collections.list(super.listOptions()));
 
@@ -411,101 +389,96 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Parses a given list of options.
    * <p/>
-   *
+   * 
    * <!-- options-start --> Valid options are:
    * <p/>
-   *
+   * 
    * <pre>
    * -Q
    *  Use resampling instead of reweighting for boosting.
    * </pre>
-   *
-   * <pre>
-   * -use-estimated-priors
-   *  Use estimated priors rather than uniform ones.
-   * </pre>
-   *
+   * 
    * <pre>
    * -P &lt;percent&gt;
    *  Percentage of weight mass to base training on.
    *  (default 100, reduce to around 90 speed up)
    * </pre>
-   *
+   * 
    * <pre>
    * -L &lt;num&gt;
    *  Threshold on the improvement of the likelihood.
    *  (default -Double.MAX_VALUE)
    * </pre>
-   *
+   * 
    * <pre>
    * -H &lt;num&gt;
    *  Shrinkage parameter.
    *  (default 1)
    * </pre>
-   *
+   * 
    * <pre>
    * -Z &lt;num&gt;
    *  Z max threshold for responses.
    *  (default 3)
    * </pre>
-   *
+   * 
    * <pre>
    * -O &lt;int&gt;
    *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
    * </pre>
-   *
+   * 
    * <pre>
    * -E &lt;int&gt;
    *  The number of threads to use for batch prediction, which should be &gt;= size of thread pool.
    *  (default 1)
    * </pre>
-   *
+   * 
    * <pre>
    * -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)
    * </pre>
-   *
+   * 
    * <pre>
    * -I &lt;num&gt;
    *  Number of iterations.
    *  (default 10)
    * </pre>
-   *
+   * 
    * <pre>
    * -W
    *  Full name of base classifier.
    *  (default: weka.classifiers.trees.DecisionStump)
    * </pre>
-   *
+   * 
    * <pre>
    * -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console
    * </pre>
-   *
+   * 
    * <pre>
    * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
    *  (use with caution).
    * </pre>
-   *
+   * 
    * <pre>
    * Options specific to classifier weka.classifiers.trees.DecisionStump:
    * </pre>
-   *
+   * 
    * <pre>
    * -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console
    * </pre>
-   *
+   * 
    * <pre>
    * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
    *  (use with caution).
    * </pre>
-   *
+   * 
    * <!-- options-end -->
    *
    * Options after -- are passed to the designated learner.
@@ -546,7 +519,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     if (m_UseResampling && (thresholdString.length() != 0)) {
       throw new Exception("Weight pruning with resampling" + "not allowed.");
     }
-    setUseEstimatedPriors(Utils.getFlag("use-estimated-priors", options));
     String PoolSize = Utils.getOption('O', options);
     if (PoolSize.length() != 0) {
       setPoolSize(Integer.parseInt(PoolSize));
@@ -559,8 +531,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     } else {
       setNumThreads(1);
     }
-
-    setResume(Utils.getFlag("resume", options));
 
     super.setOptions(options);
 
@@ -582,9 +552,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
       options.add("-P");
       options.add("" + getWeightThreshold());
     }
-    if (getUseEstimatedPriors()) {
-      options.add("-use-estimated-priors");
-    }
     options.add("-L");
     options.add("" + getLikelihoodThreshold());
     options.add("-H");
@@ -598,10 +565,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     options.add("-E");
     options.add("" + getNumThreads());
 
-    if (getResume()) {
-      options.add("-resume");
-    }
-
     Collections.addAll(options, super.getOptions());
 
     return options.toArray(new String[0]);
@@ -609,7 +572,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -619,7 +582,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Set the Z max threshold on the responses
-   *
+   * 
    * @param zMax the threshold to use
    */
   public void setZMax(double zMax) {
@@ -628,7 +591,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Get the Z max threshold on the responses
-   *
+   * 
    * @return the threshold to use
    */
   public double getZMax() {
@@ -637,7 +600,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -668,7 +631,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -698,7 +661,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -728,37 +691,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String useEstimatedPriorsTipText() {
-    return "Whether estimated priors are used rather than uniform ones.";
-  }
-
-  /**
-   * Set resampling mode
-   *
-   * @param r true if resampling should be done
-   */
-  public void setUseEstimatedPriors(boolean r) {
-
-    m_UseEstimatedPriors = r;
-  }
-
-  /**
-   * Get whether resampling is turned on
-   *
-   * @return true if resampling output is on
-   */
-  public boolean getUseEstimatedPriors() {
-
-    return m_UseEstimatedPriors;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -855,7 +788,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    * Method used to build the classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
-    reset();
 
     // Initialize classifier
     initializeClassifier(data);
@@ -863,150 +795,98 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     // For the given number of iterations
     while (next()) {
     }
+    ;
 
     // Clean up
     done();
   }
 
-  protected void reset() {
-    m_data = null;
-    m_NumericClassData = null;
-    m_trainFs = null;
-    m_trainYs = null;
-    m_InitialFs = null;
-    m_probs = null;
-    m_ZeroR = null;
-    m_Classifiers = null;
-    m_NumItsPerformed = 0;
-    m_NumGenerated = 0;
-    m_sumOfWeights = 0;
-    m_logLikelihood = 0;
-    m_NumClasses = 0;
-  }
-
   /**
    * Builds the boosted classifier
-   *
+   * 
    * @param data the data to train the classifier with
    * @throws Exception if building fails, e.g., can't handle data
    */
-  @Override public void initializeClassifier(Instances data) throws Exception {
+  public void initializeClassifier(Instances data) throws Exception {
 
-    m_NumItsPerformed = 0;
-    if (m_data == null) {
-      m_RandomInstance = new Random(m_Seed);
-      int classIndex = data.classIndex();
+    m_RandomInstance = new Random(m_Seed);
+    int classIndex = data.classIndex();
 
-      if (m_Classifier == null) {
-        throw new Exception("A base classifier has not been specified!");
-      }
-
-      if (!(m_Classifier instanceof WeightedInstancesHandler) && !m_UseResampling) {
-        m_UseResampling = true;
-      }
-
-      // can classifier handle the data?
-      getCapabilities().testWithFail(data);
-
-      if (m_Debug) {
-        System.err.println("Creating copy of the training data");
-      }
-
-      // remove instances with missing class
-      m_data = new Instances(data);
-      m_data.deleteWithMissingClass();
-
-      if (m_ZeroR == null) {
-        // only class? -> build ZeroR model
-        if ((m_data.numAttributes() == 1) || (m_data.numInstances() == 0)) {
-          System.err.println(
-            "Cannot build model (only class attribute present in data!), " + "using ZeroR model instead!");
-          m_ZeroR = new ZeroR();
-          m_ZeroR.buildClassifier(m_data);
-          return;
-        }
-      }
-
-      // Set up initial probabilities and Fs
-      int numInstances = m_data.numInstances();
-      m_NumClasses = m_data.numClasses();
-      m_ClassAttribute = m_data.classAttribute();
-      m_probs = new double[numInstances][m_NumClasses];
-      m_InitialFs = new double[m_NumClasses];
-      m_trainFs = new double[numInstances][m_NumClasses];
-
-      if (!m_UseEstimatedPriors) {
-
-        // Default behaviour: equal probabilities for all classes initially
-        for (int i = 0; i < numInstances; i++) {
-          for (int j = 0; j < m_NumClasses; j++) {
-            m_probs[i][j] = 1.0 / m_NumClasses;
-          }
-        }
-      } else {
-
-        // If requested, used priors estimated from the training set initially
-        m_ZeroR = new ZeroR();
-        m_ZeroR.buildClassifier(m_data);
-        for (int i = 0; i < numInstances; i++) {
-          m_probs[i] = m_ZeroR.distributionForInstance(m_data.instance(i));
-        }
-        double avg = 0;
-        for (int j = 0; j < m_NumClasses; j++) {
-          avg += Math.log(m_probs[0][j]);
-        }
-        avg /= m_NumClasses;
-        for (int j = 0; j < m_NumClasses; j++) {
-          m_InitialFs[j] = Math.log(m_probs[0][j]) - avg;
-        }
-        for (int i = 0; i < numInstances; i++) {
-          for (int j = 0; j < m_NumClasses; j++) {
-            m_trainFs[i][j] = m_InitialFs[j];
-          }
-        }
-        m_ZeroR = null;
-      }
-
-      // Create the base classifiers
-      if (m_Debug) {
-        System.err.println("Creating base classifiers");
-      }
-      m_Classifiers = new ArrayList<Classifier[]>();
-
-      // Build classifier on all the data
-      m_trainYs = new double[numInstances][m_NumClasses];
-      for (int j = 0; j < m_NumClasses; j++) {
-        for (int i = 0, k = 0; i < numInstances; i++, k++) {
-          m_trainYs[i][j] = (m_data.instance(k).classValue() == j) ?
-            1.0 - m_Offset :
-            0.0 + (m_Offset / (double) m_NumClasses);
-        }
-      }
-
-      // Make class numeric
-      m_data.setClassIndex(-1);
-      m_data.deleteAttributeAt(classIndex);
-      m_data.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
-      m_data.setClassIndex(classIndex);
-      m_NumericClassData = new Instances(m_data, 0);
-
-      // Perform iterations
-      m_sumOfWeights = m_data.sumOfWeights();
-      m_logLikelihood =
-        negativeLogLikelihood(m_trainYs, m_probs, m_data, m_sumOfWeights);
-      if (m_Debug) {
-        System.err.println("Avg. negative log-likelihood: " + m_logLikelihood);
-      }
-      m_NumGenerated = 0;
+    if (m_Classifier == null) {
+      throw new Exception("A base classifier has not been specified!");
     }
-   }
+
+    if (!(m_Classifier instanceof WeightedInstancesHandler) && !m_UseResampling) {
+      m_UseResampling = true;
+    }
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    if (m_Debug) {
+      System.err.println("Creating copy of the training data");
+    }
+
+    // remove instances with missing class
+    m_data = new Instances(data);
+    m_data.deleteWithMissingClass();
+
+    // only class? -> build ZeroR model
+    if (m_data.numAttributes() == 1) {
+      System.err
+        .println("Cannot build model (only class attribute present in data!), "
+          + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(m_data);
+      return;
+    } else {
+      m_ZeroR = null;
+    }
+
+    m_NumClasses = m_data.numClasses();
+    m_ClassAttribute = m_data.classAttribute();
+
+    // Create the base classifiers
+    if (m_Debug) {
+      System.err.println("Creating base classifiers");
+    }
+    m_Classifiers = new ArrayList<Classifier[]>();
+
+    // Build classifier on all the data
+    int numInstances = m_data.numInstances();
+    m_trainFs = new double[numInstances][m_NumClasses];
+    m_trainYs = new double[numInstances][m_NumClasses];
+    for (int j = 0; j < m_NumClasses; j++) {
+      for (int i = 0, k = 0; i < numInstances; i++, k++) {
+        m_trainYs[i][j] =
+          (m_data.instance(k).classValue() == j) ? 1.0 - m_Offset
+            : 0.0 + (m_Offset / (double) m_NumClasses);
+      }
+    }
+
+    // Make class numeric
+    m_data.setClassIndex(-1);
+    m_data.deleteAttributeAt(classIndex);
+    m_data.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
+    m_data.setClassIndex(classIndex);
+    m_NumericClassData = new Instances(m_data, 0);
+
+    // Perform iterations
+    m_probs = initialProbs(numInstances);
+    m_logLikelihood = logLikelihood(m_trainYs, m_probs);
+    m_NumGenerated = 0;
+    if (m_Debug) {
+      System.err.println("Avg. log-likelihood: " + m_logLikelihood);
+    }
+    m_sumOfWeights = m_data.sumOfWeights();
+  }
 
   /**
    * Perform another iteration of boosting.
    */
-  @Override public boolean next() throws Exception {
+  public boolean next() throws Exception {
 
-    if (m_NumItsPerformed >= m_NumIterations) {
+    if (m_NumGenerated >= m_NumIterations) {
       return false;
     }
 
@@ -1017,9 +897,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
     double previousLoglikelihood = m_logLikelihood;
     performIteration(m_trainYs, m_trainFs, m_probs, m_data, m_sumOfWeights);
-    m_logLikelihood = negativeLogLikelihood(m_trainYs, m_probs, m_data, m_sumOfWeights);
+    m_logLikelihood = logLikelihood(m_trainYs, m_probs);
     if (m_Debug) {
-      System.err.println("Avg. negative log-likelihood: " + m_logLikelihood);
+      System.err.println("Avg. log-likelihood: " + m_logLikelihood);
     }
     if (Math.abs(previousLoglikelihood - m_logLikelihood) < m_Precision) {
       return false;
@@ -1028,73 +908,54 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Tool tip text for the resume property
-   *
-   * @return the tool tip text for the finalize property
-   */
-  public String resumeTipText() {
-    return "Set whether classifier can continue training after performing the"
-      + "requested number of iterations. \n\tNote that setting this to true will "
-      + "retain certain data structures which can increase the \n\t"
-      + "size of the model.";
-  }
-
-  /**
-   * If called with argument true, then the next time done() is called the model is effectively
-   * "frozen" and no further iterations can be performed
-   *
-   * @param resume true if the model is to be finalized after performing iterations
-   */
-  public void setResume(boolean resume) {
-    m_resume = resume;
-  }
-
-  /**
-   * Returns true if the model is to be finalized (or has been finalized) after
-   * training.
-   *
-   * @return the current value of finalize
-   */
-  public boolean getResume() {
-    return m_resume;
-  }
-
-  /**
    * Clean up after boosting.
    */
-  @Override public void done() {
-    if (!m_resume) {
-      m_trainYs = m_trainFs = m_probs = null;
-      m_data = null;
-      m_NumItsPerformed = 0;
-    }
+  public void done() {
+
+    m_trainYs = m_trainFs = m_probs = null;
+    m_data = null;
   }
 
   /**
-   * Computes negative loglikelihood given class values and estimated probabilities.
-   *
+   * Gets the intial class probabilities.
+   * 
+   * @param numInstances the number of instances
+   * @return the initial class probabilities
+   */
+  private double[][] initialProbs(int numInstances) {
+
+    double[][] probs = new double[numInstances][m_NumClasses];
+    for (int i = 0; i < numInstances; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        probs[i][j] = 1.0 / m_NumClasses;
+      }
+    }
+    return probs;
+  }
+
+  /**
+   * Computes loglikelihood given class values and estimated probablities.
+   * 
    * @param trainYs class values
    * @param probs estimated probabilities
-   * @param data the data
-   * @param sumOfWeights the sum of weights
-   * @return the computed negative loglikelihood
+   * @return the computed loglikelihood
    */
-  private double negativeLogLikelihood(double[][] trainYs, double[][] probs, Instances data, double sumOfWeights) {
+  private double logLikelihood(double[][] trainYs, double[][] probs) {
 
     double logLikelihood = 0;
     for (int i = 0; i < trainYs.length; i++) {
       for (int j = 0; j < m_NumClasses; j++) {
         if (trainYs[i][j] == 1.0 - m_Offset) {
-          logLikelihood -= data.instance(i).weight() * Math.log(probs[i][j]);
+          logLikelihood -= Math.log(probs[i][j]);
         }
       }
     }
-    return logLikelihood / sumOfWeights;
+    return logLikelihood / (double) trainYs.length;
   }
 
   /**
    * Performs one boosting iteration.
-   *
+   * 
    * @param trainYs class values
    * @param trainFs F scores
    * @param probs probabilities
@@ -1179,16 +1040,17 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
       }
     }
     m_Classifiers.add(classifiers);
-    m_NumItsPerformed ++;
 
     // Evaluate / increment trainFs from the classifier
     for (int i = 0; i < trainFs.length; i++) {
       double[] pred = new double[m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-        double tempPred = m_Shrinkage * classifiers[j].classifyInstance(data.instance(i));
+        double tempPred =
+          m_Shrinkage * classifiers[j].classifyInstance(data.instance(i));
         if (Utils.isMissingValue(tempPred)) {
-          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
+          throw new UnassignedClassException(
+            "LogitBoost: base learner predicted missing value.");
         }
         pred[j] = tempPred;
         if (m_NumClasses == 2) {
@@ -1199,10 +1061,11 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
       }
       predSum /= m_NumClasses;
       for (int j = 0; j < m_NumClasses; j++) {
-        trainFs[i][j] += (pred[j] - predSum) * (m_NumClasses - 1) / m_NumClasses;
+        trainFs[i][j] +=
+          (pred[j] - predSum) * (m_NumClasses - 1) / m_NumClasses;
       }
     }
-    m_NumGenerated = m_Classifiers.size();
+    m_NumGenerated++;
 
     // Compute the current probability estimates
     for (int i = 0; i < trainYs.length; i++) {
@@ -1212,7 +1075,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the array of classifiers that have been built.
-   *
+   * 
    * @return the built classifiers
    */
   public Classifier[][] classifiers() {
@@ -1222,7 +1085,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Computes probabilities from F scores
-   *
+   * 
    * @param Fs the F scores
    * @return the computed probabilities
    */
@@ -1245,7 +1108,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Performs efficient batch prediction
+   * Performs efficient batch predcition
    *
    * @return true, as LogitBoost can perform efficient batch prediction
    */
@@ -1257,7 +1120,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Calculates the class membership probabilities for the given test instance.
    *
-   * @param inst the instance to be classified
+   * @param instance the instance to be classified
    * @return predicted class probability distribution
    * @throws Exception if instance could not be classified successfully
    */
@@ -1267,31 +1130,19 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     if (m_ZeroR != null) {
       return m_ZeroR.distributionForInstance(inst);
     }
-    Instance instance = (Instance) inst.copy();
-    instance.setDataset(m_NumericClassData);
-
-    return processInstance(instance);
-  }
-
-  /**
-   * Applies models to an instance to get class probabilities.
-   */
-  protected double[] processInstance(Instance instance) throws Exception {
 
     double[] Fs = new double[m_NumClasses];
     double[] pred = new double[m_NumClasses];
-
-    if (m_InitialFs != null) {
-      for (int i = 0; i < m_NumClasses; i++) {
-        Fs[i] = m_InitialFs[i];
-      }
-    }
+    Instance instance = (Instance) inst.copy();
+    instance.setDataset(m_NumericClassData);
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-        double tempPred = m_Shrinkage * m_Classifiers.get(i)[j].classifyInstance(instance);
+        double tempPred =
+          m_Shrinkage * m_Classifiers.get(i)[j].classifyInstance(instance);
         if (Utils.isMissingValue(tempPred)) {
-          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
+          throw new UnassignedClassException(
+            "LogitBoost: base learner predicted missing value.");
         }
         pred[j] = tempPred;
         if (m_NumClasses == 2) {
@@ -1305,6 +1156,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
         Fs[j] += (pred[j] - predSum) * (m_NumClasses - 1) / m_NumClasses;
       }
     }
+
     return probs(Fs);
   }
 
@@ -1335,26 +1187,53 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     // Start thread pool
     ExecutorService pool = Executors.newFixedThreadPool(m_poolSize);
 
+    double[][] Fs = new double[insts.numInstances()][m_NumClasses];
+
     // Set up result set, and chunk size
-    final int chunksize = numericClassInsts.numInstances() / m_numThreads;
-    Set<Future<Void>> results = new HashSet<Future<Void>>();
-    double[][] preds = new double[insts.numInstances()][];
+    final int chunksize = m_NumGenerated / m_numThreads;
+    Set<Future<double[][]>> results = new HashSet<Future<double[][]>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
 
       // Determine batch to be processed
       final int lo = j * chunksize;
-      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : numericClassInsts.numInstances();
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_NumGenerated;
 
-      // Create and submit new job for each batch of instances
-      Future<Void> futureT = pool.submit(new Callable<Void>() {
+      // Create and submit new job, where each instance in batch is processed
+      Future<double[][]> futureT = pool.submit(new Callable<double[][]>() {
         @Override
-        public Void call() throws Exception {
-          for (int i = lo; i < hi; i++) {
-            preds[i] = processInstance(numericClassInsts.instance(i));
+        public double[][] call() throws Exception {
+          double[][] localFs =
+            new double[numericClassInsts.numInstances()][m_NumClasses];
+          for (int k = 0; k < numericClassInsts.numInstances(); k++) {
+            Instance instance = numericClassInsts.instance(k);
+            for (int i = lo; i < hi; i++) {
+              double predSum = 0;
+              double[] pred = new double[m_NumClasses];
+              for (int j = 0; j < m_NumClasses; j++) {
+                double tempPred =
+                  m_Shrinkage
+                    * m_Classifiers.get(i)[j].classifyInstance(instance);
+                if (Utils.isMissingValue(tempPred)) {
+                  throw new UnassignedClassException(
+                    "LogitBoost: base learner predicted missing value.");
+                }
+                pred[j] = tempPred;
+                if (m_NumClasses == 2) {
+                  pred[1] = -tempPred; // Can treat 2 classes as special case
+                  break;
+                }
+                predSum += pred[j];
+              }
+              predSum /= m_NumClasses;
+              for (int j = 0; j < m_NumClasses; j++) {
+                localFs[k][j] +=
+                  (pred[j] - predSum) * (m_NumClasses - 1) / m_NumClasses;
+              }
+            }
           }
-          return null;
+          return localFs;
         }
       });
       results.add(futureT);
@@ -1362,8 +1241,13 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
     // Incorporate predictions
     try {
-      for (Future<Void> futureT : results) {
-        futureT.get();
+      for (Future<double[][]> futureT : results) {
+        double[][] f = futureT.get();
+        for (int j = 0; j < Fs.length; j++) {
+          for (int i = 0; i < Fs[j].length; i++) {
+            Fs[j][i] += f[j][i];
+          }
+        }
       }
     } catch (Exception e) {
       System.out.println("Predictions could not be generated.");
@@ -1372,6 +1256,10 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
     pool.shutdown();
 
+    double[][] preds = new double[insts.numInstances()][];
+    for (int i = 0; i < preds.length; i++) {
+      preds[i] = probs(Fs[i]);
+    }
     return preds;
   }
 
@@ -1411,16 +1299,11 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     text.append("  public static double [] distribution(Object [] i) {\n");
     text.append("    double [] Fs = new double [" + m_NumClasses + "];\n");
     text.append("    double [] Fi = new double [" + m_NumClasses + "];\n");
-    if (m_InitialFs != null) {
-      for (int j = 0; j < m_NumClasses; j++) {
-        text.append("    Fs[" + j + "] = " + m_InitialFs[j] + ";\n");
-      }
-    }
     text.append("    double Fsum;\n");
     for (int i = 0; i < m_NumGenerated; i++) {
       text.append("    Fsum = 0;\n");
       for (int j = 0; j < m_NumClasses; j++) {
-        text.append("    Fi[" + j + "] = " + m_Shrinkage + " * " + className + '_' + j + '_' + i
+        text.append("    Fi[" + j + "] = " + className + '_' + j + '_' + i
           + ".classify(i); Fsum += Fi[" + j + "];\n");
         if (m_NumClasses == 2) {
           text.append("    Fi[1] = -Fi[0];\n"); // 2-class case is special
@@ -1472,15 +1355,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     }
 
     StringBuffer text = new StringBuffer();
-    if ((m_InitialFs != null) && getUseEstimatedPriors()) {
-      text.append("Initial Fs: \n");
-      for (int j = 0; j < m_NumClasses; j++) {
-        text.append("\n\tClass " + (j + 1) + " (" + m_ClassAttribute.name()
-                + "=" + m_ClassAttribute.value(j) + "): " + Utils.doubleToString(m_InitialFs[j], getNumDecimalPlaces())
-                + "\n");
-      }
-      text.append("\n");
-    }
+
     if (m_NumGenerated == 0) {
       text.append("LogitBoost: No model built yet.");
       // text.append(m_Classifiers[0].toString()+"\n");
@@ -1512,7 +1387,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    * @return the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15021 $");
+    return RevisionUtils.extract("$Revision: 13156 $");
   }
 
   /**

@@ -1550,12 +1550,12 @@ public class SGDText extends RandomizableClassifier implements
     if (m_dictionary == null) {
       throw new Exception("No model built yet, can't aggregate");
     }
-    LinkedHashMap<String, Count> tempDict = toAggregate.getDictionary();
+    LinkedHashMap<String, SGDText.Count> tempDict = toAggregate.getDictionary();
 
-    Iterator<Map.Entry<String, Count>> entries = tempDict.entrySet()
+    Iterator<Map.Entry<String, SGDText.Count>> entries = tempDict.entrySet()
       .iterator();
     while (entries.hasNext()) {
-      Map.Entry<String, Count> entry = entries.next();
+      Map.Entry<String, SGDText.Count> entry = entries.next();
 
       Count masterCount = m_dictionary.get(entry.getKey());
       if (masterCount == null) {
@@ -1594,7 +1594,7 @@ public class SGDText extends RandomizableClassifier implements
     
     pruneDictionary(true);
 
-    Iterator<Map.Entry<String, Count>> entries = m_dictionary
+    Iterator<Map.Entry<String, SGDText.Count>> entries = m_dictionary
       .entrySet().iterator();
 
     while (entries.hasNext()) {

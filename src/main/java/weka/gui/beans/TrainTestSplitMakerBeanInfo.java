@@ -60,7 +60,7 @@ public class TrainTestSplitMakerBeanInfo
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(TrainTestSplitMaker.class,
+    return new BeanDescriptor(weka.gui.beans.TrainTestSplitMaker.class,
 			      TrainTestSplitMakerCustomizer.class);
   }
  }

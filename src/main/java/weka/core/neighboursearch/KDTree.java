@@ -106,7 +106,7 @@ import weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide;
  * @author Gabi Schmidberger (gabi[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Malcolm Ware (mfw4[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 14830 $
+ * @version $Revision: 12479 $
  */
 public class KDTree
   extends NearestNeighbourSearch
@@ -1211,12 +1211,12 @@ public class KDTree
     newVector.addElement(new Option(
 	"\tSet minimal width of a box\n"
         + "\t(default: 1.0E-2).", 
-        "W", 1, "-W <value>"));
+        "W", 0, "-W <value>"));
     
     newVector.addElement(new Option(
 	"\tMaximal number of instances in a leaf\n"
         + "\t(default: 40).",
-        "L", 1, "-L <value>"));
+        "L", 0, "-L"));
     
     newVector.addElement(new Option(
 	"\tNormalizing will be done\n"
@@ -1330,6 +1330,6 @@ public class KDTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14830 $");
+    return RevisionUtils.extract("$Revision: 12479 $");
   }
 }

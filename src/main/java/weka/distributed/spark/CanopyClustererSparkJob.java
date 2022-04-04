@@ -319,7 +319,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
 
   /**
    * Get whether to randomize (and stratify) the input data or not
-   * 
+   *
    * @return true if the input data is to be randomized and stratified
    */
   public boolean getRandomizeAndStratify() {
@@ -346,7 +346,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
 
   /**
    * Get the name only for the model file
-   * 
+   *
    * @return the name only (not full path) that the model should be saved to
    */
   public String getModelFileName() {
@@ -778,7 +778,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
     p = p.makeQualified(fs);
 
     assignments.saveAsNewAPIHadoopFile(pathOnly[0], NullWritable.class,
-      Text.class, SparkJob.NoKeyTextOutputFormat.class, conf);
+      Text.class, NoKeyTextOutputFormat.class, conf);
   }
 
   @Override

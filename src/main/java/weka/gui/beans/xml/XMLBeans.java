@@ -368,9 +368,9 @@ public class XMLBeans extends XMLBasicSerialization {
                                          // with Point!
 
     // allow
-    m_Properties.addAllowed(BeanInstance.class, "x");
-    m_Properties.addAllowed(BeanInstance.class, "y");
-    m_Properties.addAllowed(BeanInstance.class, "bean");
+    m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "x");
+    m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "y");
+    m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Loader.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Saver.class,
@@ -426,14 +426,14 @@ public class XMLBeans extends XMLBasicSerialization {
     m_CustomMethods.register(this, ColorUIResource.class, "ColorUIResource");
     m_CustomMethods.register(this, FontUIResource.class, "FontUIResource");
 
-    m_CustomMethods.register(this, BeanInstance.class,
+    m_CustomMethods.register(this, weka.gui.beans.BeanInstance.class,
       "BeanInstance");
-    m_CustomMethods.register(this, BeanConnection.class,
+    m_CustomMethods.register(this, weka.gui.beans.BeanConnection.class,
       "BeanConnection");
-    m_CustomMethods.register(this, BeanVisual.class,
+    m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class,
       "BeanVisual");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
-    m_CustomMethods.register(this, MetaBean.class, "MetaBean");
+    m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
 
     classnames = ConverterUtils.getFileLoaders();
     for (i = 0; i < classnames.size(); i++) {
@@ -1464,7 +1464,7 @@ public class XMLBeans extends XMLBasicSerialization {
     beaninst = (BeanInstance) result;
 
     // set parent of BeanVisual
-    if (beaninst.getBean() instanceof Visible) {
+    if (beaninst.getBean() instanceof weka.gui.beans.Visible) {
       visual = ((Visible) beaninst.getBean()).getVisual();
       visual.setSize(visual.getPreferredSize());
       if (visual.getParent() == null) {

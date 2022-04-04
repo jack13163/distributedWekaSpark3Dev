@@ -45,7 +45,7 @@ public class RuleSetModelTest extends AbstractPMMLClassifierTest {
   }
 
   public static Test suite() {
-    return new TestSuite(RuleSetModelTest.class);
+    return new TestSuite(weka.classifiers.pmml.consumer.RuleSetModelTest.class);
   }
 
   public static void main(String[] args) {

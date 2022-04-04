@@ -420,7 +420,7 @@ public abstract class AbstractStopwordsTest extends TestCase {
       } else if (!diff.equals("")) {
         fail("Regression test failed. Difference:\n" + diff);
       }
-    } catch (IOException ex) {
+    } catch (java.io.IOException ex) {
       fail("Problem during regression testing.\n" + ex);
     }
   }

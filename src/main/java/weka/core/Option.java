@@ -42,7 +42,7 @@ import java.util.*;
  * <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14847 $
+ * @version $Revision: 13658 $
  */
 public class Option implements RevisionHandler {
 
@@ -507,8 +507,10 @@ public class Option implements RevisionHandler {
                     + "for it.");
                 }
               } else if (value instanceof Enum) {
-                Class<?> eClazz = value.getClass();
-                valueToSet = EnumHelper.valueFromString(eClazz, optionValue);
+                EnumHelper helper = new EnumHelper((Enum) value);
+                valueToSet =
+                  EnumHelper
+                    .valueFromString(helper.getEnumClass(), optionValue);
               } else if (value instanceof OptionHandler) {
                 valueToSet = constructOptionHandlerValue(optionValue);
               } else if (value instanceof Number) {
@@ -686,6 +688,6 @@ public class Option implements RevisionHandler {
    * @return the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14847 $");
+    return RevisionUtils.extract("$Revision: 13658 $");
   }
 }

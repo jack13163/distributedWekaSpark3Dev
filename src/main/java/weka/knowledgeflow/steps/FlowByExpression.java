@@ -810,13 +810,13 @@ public class FlowByExpression extends BaseStep {
             if (inst.isMissing(lhsAttIndex) || inst.isMissing(rhsAttIndex)) {
               return false;
             }
-            return (inst.value(lhsAttIndex) == inst.value(rhsAttIndex));
+            return Utils.eq(inst.value(lhsAttIndex), inst.value(rhsAttIndex));
           }
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
           }
-          return (inst.value(lhsAttIndex) == numericOperand);
+          return (Utils.eq(inst.value(lhsAttIndex), numericOperand));
         }
       },
       NOTEQUAL(" != ") {

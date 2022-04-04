@@ -44,7 +44,7 @@ import weka.core.Utils;
  * and clusterers.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15437 $
+ * @version $Revision: 10583 $
  */
 public abstract class DataGenerator implements OptionHandler, Randomizable,
   Serializable, RevisionHandler {
@@ -58,7 +58,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   /** The format for the generated dataset */
   protected Instances m_DatasetFormat = null;
 
-  /** Relation name specified by the user (relation name will be auto-generated if empty) */
+  /** Relation name the dataset should have */
   protected String m_RelationName = "";
 
   /**
@@ -80,7 +80,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   /** random number generator */
   protected Random m_Random = null;
 
-  /** This flag is no longer used (left here to maintain compatibility for serialization) */
+  /** flag, that indicates whether the relationname is currently assembled */
   protected boolean m_CreatingRelationName = false;
 
   /**
@@ -199,9 +199,10 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
 
-    if (getRelationName().length() > 0) {
+    // to avoid endless loop
+    if (!m_CreatingRelationName) {
       result.add("-r");
-      result.add(Utils.quote(getRelationName()));
+      result.add(Utils.quote(getRelationNameToUse()));
     }
 
     if (getDebug()) {
@@ -215,16 +216,18 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   }
 
   /**
-   * Constructs the Instances object representing the format of the generated data.
-   *
-   * This default implementation simply returns the Instances object that holds the dataset format
-   * currently stored in m_DatasetFormat.
+   * Initializes the format for the dataset produced. Must be called before the
+   * generateExample or generateExamples methods are used. Also sets a default
+   * relation name in case the current relation name is empty.
    * 
    * @return the format for the dataset
    * @throws Exception if the generating of the format failed
    * @see #defaultRelationName()
    */
   public Instances defineDataFormat() throws Exception {
+    if (getRelationName().length() == 0) {
+      setRelationName(defaultRelationName());
+    }
 
     return m_DatasetFormat;
   }
@@ -325,6 +328,8 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     String option;
     int i;
 
+    m_CreatingRelationName = true;
+
     result = new StringBuffer(this.getClass().getName());
 
     options = getOptions();
@@ -335,6 +340,8 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
       }
       result.append(option.replaceAll(" ", "_"));
     }
+
+    m_CreatingRelationName = false;
 
     return result.toString();
   }
@@ -667,59 +674,6 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   }
 
   /**
-   * Gets the prologue string.
-   *
-   * @return prologue
-   */
-  public String getPrologue() throws Exception {
-
-    StringBuilder sb = new StringBuilder();
-
-    // output of options
-    sb.append("%");
-    sb.append("% Commandline");
-    sb.append("%");
-    sb.append("% " + getClass().getName() + " "  + Utils.joinOptions(getOptions()));
-    sb.append("%");
-
-    // comment at beginning of ARFF File
-    String commentAtStart = generateStart();
-
-    if (commentAtStart.length() > 0) {
-      sb.append("%");
-      sb.append("% Prologue");
-      sb.append("%");
-      sb.append(commentAtStart.trim());
-      sb.append("%");
-    }
-
-    return sb.toString();
-  }
-
-  /**
-   * Gets the epilogue string.
-   *
-   * @return epilogue
-   */
-  public String getEpilogue() throws Exception {
-
-    StringBuilder sb = new StringBuilder();
-
-    // comment at end of ARFF File
-    String commentAtEnd = generateFinished();
-
-    if (commentAtEnd.length() > 0) {
-      sb.append("%");
-      sb.append("% Epilogue");
-      sb.append("%");
-      sb.append(commentAtEnd.trim());
-      sb.append("%");
-    }
-
-    return sb.toString();
-  }
-
-  /**
    * Calls the data generator.
    * 
    * @param generator one of the data generators
@@ -729,8 +683,12 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   public static void makeData(DataGenerator generator, String[] options)
     throws Exception {
 
+    boolean printhelp;
+    Vector<String> unknown;
+    int i;
+
     // help?
-    boolean printhelp = (Utils.getFlag('h', options));
+    printhelp = (Utils.getFlag('h', options));
 
     // read options
     if (!printhelp) {
@@ -739,15 +697,15 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
         generator.setOptions(options);
 
         // check for left-over options, but don't raise exception
-        Vector<String> unknown = new Vector<String>();
-        for (int i = 0; i < options.length; i++) {
+        unknown = new Vector<String>();
+        for (i = 0; i < options.length; i++) {
           if (options[i].length() != 0) {
             unknown.add(options[i]);
           }
         }
         if (unknown.size() > 0) {
           System.out.print("Unknown options:");
-          for (int i = 0; i < unknown.size(); i++) {
+          for (i = 0; i < unknown.size(); i++) {
             System.out.print(" " + unknown.get(i));
           }
           System.out.println();
@@ -767,9 +725,27 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     // computes actual number of examples to be produced
     generator.setDatasetFormat(generator.defineDataFormat());
 
-    // get print writer and print header
+    // get print writer
     PrintWriter output = generator.getOutput();
-    output.println(generator.getPrologue());
+
+    // output of options
+    output.println("%");
+    output.println("% Commandline");
+    output.println("%");
+    output.println("% " + generator.getClass().getName() + " "
+      + Utils.joinOptions(generator.getOptions()));
+    output.println("%");
+
+    // comment at beginning of ARFF File
+    String commentAtStart = generator.generateStart();
+
+    if (commentAtStart.length() > 0) {
+      output.println("%");
+      output.println("% Prologue");
+      output.println("%");
+      output.println(commentAtStart.trim());
+      output.println("%");
+    }
 
     // ask data generator which mode
     boolean singleMode = generator.getSingleModeFlag();
@@ -778,23 +754,27 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     if (singleMode) {
       // output of dataset header
       output.println(generator.toStringFormat());
-      for (int i = 0; i < generator.getNumExamplesAct(); i++) {
+      for (i = 0; i < generator.getNumExamplesAct(); i++) {
         // over all examples to be produced
-        output.println(generator.generateExample());
+        Instance inst = generator.generateExample();
+        output.println(inst);
       }
     } else { // generator produces all instances at once
-      Instances data = generator.generateExamples();
+      Instances dataset = generator.generateExamples();
       // output of dataset
-      for (int i = 0; i < data.numInstances(); i++) {
-        if (i % 1000 == 0) {
-          output.flush();
-        }
-        output.println(data.instance(i));
-      }
-      output.flush();
+      output.println(dataset);
+    }
+    // comment at end of ARFF File
+    String commentAtEnd = generator.generateFinished();
+
+    if (commentAtEnd.length() > 0) {
+      output.println("%");
+      output.println("% Epilogue");
+      output.println("%");
+      output.println(commentAtEnd.trim());
+      output.println("%");
     }
 
-    output.println(generator.getEpilogue());
     output.flush();
 
     if (generator.getOutput() != generator.defaultOutput()) {

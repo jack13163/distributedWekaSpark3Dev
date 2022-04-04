@@ -21,8 +21,14 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
@@ -43,11 +49,11 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, Sourcable, WeightedAttributesHandler, WeightedInstancesHandler {
+  implements UnsupervisedFilter, Sourcable {
   
   /** for serialization */
   static final long serialVersionUID = -6830769026855053281L;
@@ -157,18 +163,18 @@ public class Standardize
       m_Means = new double[input.numAttributes()];
       m_StdDevs = new double[input.numAttributes()];
       for (int i = 0; i < input.numAttributes(); i++) {
-        if (input.attribute(i).isNumeric() &&
-                (input.classIndex() != i)) {
-          m_Means[i] = input.meanOrMode(i);
-          m_StdDevs[i] = Math.sqrt(input.variance(i));
-        }
+	if (input.attribute(i).isNumeric() &&
+	    (input.classIndex() != i)) {
+	  m_Means[i] = input.meanOrMode(i);
+	  m_StdDevs[i] = Math.sqrt(input.variance(i));
+	}
       }
 
       // Convert pending input instances
-      for (int i = 0; i < input.numInstances(); i++) {
-        convertInstance(input.instance(i));
+      for(int i = 0; i < input.numInstances(); i++) {
+	convertInstance(input.instance(i));
       }
-    }
+    } 
     // Free memory
     flushInput();
 
@@ -184,7 +190,7 @@ public class Standardize
    * @exception Exception if an error occurs
    */
   private void convertInstance(Instance instance) throws Exception {
-
+  
     Instance inst = null;
     if (instance instanceof SparseInstance) {
       double[] newVals = new double[instance.numAttributes()];
@@ -192,62 +198,62 @@ public class Standardize
       double[] vals = instance.toDoubleArray();
       int ind = 0;
       for (int j = 0; j < instance.numAttributes(); j++) {
-        double value;
-        if (instance.attribute(j).isNumeric() &&
-                (!Utils.isMissingValue(vals[j])) &&
-                (getInputFormat().classIndex() != j)) {
-
-          // Just subtract the mean if the standard deviation is zero
-          if (m_StdDevs[j] > 0) {
-            value = (vals[j] - m_Means[j]) / m_StdDevs[j];
-          } else {
-            value = vals[j] - m_Means[j];
-          }
+	double value;
+	if (instance.attribute(j).isNumeric() &&
+	    (!Utils.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
+	  
+	  // Just subtract the mean if the standard deviation is zero
+	  if (m_StdDevs[j] > 0) { 
+	    value = (vals[j] - m_Means[j]) / m_StdDevs[j];
+	  } else {
+	    value = vals[j] - m_Means[j];
+	  }
           if (Double.isNaN(value)) {
             throw new Exception("A NaN value was generated "
-                    + "while standardizing attribute "
-                    + instance.attribute(j).name());
+                                + "while standardizing attribute " 
+                                + instance.attribute(j).name());
           }
-          if (value != 0.0) {
-            newVals[ind] = value;
-            newIndices[ind] = j;
-            ind++;
-          }
-        } else {
-          value = vals[j];
-          if (value != 0.0) {
-            newVals[ind] = value;
-            newIndices[ind] = j;
-            ind++;
-          }
-        }
-      }
+	  if (value != 0.0) {
+	    newVals[ind] = value;
+	    newIndices[ind] = j;
+	    ind++;
+	  }
+	} else {
+	  value = vals[j];
+	  if (value != 0.0) {
+	    newVals[ind] = value;
+	    newIndices[ind] = j;
+	    ind++;
+	  }
+	}
+      }	
       double[] tempVals = new double[ind];
       int[] tempInd = new int[ind];
       System.arraycopy(newVals, 0, tempVals, 0, ind);
       System.arraycopy(newIndices, 0, tempInd, 0, ind);
       inst = new SparseInstance(instance.weight(), tempVals, tempInd,
-              instance.numAttributes());
+                                instance.numAttributes());
     } else {
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
-        if (instance.attribute(j).isNumeric() &&
-                (!Utils.isMissingValue(vals[j])) &&
-                (getInputFormat().classIndex() != j)) {
-
-          // Just subtract the mean if the standard deviation is zero
-          if (m_StdDevs[j] > 0) {
-            vals[j] = (vals[j] - m_Means[j]) / m_StdDevs[j];
-          } else {
-            vals[j] = (vals[j] - m_Means[j]);
-          }
+	if (instance.attribute(j).isNumeric() &&
+	    (!Utils.isMissingValue(vals[j])) &&
+	    (getInputFormat().classIndex() != j)) {
+	  
+	  // Just subtract the mean if the standard deviation is zero
+	  if (m_StdDevs[j] > 0) { 
+	    vals[j] = (vals[j] - m_Means[j]) / m_StdDevs[j];
+	  } else {
+	    vals[j] = (vals[j] - m_Means[j]);
+	  }
           if (Double.isNaN(vals[j])) {
             throw new Exception("A NaN value was generated "
-                    + "while standardizing attribute "
-                    + instance.attribute(j).name());
+                                + "while standardizing attribute " 
+                                + instance.attribute(j).name());
           }
-        }
-      }
+	}
+      }	
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
@@ -350,7 +356,7 @@ public class Standardize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

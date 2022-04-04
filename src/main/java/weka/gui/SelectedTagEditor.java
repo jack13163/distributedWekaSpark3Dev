@@ -81,7 +81,7 @@ public class SelectedTagEditor extends PropertyEditorSupport {
    * Sets the current property value as text.
    *
    * @param text the text of the selected tag.
-   * @exception IllegalArgumentException if an error occurs
+   * @exception java.lang.IllegalArgumentException if an error occurs
    */
   public void setAsText(String text)
     {
@@ -96,7 +96,7 @@ public class SelectedTagEditor extends PropertyEditorSupport {
 	}
       }
     } catch (Exception ex) {
-      throw new IllegalArgumentException(text);
+      throw new java.lang.IllegalArgumentException(text);
     }
   }
 

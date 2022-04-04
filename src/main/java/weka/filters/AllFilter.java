@@ -22,19 +22,22 @@
 
 package weka.filters;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 /** 
  * A simple instance filter that passes all instances directly
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class AllFilter
   extends Filter
-  implements Sourcable, WeightedAttributesHandler, WeightedInstancesHandler {
+  implements Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = 5022109283147503266L;
@@ -174,7 +177,7 @@ public class AllFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

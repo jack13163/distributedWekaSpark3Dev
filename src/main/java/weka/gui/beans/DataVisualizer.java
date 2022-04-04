@@ -21,13 +21,17 @@
 
 package weka.gui.beans;
 
-import weka.core.*;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.PluginManager;
 import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
@@ -48,7 +52,7 @@ import java.util.Vector;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 14494 $
+ * @version $Revision: 12409 $
  */
 public class DataVisualizer extends JPanel implements DataSourceListener,
   TrainingSetListener, TestSetListener, Visible, UserRequestAcceptor,
@@ -141,7 +145,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
     this);
 
   public DataVisualizer() {
-    GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!GraphicsEnvironment.isHeadless()) {
       appearanceFinal();
     } else {
@@ -167,7 +171,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
   }
 
   protected void appearanceFinal() {
-    GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
 
     removeAll();
     if (!GraphicsEnvironment.isHeadless()) {
@@ -370,7 +374,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
   @Override
   public void processHeadlessEvents(List<EventObject> headless) {
     // only process if we're not headless
-    if (!GraphicsEnvironment.isHeadless()) {
+    if (!java.awt.GraphicsEnvironment.isHeadless()) {
       m_processingHeadlessEvents = true;
       for (EventObject e : headless) {
         if (e instanceof DataSetEvent) {
@@ -480,7 +484,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
     if (m_design) {
       appearanceDesign();
     } else {
-      GraphicsEnvironment.getLocalGraphicsEnvironment();
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
       if (!GraphicsEnvironment.isHeadless()) {
         appearanceFinal();
       }
@@ -578,7 +582,8 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               + "visualization (DataVisualizer)");
             ex.printStackTrace();
           }
-          final JFrame jf = Utils.getWekaJFrame("Visualize", m_visual);
+          final JFrame jf = new JFrame("Visualize");
+          jf.setSize(800, 600);
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(vis, BorderLayout.CENTER);
           jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -588,9 +593,6 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               m_framePoppedUp = false;
             }
           });
-          jf.pack();
-          jf.setSize(800, 600);
-          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
           jf.setVisible(true);
           m_popupFrame = jf;
         } else {
@@ -620,7 +622,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
         try {
           Object r = PluginManager.getPluginInstance(
             "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
-          if (r != null && r instanceof OffscreenChartRenderer) {
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default
@@ -661,12 +663,12 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
       java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
         args[0]));
       Instances inst = new Instances(r);
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
       final DataVisualizer as = new DataVisualizer();
       as.setInstances(inst);
 
-      jf.getContentPane().add(as, BorderLayout.CENTER);
+      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

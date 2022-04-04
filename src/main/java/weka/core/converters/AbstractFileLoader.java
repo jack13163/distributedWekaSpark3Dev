@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.GZIPInputStream;
 
-import weka.core.AbstractInstance;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -39,7 +38,7 @@ import weka.core.Utils;
  * Abstract superclass for all file loaders.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14944 $
+ * @version $Revision: 12104 $
  */
 public abstract class AbstractFileLoader extends AbstractLoader implements
   FileSourcedConverter, EnvironmentHandler {
@@ -168,8 +167,8 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
 
       // forward slashes are platform independent for loading from the
       // classpath...
-      String fnameWithCorrectSeparators =
-        fName.replace(File.separatorChar, '/');
+      String fnameWithCorrectSeparators = fName
+        .replace(File.separatorChar, '/');
       if (this.getClass().getClassLoader()
         .getResource(fnameWithCorrectSeparators) != null) {
         // System.out.println("Found resource in classpath...");
@@ -268,17 +267,14 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
       }
       result.append("file" + ext[i]);
     }
-    result.append("> [options]\n");
-    
+    result.append(">");
+    if (loader instanceof OptionHandler) {
+      result.append(" [options]");
+    }
+    result.append("\n");
+
     if (loader instanceof OptionHandler) {
       result.append("\nOptions:\n\n");
-      Option tempOpt =
-        new Option("\tThe maximum number of digits to "
-          + "print after the decimal\n\tplace for numeric values (default: 6)",
-          "decimal", 1, "-decimal <num>");
-      result.append(tempOpt.synopsis() + "\n");
-      result.append(tempOpt.description() + "\n");
-
       Enumeration<Option> enm = ((OptionHandler) loader).listOptions();
       while (enm.hasMoreElements()) {
         option = enm.nextElement();
@@ -309,22 +305,12 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
       // ignore it
     }
 
-    int dec = AbstractInstance.s_numericAfterDecimalPoint;
     if (options.length > 0) {
       String fileName = options[0];
       options[0] = "";
       if (loader instanceof OptionHandler) {
         // set options
         try {
-          String decPlaces = Utils.getOption("decimal", options);
-          if (decPlaces.length() > 0) {
-            try {
-              dec = Integer.parseInt(decPlaces);
-            } catch (NumberFormatException e) {
-              // ignore and go with default
-            }
-          }
-
           ((OptionHandler) loader).setOptions(options);
           // find file
           for (int i = 0; i < options.length; i++) {
@@ -349,10 +335,7 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
           do {
             temp = loader.getNextInstance(structure);
             if (temp != null) {
-              // System.out.println(temp);
-              System.out
-                .println(temp
-                  .toStringMaxDecimalDigits(dec));
+              System.out.println(temp);
             }
           } while (temp != null);
         }

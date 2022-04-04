@@ -57,21 +57,21 @@ public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
     try {
       incomingStructure =
         step.getStepManager().getIncomingStructureForConnectionType(
-          StepManager.CON_DATASET, m_env);
+          StepManager.CON_DATASET);
       if (incomingStructure == null) {
         incomingStructure =
           step.getStepManager().getIncomingStructureForConnectionType(
-            StepManager.CON_TRAININGSET, m_env);
+            StepManager.CON_TRAININGSET);
       }
       if (incomingStructure == null) {
         incomingStructure =
           step.getStepManager().getIncomingStructureForConnectionType(
-            StepManager.CON_TESTSET, m_env);
+            StepManager.CON_TESTSET);
       }
       if (incomingStructure == null) {
         incomingStructure =
           step.getStepManager().getIncomingStructureForConnectionType(
-            StepManager.CON_INSTANCE, m_env);
+            StepManager.CON_INSTANCE);
       }
     } catch (WekaException ex) {
       showErrorDialog(ex);

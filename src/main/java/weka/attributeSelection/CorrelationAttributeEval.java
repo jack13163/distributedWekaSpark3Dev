@@ -61,7 +61,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14571 $
+ * @version $Revision: 10172 $
  */
 public class CorrelationAttributeEval extends ASEvaluation implements
   AttributeEvaluator, OptionHandler {
@@ -111,7 +111,6 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
 
     return result;
@@ -467,7 +466,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14571 $");
+    return RevisionUtils.extract("$Revision: 10172 $");
   }
 
   /**

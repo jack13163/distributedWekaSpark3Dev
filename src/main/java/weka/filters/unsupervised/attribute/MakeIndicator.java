@@ -25,17 +25,27 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> A filter that creates a new dataset with a Boolean
+ * <!-- globalinfo-start --> A filter that creates a new dataset with a boolean
  * attribute replacing a nominal attribute. In the new dataset, a value of 1 is
- * assigned to an instance that exhibits a value in the given range of attribute values,
- * and a value of 0 is assigned to an instance that does not. The Boolean attribute is coded as numeric by
+ * assigned to an instance that exhibits a particular range of attribute values,
+ * a 0 to an instance that doesn't. The boolean attribute is coded as numeric by
  * default.
  * <p/>
  * <!-- globalinfo-end -->
@@ -56,16 +66,16 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -N &lt;index&gt;
- *  Set if new Boolean attribute nominal.
+ *  Set if new boolean attribute nominal.
  * </pre>
  * 
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class MakeIndicator extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 766001176862773163L;
@@ -76,7 +86,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
   /** The value's index */
   private final Range m_ValIndex;
 
-  /** Make Boolean attribute numeric. */
+  /** Make boolean attribute numeric. */
   private boolean m_Numeric = true;
 
   /**
@@ -188,7 +198,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
       "\tSpecify the list of values to indicate. First and last are\n"
         + "\tvalid indexes (default last)", "V", 1,
       "-V <index1,index2-index4,...>"));
-    newVector.addElement(new Option("\tSet if new Boolean attribute nominal.",
+    newVector.addElement(new Option("\tSet if new boolean attribute nominal.",
       "N", 0, "-N <index>"));
 
     return newVector.elements();
@@ -214,7 +224,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -N &lt;index&gt;
-   *  Set if new Boolean attribute nominal.
+   *  Set if new boolean attribute nominal.
    * </pre>
    * 
    * <!-- options-end -->
@@ -275,10 +285,10 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
 
-    return "A filter that creates a new dataset with a Boolean attribute "
+    return "A filter that creates a new dataset with a boolean attribute "
       + "replacing a nominal attribute.  In the new dataset, a value of 1 is "
-      + "assigned to an instance that exhibits a value in the given range of attribute "
-      + "values, and a value of 0 is assigned to an instance that does not. The Boolean attribute is "
+      + "assigned to an instance that exhibits a particular range of attribute "
+      + "values, a 0 to an instance that doesn't. The boolean attribute is "
       + "coded as numeric by default.";
   }
 
@@ -371,6 +381,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    * @param indices an array containing indexes of attributes to select. Since
    *          the array will typically come from a program, attributes are
    *          indexed from 0.
+   * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setValueIndicesArray(int[] indices) {
 
@@ -428,9 +439,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
         newAtts.add(att);
       } else {
         if (m_Numeric) {
-          Attribute a = new Attribute(att.name());
-          a.setWeight(att.weight());
-          newAtts.add(a);
+          newAtts.add(new Attribute(att.name()));
         } else {
           String vals;
           int[] sel = m_ValIndex.getSelection();
@@ -442,9 +451,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
           newVals = new ArrayList<String>(2);
           newVals.add("neg_" + vals);
           newVals.add("pos_" + vals);
-          Attribute a = new Attribute(att.name(), newVals);
-          a.setWeight(att.weight());
-          newAtts.add(a);
+          newAtts.add(new Attribute(att.name(), newVals));
         }
       }
     }
@@ -462,7 +469,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

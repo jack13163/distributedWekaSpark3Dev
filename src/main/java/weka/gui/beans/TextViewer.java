@@ -43,9 +43,15 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 
-import weka.core.Utils;
 import weka.gui.Logger;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -54,7 +60,7 @@ import weka.gui.SaveBuffer;
  * Bean that collects and displays pieces of text
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 14494 $
+ * @version $Revision: 10815 $
  */
 public class TextViewer extends JPanel implements TextListener,
   DataSourceListener, TrainingSetListener, TestSetListener, Visible,
@@ -103,7 +109,7 @@ public class TextViewer extends JPanel implements TextListener,
     new Vector<TextListener>();
 
   public TextViewer() {
-    GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!GraphicsEnvironment.isHeadless()) {
       appearanceFinal();
     } else {
@@ -151,7 +157,7 @@ public class TextViewer extends JPanel implements TextListener,
   }
 
   private void setUpResultHistory() {
-    GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!GraphicsEnvironment.isHeadless()) {
       if (m_outText == null) {
         m_outText = new JTextArea(20, 80);
@@ -349,7 +355,7 @@ public class TextViewer extends JPanel implements TextListener,
   @Override
   public void processHeadlessEvents(List<EventObject> headless) {
     // only process if we're not headless
-    if (!GraphicsEnvironment.isHeadless()) {
+    if (!java.awt.GraphicsEnvironment.isHeadless()) {
       for (EventObject e : headless) {
         if (e instanceof TextEvent) {
           acceptText((TextEvent) e);
@@ -393,7 +399,7 @@ public class TextViewer extends JPanel implements TextListener,
       if (m_outText == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = Utils.getWekaJFrame("Text Viewer", m_visual);
+      m_resultsFrame = new JFrame("Text Viewer");
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       final JScrollPane js = new JScrollPane(m_outText);
       js.setBorder(BorderFactory.createTitledBorder("Text"));
@@ -411,7 +417,6 @@ public class TextViewer extends JPanel implements TextListener,
         }
       });
       m_resultsFrame.pack();
-      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();
@@ -510,7 +515,7 @@ public class TextViewer extends JPanel implements TextListener,
     if (m_design) {
       appearanceDesign();
     } else {
-      GraphicsEnvironment.getLocalGraphicsEnvironment();
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
       if (!GraphicsEnvironment.isHeadless()) {
         appearanceFinal();
       }
@@ -677,14 +682,14 @@ public class TextViewer extends JPanel implements TextListener,
 
   public static void main(String[] args) {
     try {
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
       final TextViewer tv = new TextViewer();
 
       tv.acceptText(new TextEvent(tv, "Here is some test text from the main "
         + "method of this class.", "The Title"));
-      jf.getContentPane().add(tv, BorderLayout.CENTER);
+      jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

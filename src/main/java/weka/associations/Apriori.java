@@ -171,7 +171,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 15232 $
+ * @version $Revision: 12014 $
  */
 public class Apriori extends AbstractAssociator implements OptionHandler,
   AssociationRulesProducer, CARuleMiner, TechnicalInformationHandler {
@@ -881,8 +881,6 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     if (toStringDelimitersString.length() == 2) {
       m_toStringDelimiters = toStringDelimitersString;
     }
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1963,7 +1961,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15232 $");
+    return RevisionUtils.extract("$Revision: 12014 $");
   }
 
   /**

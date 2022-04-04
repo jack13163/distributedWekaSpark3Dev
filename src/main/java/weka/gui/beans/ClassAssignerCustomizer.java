@@ -73,7 +73,7 @@ public class ClassAssignerCustomizer
   private transient String m_backup;
 
   public ClassAssignerCustomizer() {
-    setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+    setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
     add(new javax.swing.JLabel("ClassAssignerCustomizer"), 

@@ -55,7 +55,7 @@ public class AssociatorCustomizer
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
   
-  private Associator m_dsAssociator;
+  private weka.gui.beans.Associator m_dsAssociator;
   /*  private GenericObjectEditor m_ClassifierEditor = 
       new GenericObjectEditor(true); */
   private PropertySheetPanel m_AssociatorEditor = 
@@ -114,7 +114,7 @@ public class AssociatorCustomizer
    * @param object an <code>Object</code> value
    */
   public void setObject(Object object) {
-    m_dsAssociator = (Associator)object;
+    m_dsAssociator = (weka.gui.beans.Associator)object;
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
     try {
       m_backup = 

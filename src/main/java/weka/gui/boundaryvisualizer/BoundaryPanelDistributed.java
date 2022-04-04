@@ -555,7 +555,7 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
       jf.getContentPane().setLayout(new BorderLayout());
 
       System.err.println("Loading instances from : " + args[0]);
-      java.io.Reader r = new BufferedReader(new FileReader(
+      java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
         args[0]));
       final Instances i = new Instances(r);
       i.setClassIndex(Integer.parseInt(args[1]));

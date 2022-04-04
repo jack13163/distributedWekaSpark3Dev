@@ -961,7 +961,7 @@ public class DecisionTable extends AbstractClassifier implements OptionHandler,
 
     String searchString = Utils.getOption('S', options);
     if (searchString.length() == 0) {
-      searchString = BestFirst.class.getName();
+      searchString = weka.attributeSelection.BestFirst.class.getName();
     }
     String[] searchSpec = Utils.splitOptions(searchString);
     if (searchSpec.length == 0) {

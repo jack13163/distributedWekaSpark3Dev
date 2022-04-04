@@ -39,11 +39,11 @@ public interface StartSetHandler {
    * eg. 1,2,6,10-15.
    * @exception Exception if start set can't be set.
    */
-  void setStartSet(String startSet) throws Exception;
+  void setStartSet (String startSet) throws Exception;
 
   /**
    * Returns a list of attributes (and or attribute ranges) as a String
    * @return a list of attributes (and or attribute ranges)
    */
-  String getStartSet();
+  String getStartSet ();
 }

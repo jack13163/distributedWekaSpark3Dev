@@ -31,7 +31,18 @@ import java.util.Vector;
 
 import weka.clusterers.AbstractClusterer;
 import weka.clusterers.Clusterer;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -70,10 +81,10 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15203 $
+ * @version $Revision: 12037 $
  */
 public class AddCluster extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** for serialization. */
   static final long serialVersionUID = 7414280611943807337L;
@@ -204,42 +215,30 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
     Instances toFilter = getInputFormat();
 
     if (!isFirstBatchDone()) {
+      // filter out attributes if necessary
+      Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
+
       // serialized model or build clusterer from scratch?
       File file = getSerializedClustererFile();
       if (!file.isDirectory()) {
-        int[] attsToIgnore = null;
-        ObjectInputStream ois = //new ObjectInputStream(new FileInputStream(file));
-          SerializationHelper.getObjectInputStream(new FileInputStream(file));
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
         m_ActualClusterer = (Clusterer) ois.readObject();
         Instances header = null;
         // let's see whether there's an Instances header stored as well
         try {
           header = (Instances) ois.readObject();
-          // ignored atts
-          attsToIgnore = (int[]) ois.readObject();
         } catch (Exception e) {
           // ignored
         }
         ois.close();
-
-        if (attsToIgnore != null && attsToIgnore.length > 0) {
-          m_removeAttributes = new Remove();
-          ((Remove) m_removeAttributes).setAttributeIndicesArray(attsToIgnore);
-          ((Remove) m_removeAttributes).setInvertSelection(false);
-          m_removeAttributes.setInputFormat(toFilter);
-        }
-
         // same dataset format?
         if ((header != null)
-          && (!header.equalHeaders(toFilter))) {
+          && (!header.equalHeaders(toFilterIgnoringAttributes))) {
           throw new WekaException(
             "Training header of clusterer and filter dataset don't match:\n"
-              + header.equalHeadersMsg(toFilter));
+              + header.equalHeadersMsg(toFilterIgnoringAttributes));
         }
       } else {
-        // filter out attributes if necessary
-        Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
-
         m_ActualClusterer = AbstractClusterer.makeCopy(m_Clusterer);
         m_ActualClusterer.buildClusterer(toFilterIgnoringAttributes);
       }
@@ -273,7 +272,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
    * Input an instance for filtering. Ordinarily the instance is processed and
    * made available for output immediately. Some filters require all instances
    * be read before producing output.
-   *
+   * 
    * @param instance the input instance
    * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been defined.
@@ -301,7 +300,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
   /**
    * Convert a single instance over. The converted instance is added to the end
    * of the output queue.
-   *
+   * 
    * @param instance the instance to convert
    * @throws Exception if something goes wrong
    */
@@ -613,7 +612,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15203 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

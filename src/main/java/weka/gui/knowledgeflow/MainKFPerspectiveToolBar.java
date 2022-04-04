@@ -723,7 +723,7 @@ public class MainKFPerspectiveToolBar extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         // createTemplateMenuPopup();
-        JPopupMenu popupMenu = new JPopupMenu();
+        PopupMenu popupMenu = new PopupMenu();
         List<String> builtinTemplates =
           m_mainPerspective.getTemplateManager()
             .getBuiltinTemplateDescriptions();
@@ -732,7 +732,7 @@ public class MainKFPerspectiveToolBar extends JPanel {
             .getPluginTemplateDescriptions();
 
         for (final String desc : builtinTemplates) {
-          JMenuItem menuItem = new JMenuItem(desc);
+          MenuItem menuItem = new MenuItem(desc);
           menuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -752,7 +752,7 @@ public class MainKFPerspectiveToolBar extends JPanel {
           popupMenu.addSeparator();
         }
         for (final String desc : pluginTemplates) {
-          JMenuItem menuItem = new JMenuItem(desc);
+          MenuItem menuItem = new MenuItem(desc);
           menuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -986,13 +986,13 @@ public class MainKFPerspectiveToolBar extends JPanel {
       }
 
       lnr.close();
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
       final JTextArea ta = new JTextArea(helpHolder.toString());
       ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
       ta.setEditable(false);
       final JScrollPane sp = new JScrollPane(ta);
-      jf.getContentPane().add(sp, BorderLayout.CENTER);
+      jf.getContentPane().add(sp, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

@@ -26,14 +26,22 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start -->
- * Merges all values of the specified nominal attributes that are insufficiently frequent.
+ * Merges all values of the specified nominal attribute that are sufficiently infrequent.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -69,7 +77,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision: ???? $
  */
 public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
-  UnsupervisedFilter, WeightedAttributesHandler, WeightedInstancesHandler {
+  UnsupervisedFilter {
 
   /** for serialization */
   static final long serialVersionUID = 4444337331921333847L;
@@ -100,7 +108,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
    */
   @Override
   public String globalInfo() {
-    return "Merges all values of the specified nominal attributes that are insufficiently frequent.";
+    return "Merges all values of the specified nominal attribute that are sufficiently infrequent.";
   }
 
   /**
@@ -478,9 +486,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
         } else {
           vals.set(0, sb.toString()); // Replace empty string
         }
-        Attribute a = new Attribute(att.name() + "_merged_infrequent_values", vals);
-        a.setWeight(att.weight());
-        atts.add(a);
+        atts.add(new Attribute(att.name() + "_merged_infrequent_values", vals));
       } else {
         atts.add((Attribute) att.copy());
       }
@@ -540,7 +546,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
           newData[j] = inst.value(j);
         }
       }
-      DenseInstance instNew = new DenseInstance(inst.weight(), newData);
+      DenseInstance instNew = new DenseInstance(1.0, newData);
       instNew.setDataset(result);
 
       // copy possible strings, relational values...

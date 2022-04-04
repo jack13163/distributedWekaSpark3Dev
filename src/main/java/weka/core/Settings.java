@@ -386,7 +386,7 @@ public class Settings implements Serializable {
    * Class implementing a key for a setting. Has a unique key, description, tool
    * tip text and map of arbitrary other metadata
    */
-  public static class SettingKey implements Serializable {
+  public static class SettingKey implements java.io.Serializable {
 
     /** Key for this setting */
     protected String m_key;

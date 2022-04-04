@@ -196,7 +196,7 @@ public class ModelPerformanceChart extends JPanel implements
         try {
           Object r = PluginManager.getPluginInstance(
             "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
-          if (r != null && r instanceof OffscreenChartRenderer) {
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default
@@ -700,7 +700,7 @@ public class ModelPerformanceChart extends JPanel implements
         if (!m_framePoppedUp) {
           m_framePoppedUp = true;
 
-          final JFrame jf = new JFrame(
+          final javax.swing.JFrame jf = new javax.swing.JFrame(
             "Model Performance Chart");
           jf.setSize(800, 600);
           jf.getContentPane().setLayout(new BorderLayout());
@@ -743,15 +743,15 @@ public class ModelPerformanceChart extends JPanel implements
       java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
         args[0]));
       Instances inst = new Instances(r);
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
       final ModelPerformanceChart as = new ModelPerformanceChart();
       PlotData2D pd = new PlotData2D(inst);
       pd.setPlotName(inst.relationName());
       ThresholdDataEvent roc = new ThresholdDataEvent(as, pd);
       as.acceptDataSet(roc);
 
-      jf.getContentPane().add(as, BorderLayout.CENTER);
+      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

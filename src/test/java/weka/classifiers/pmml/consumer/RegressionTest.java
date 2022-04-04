@@ -47,7 +47,7 @@ public class RegressionTest extends AbstractPMMLClassifierTest {
   }
 
   public static Test suite() {
-    return new TestSuite(RegressionTest.class);
+    return new TestSuite(weka.classifiers.pmml.consumer.RegressionTest.class);
   }
 
   public static void main(String[] args) {

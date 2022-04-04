@@ -119,20 +119,21 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
     JSplitPane p2 =
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_history, m_textScroller);
     add(p2, BorderLayout.CENTER);
-    p2.setDividerLocation(200 + p2.getInsets().left);
 
     // copy all results over to the history panel.
     Map<String, String> runResults = ((TextViewer) getStep()).getResults();
-    String lastName = "";
     if (runResults.size() > 0) {
+      boolean first = true;
+      String firstKey = "";
       for (Map.Entry<String, String> e : runResults.entrySet()) {
+        if (first) {
+          firstKey = e.getKey();
+          first = false;
+        }
         m_history
           .addResult(e.getKey(), new StringBuffer().append(e.getValue()));
-        lastName = e.getKey();
       }
-      if (lastName.length() > 0) {
-        m_history.setSingle(lastName);
-      }
+      m_history.setSingle(firstKey);
     }
 
     m_clearButton.addActionListener(new ActionListener() {
@@ -155,7 +156,6 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
   public void closePressed() {
     ((TextViewer) getStep())
       .removeTextNotificationListener(TextViewerInteractiveView.this);
-    super.closePressed();
   }
 
   /**

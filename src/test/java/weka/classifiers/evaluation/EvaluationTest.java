@@ -81,7 +81,7 @@ public class EvaluationTest extends TestCase {
   }
 
   public static Test suite() {
-    return new TestSuite(EvaluationTest.class);
+    return new TestSuite(weka.classifiers.evaluation.EvaluationTest.class);
   }
 
   public static void main(String[] args) {

@@ -24,8 +24,15 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.AttributeStats;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -42,18 +49,16 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -M &lt;max variance %&gt;
- *  Maximum variance percentage allowed (default 99). Specifically, if
- *  (number_of_distinct_values / total_number_of_values * 100)
- *  is greater than this value, then the attribute will be removed.
+ *  Maximum variance percentage allowed (default 99)
  * </pre>
  * 
  * <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8659417851407640038L;
@@ -216,9 +221,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-      "\tMaximum variance percentage allowed (default 99). Specifically, if"
-                + "\t(number_of_distinct_values / total_number_of_values * 100)"
-                + "\tis greater than this value, then the attribute will be removed.", "M", 1,
+      "\tMaximum variance percentage allowed (default 99)", "M", 1,
       "-M <max variance %>"));
 
     return newVector.elements();
@@ -233,9 +236,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -M &lt;max variance %&gt;
-   *  Maximum variance percentage allowed (default 99). Specifically, if
-   *  (number_of_distinct_values / total_number_of_values * 100)
-   *  is greater than this value, then the attribute will be removed.
+   *  Maximum variance percentage allowed (default 99)
    * </pre>
    * 
    * <!-- options-end -->
@@ -298,9 +299,9 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    */
   public String maximumVariancePercentageAllowedTipText() {
 
-    return "Set the threshold for the highest variance allowed before a nominal attribute will be deleted. "
+    return "Set the threshold for the highest variance allowed before a nominal attribute will be deleted."
       + "Specifically, if (number_of_distinct_values / total_number_of_values * 100)"
-      + " is greater than this value, then the attribute will be removed.";
+      + " is greater than this value then the attribute will be removed.";
   }
 
   /**
@@ -332,7 +333,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

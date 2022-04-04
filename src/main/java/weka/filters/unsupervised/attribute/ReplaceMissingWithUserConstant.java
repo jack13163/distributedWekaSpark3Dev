@@ -29,8 +29,19 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
@@ -42,11 +53,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
-  implements UnsupervisedFilter, StreamableFilter, EnvironmentHandler,
-        WeightedInstancesHandler, WeightedAttributesHandler {
+  implements UnsupervisedFilter, StreamableFilter, EnvironmentHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -7334039452189350356L;
@@ -316,7 +326,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
   /**
    * Set the nominal/string replacement value
    * 
-   * @param nominalStringConstant the nominal/string constant to use
+   * @param m_nominalStringConstant the nominal/string constant to use
    */
   public void setNominalStringReplacementValue(String nominalStringConstant) {
     m_nominalStringConstant = nominalStringConstant;
@@ -580,10 +590,10 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
           if (instanceInfo.attribute(i).isNominal()) {
             atts.add(updatedNoms.get(nomCount++));
           } else {
-            atts.add(instanceInfo.attribute(i)); // Copy not necessary
+            atts.add((Attribute) instanceInfo.attribute(i).copy());
           }
         } else {
-          atts.add(instanceInfo.attribute(i)); // Copy not necessary
+          atts.add((Attribute) instanceInfo.attribute(i).copy());
         }
       }
 
@@ -664,8 +674,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
             vals[i] = outputFormatPeek().attribute(i).indexOfValue(
               inst.stringValue(i));
           } else if (inst.attribute(i).isNominal() && i != inst.classIndex()) {
-            // vals[i] = inst.value(i) + 1;
-            vals[i] = outputFormatPeek().attribute(i).indexOfValue(inst.stringValue(i));
+            vals[i] = inst.value(i) + 1;
           } else {
             vals[i] = inst.value(i);
           }
@@ -705,7 +714,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

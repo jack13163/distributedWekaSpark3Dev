@@ -33,8 +33,17 @@ import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.Ranker;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -107,10 +116,10 @@ import weka.filters.SupervisedFilter;
  <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 10866 $
  */
 public class AttributeSelection extends Filter implements SupervisedFilter,
-  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -296211247688169716L;
@@ -593,7 +602,7 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 10866 $");
   }
 
   /**

@@ -131,7 +131,7 @@ public interface DistanceFunction extends OptionHandler {
    *         larger than cutOffValue.
    */
   public double distance(Instance first, Instance second, double cutOffValue,
-                         PerformanceStats stats);
+    PerformanceStats stats);
 
   /**
    * Does post processing of the distances (if necessary) returned by

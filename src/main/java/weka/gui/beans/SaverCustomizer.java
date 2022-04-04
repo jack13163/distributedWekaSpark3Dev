@@ -21,28 +21,6 @@
 
 package weka.gui.beans;
 
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-import weka.gui.WekaFileChooser;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
@@ -56,11 +34,32 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseSaver;
+import weka.core.converters.FileSourcedConverter;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+
 /**
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 15104 $
+ * @version $Revision: 8034 $
  */
 public class SaverCustomizer
 extends JPanel
@@ -76,13 +75,13 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
 
-  private Saver m_dsSaver;
+  private weka.gui.beans.Saver m_dsSaver;
 
   private PropertySheetPanel m_SaverEditor = 
     new PropertySheetPanel();
 
-  private WekaFileChooser m_fileChooser
-  = new WekaFileChooser(new File(System.getProperty("user.dir")));
+  private JFileChooser m_fileChooser 
+  = new JFileChooser(new File(System.getProperty("user.dir")));
 
 
   private Window m_parentWindow;
@@ -615,7 +614,6 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
           m_fileChooserFrame = jf;
           jf.pack();
-          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SaverCustomizer.this));
           jf.setVisible(true);
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -724,7 +722,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
    * @param object a weka.gui.beans.Saver
    */
   public void setObject(Object object) {
-    m_dsSaver = (Saver)object;
+    m_dsSaver = (weka.gui.beans.Saver)object;
     m_SaverEditor.setTarget(m_dsSaver.getSaverTemplate());
     if(m_dsSaver.getSaverTemplate() instanceof DatabaseConverter){
       setUpDatabase();

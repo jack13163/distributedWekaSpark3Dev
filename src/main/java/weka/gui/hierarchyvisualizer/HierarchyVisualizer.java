@@ -23,7 +23,7 @@ package weka.gui.hierarchyvisualizer;
  * Shows cluster trees represented in Newick format as dendrograms.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz, remco@cs.waikato.ac.nz)
- * @version $Revision: 14442 $
+ * @version $Revision: 12048 $
  */
 import java.awt.Color;
 import java.awt.Container;
@@ -51,7 +51,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 			parseNewick(sNewick);
 		} catch (Exception e) {
 			e.printStackTrace();
-			//		System.exit(0);
+			System.exit(0);
 		}
 		addComponentListener(this);
 	} // c'tor

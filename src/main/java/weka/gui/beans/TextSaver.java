@@ -61,7 +61,7 @@ public class TextSaver extends JPanel implements TextListener, BeanCommon,
   /**
    * The log for this bean
    */
-  protected transient Logger m_logger = null;
+  protected transient weka.gui.Logger m_logger = null;
 
   /**
    * The environment variables.

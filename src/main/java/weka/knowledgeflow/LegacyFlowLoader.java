@@ -232,13 +232,10 @@ public class LegacyFlowLoader implements FlowLoader {
     StepManagerImpl sourceNew = flow.findStep(sourceC.getCustomName());
     StepManagerImpl targetNew = flow.findStep(targetC.getCustomName());
     if (sourceNew == null || targetNew == null) {
-      if (m_log != null) {
-        m_log
-          .logWarning("Unable to make connection in new flow between legacy "
-            + "steps " + sourceC.getCustomName() + " and "
-            + targetC.getCustomName() + " for connection '"
-            + conn.getEventName());
-      }
+      m_log.logWarning("Unable to make connection in new flow between legacy "
+        + "steps " + sourceC.getCustomName() + " and "
+        + targetC.getCustomName() + " for connection '" + conn.getEventName());
+
       return;
     }
 
@@ -643,7 +640,7 @@ public class LegacyFlowLoader implements FlowLoader {
     }
 
     Set<String> steps =
-      PluginManager.getPluginNamesOfType(Step.class
+      PluginManager.getPluginNamesOfType(weka.knowledgeflow.steps.Step.class
         .getCanonicalName());
 
     Step result = null;
@@ -654,7 +651,7 @@ public class LegacyFlowLoader implements FlowLoader {
           try {
             result =
               (Step) PluginManager.getPluginInstance(
-                Step.class.getCanonicalName(), s);
+                weka.knowledgeflow.steps.Step.class.getCanonicalName(), s);
             break;
           } catch (Exception ex) {
             throw new WekaException(ex);

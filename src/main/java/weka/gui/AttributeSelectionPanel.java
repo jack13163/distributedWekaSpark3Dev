@@ -24,22 +24,14 @@ package weka.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -67,7 +59,7 @@ import weka.core.Instances;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14427 $
+ * @version $Revision: 10216 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -327,7 +319,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Creates the attribute selection panel with no initial instances.
-   *
+   * 
    * @param include true if the include button is to be shown
    * @param remove true if the remove button is to be shown
    * @param invert true if the invert button is to be shown
@@ -384,15 +376,6 @@ public class AttributeSelectionPanel extends JPanel {
     m_Table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     m_Table.setColumnSelectionAllowed(false);
     m_Table.setPreferredScrollableViewportSize(new Dimension(250, 150));
-    m_Table.addMouseListener(new MouseAdapter() {
-      @Override public void mouseClicked(MouseEvent e) {
-        super.mouseClicked(e);
-        if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
-          || e.isAltDown()) {
-          popupCopyRangeMenu(e.getX(), e.getY());
-        }
-      }
-    });
 
     // Set up the layout
     JPanel p1 = new JPanel();
@@ -426,78 +409,9 @@ public class AttributeSelectionPanel extends JPanel {
     m_Table.setPreferredScrollableViewportSize(d);
   }
 
-  protected void popupCopyRangeMenu(int x, int y) {
-    JPopupMenu popupMenu = new JPopupMenu();
-    final JMenuItem copyRangeItem =
-      new JMenuItem("Copy checked items to range in clipboard");
-    popupMenu.add(copyRangeItem);
-
-    if (getSelectedAttributes().length == 0) {
-      copyRangeItem.setEnabled(false);
-    }
-
-    copyRangeItem.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(ActionEvent e) {
-        int[] selected = getSelectedAttributes();
-        StringBuilder b = new StringBuilder();
-        int prev = -1;
-        int lastInString = -1;
-        for (int v : selected) {
-          if (v == 0) {
-            b.append("first-");
-            prev = v;
-            lastInString = v;
-          } else {
-            if (prev < 0) {
-              prev = v;
-              lastInString = v;
-              b.append(v + 1).append("-");
-            } else {
-              if (v - prev == 1) {
-                prev = v;
-                continue;
-              }
-              if (b.charAt(b.length() - 1) == '-') {
-                if (prev == lastInString) {
-                  b.setCharAt(b.length() - 1, ',');
-                } else {
-                  b.append(prev + 1).append(",");
-                }
-              }
-              if (v == m_Model.getRowCount() - 1) {
-                b.append("last");
-              } else {
-                b.append(v + 1).append("-");
-              }
-              prev = v;
-              lastInString = v;
-            }
-          }
-        }
-        if (b.charAt(b.length() - 1) == '-') {
-          if (selected.length > 1 &&
-            lastInString != selected[selected.length - 1]) {
-            if (selected[selected.length - 1] == m_Model.getRowCount() - 1) {
-              b.append("last");
-            } else {
-              b.append(selected[selected.length - 1] + 1);
-            }
-          } else {
-            b.setLength(b.length() - 1);
-          }
-        }
-        StringSelection selection = new StringSelection(b.toString());
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(selection, selection);
-      }
-    });
-
-    popupMenu.show(m_Table, x, y);
-  }
-
   /**
    * Sets the instances who's attribute names will be displayed.
-   *
+   * 
    * @param newInstances the new set of instances
    */
   public void setInstances(Instances newInstances) {
@@ -524,7 +438,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Gets an array containing the indices of all selected attributes.
-   *
+   * 
    * @return the array of selected indices.
    */
   public int[] getSelectedAttributes() {
@@ -535,7 +449,7 @@ public class AttributeSelectionPanel extends JPanel {
   /**
    * Set the selected attributes in the widget. Note that setInstances() must
    * have been called first.
-   *
+   * 
    * @param selected an array of boolean indicating which attributes are to have
    *          their check boxes selected.
    * @throws Exception if the supplied array of booleans does not have the same
@@ -549,7 +463,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Get the table model in use (or null if no instances have been set yet).
-   *
+   * 
    * @return the table model in use or null if no instances have been seen yet.
    */
   public TableModel getTableModel() {
@@ -558,7 +472,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Gets the selection model used by the table.
-   *
+   * 
    * @return a value of type 'ListSelectionModel'
    */
   public ListSelectionModel getSelectionModel() {
@@ -568,7 +482,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Tests the attribute selection panel from the command line.
-   *
+   * 
    * @param args must contain the name of an arff file to load.
    */
   public static void main(String[] args) {

@@ -636,7 +636,7 @@ public class FlowRunner implements FlowExecutor, CommandlineRunnable {
    *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
-  public static class SimpleLogger implements Logger {
+  public static class SimpleLogger implements weka.gui.Logger {
 
     /** The date format to use for logging */
     SimpleDateFormat m_DateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

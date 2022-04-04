@@ -259,27 +259,6 @@ public class PerspectiveManager extends JPanel {
   }
 
   /**
-   * Method to be called when GUI application is no longer needed, to free up resources so that they
-   * can be garbage collected.
-   */
-  public void terminate() {
-
-    List<Perspective> perspectives = getLoadedPerspectives();
-    for (Perspective p : perspectives) {
-      if (p instanceof AbstractPerspective) {
-        ((AbstractPerspective) p).terminate();
-      } else if (p instanceof SimpleCLIPanel) { // Does not extend AbstractPerspective
-        ((SimpleCLIPanel) p).terminate();
-      }
-    }
-    if (m_mainPerspective instanceof AbstractPerspective) {
-      ((AbstractPerspective)m_mainPerspective).terminate();
-    }
-    m_LogPanel.terminate();
-    m_appMenuBar.removeAll();
-  }
-
-  /**
    * Apply settings to the log panel
    *
    * @param settings settings to apply
@@ -645,7 +624,7 @@ public class PerspectiveManager extends JPanel {
               PluginManager.getPluginInstance(PERSPECTIVE_INTERFACE, impl);
 
             if (!(perspective instanceof Perspective)) {
-              Logger.log(Logger.Level.WARNING,
+              weka.core.logging.Logger.log(Logger.Level.WARNING,
                 "[PerspectiveManager] " + impl + " is not an instance"
                   + PERSPECTIVE_INTERFACE + ". Skipping...");
             }

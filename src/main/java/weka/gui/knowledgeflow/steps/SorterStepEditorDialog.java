@@ -269,7 +269,7 @@ public class SorterStepEditorDialog extends GOEStepEditorDialog {
           if (m_attCombo.getSelectedItem() != null) {
             text = m_attCombo.getSelectedItem().toString();
           }
-          Component theEditor =
+          java.awt.Component theEditor =
             m_attCombo.getEditor().getEditorComponent();
           if (theEditor instanceof JTextField) {
             text = ((JTextField) theEditor).getText();

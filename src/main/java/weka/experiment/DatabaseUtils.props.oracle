@@ -1,12 +1,12 @@
 # Database settings for Oracle 10g Express Edition
 #
 # General information on database access can be found here:
-# https://waikato.github.io/weka-wiki/databases/
+# http://weka.wikispaces.com/Databases
 #
 # url:     http://www.oracle.com/
 # jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 15257 $
+# version: $Revision: 5837 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=oracle.jdbc.driver.OracleDriver

@@ -56,7 +56,6 @@ import weka.gui.PropertyPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.ViewerDialog;
-import weka.gui.WekaFileChooser;
 import weka.gui.WorkbenchApp;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
@@ -90,11 +89,16 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -115,7 +119,7 @@ import java.util.List;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15377 $
+ * @version $Revision: 12396 $
  */
 @PerspectiveInfo(ID = "weka.gui.explorer.preprocesspanel",
   title = "Preprocess", toolTipText = "Preprocess data",
@@ -174,9 +178,6 @@ public class PreprocessPanel extends AbstractPerspective implements
   /** Click to apply filters and save the results */
   protected JButton m_ApplyFilterBut = new JButton("Apply");
 
-  /** Click to stop a running filter */
-  protected JButton m_StopBut = new JButton("Stop");
-
   /** The file chooser for selecting data files */
   protected ConverterFileChooser m_FileChooser;
 
@@ -224,6 +225,11 @@ public class PreprocessPanel extends AbstractPerspective implements
   /** Menus provided by this perspective */
   protected List<JMenu> m_menus = new ArrayList<JMenu>();
 
+  static {
+    weka.core.WekaPackageManager.loadPackages(false);
+    GenericObjectEditor.registerEditors();
+  }
+
   /**
    * Creates the instances panel with no initial instances.
    */
@@ -233,7 +239,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     m_FileChooser = new ConverterFileChooser(new File(initialDir));
 
     // Create/Configure/Connect components
-    m_FilterEditor.setClassType(Filter.class);
+    m_FilterEditor.setClassType(weka.filters.Filter.class);
     if (ExplorerDefaults.getFilter() != null)
       m_FilterEditor.setValue(ExplorerDefaults.getFilter());
 
@@ -303,7 +309,6 @@ public class PreprocessPanel extends AbstractPerspective implements
 
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
-    m_StopBut.setToolTipText("Stop the filtering process");
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -319,16 +324,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JFrame frame = null;
-        Window window = SwingUtilities.getWindowAncestor(PreprocessPanel.this);
-        if (window instanceof JFrame) {
-          frame = (JFrame)window;
-        }
-        SqlViewerDialog dialog = new SqlViewerDialog(frame);
-        dialog.pack();
-        dialog.setSize(800, 700);
-        dialog.setIconImage(((Frame) SwingUtilities.getWindowAncestor(PreprocessPanel.this)).getIconImage());
-        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
+        SqlViewerDialog dialog = new SqlViewerDialog(null);
         dialog.setVisible(true);
         if (dialog.getReturnValue() == JOptionPane.OK_OPTION)
           setInstancesFromDBQ(dialog.getURL(), dialog.getUser(),
@@ -382,19 +378,6 @@ public class PreprocessPanel extends AbstractPerspective implements
     m_ApplyFilterBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applyFilter((Filter) m_FilterEditor.getValue());
-      }
-    });
-    m_StopBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_IOThread != null) {
-          m_IOThread.stop();
-          m_StopBut.setEnabled(false);
-          m_IOThread = null;
-          if (m_Log instanceof TaskLogger) {
-            ((TaskLogger) m_Log).taskFinished();
-          }
-          m_Log.statusMessage("Filtering process stopped prematurely");
-        }
       }
     });
     m_AttPanel.getSelectionModel().addListSelectionListener(
@@ -452,7 +435,6 @@ public class PreprocessPanel extends AbstractPerspective implements
             "Remove Attributes", JOptionPane.ERROR_MESSAGE);
           m_Log.logMessage("Problem removing attributes: " + ex.getMessage());
           m_Log.statusMessage("Problem removing attributes");
-          ex.printStackTrace();
         }
       }
     });
@@ -468,7 +450,6 @@ public class PreprocessPanel extends AbstractPerspective implements
     m_EditBut.setEnabled(false);
     m_SaveBut.setEnabled(false);
     m_ApplyFilterBut.setEnabled(false);
-    m_StopBut.setEnabled(false);
 
     // Set up the GUI layout
     JPanel buttons = new JPanel();
@@ -491,12 +472,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     filter.setBorder(BorderFactory.createTitledBorder("Filter"));
     filter.setLayout(new BorderLayout());
     filter.add(m_FilterPanel, BorderLayout.CENTER);
-    JPanel ssButs = new JPanel();
-    ssButs.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    ssButs.setLayout(new GridLayout(1, 2, 2, 0));
-    ssButs.add(m_ApplyFilterBut);
-    ssButs.add(m_StopBut);
-    filter.add(ssButs, BorderLayout.EAST);
+    filter.add(m_ApplyFilterBut, BorderLayout.EAST);
 
     JPanel attVis = new JPanel();
     attVis.setLayout(new GridLayout(2, 1));
@@ -522,20 +498,18 @@ public class PreprocessPanel extends AbstractPerspective implements
             as.setColoringIndex(m_AttVisualizePanel.getColoringIndex());
             as.setInstances(m_Instances);
 
-            final JFrame jf = Utils.getWekaJFrame("All attributes", PreprocessPanel.this);
-            jf.getContentPane().setLayout(new BorderLayout());
+            final javax.swing.JFrame jf = new javax.swing.JFrame();
+            jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
-            jf.getContentPane().add(as, BorderLayout.CENTER);
-            jf.addWindowListener(new WindowAdapter() {
+            jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
+            jf.addWindowListener(new java.awt.event.WindowAdapter() {
               @Override
-              public void windowClosing(WindowEvent e) {
+              public void windowClosing(java.awt.event.WindowEvent e) {
                 visAllBut.setEnabled(true);
                 jf.dispose();
               }
             });
-            jf.pack();
-            jf.setSize(1000, 600);
-            jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
+            jf.setSize(830, 600);
             jf.setVisible(true);
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -713,7 +687,6 @@ public class PreprocessPanel extends AbstractPerspective implements
           m_AttVisualizePanel.setAttribute(0);
 
           m_ApplyFilterBut.setEnabled(true);
-          m_StopBut.setEnabled(false);
 
           m_Log.logMessage("Base relation is now " + m_Instances.relationName()
             + " (" + m_Instances.numInstances() + " instances)");
@@ -883,11 +856,9 @@ public class PreprocessPanel extends AbstractPerspective implements
               }
               Instances copy = new Instances(m_Instances);
               copy.setClassIndex(classIndex);
-              m_StopBut.setEnabled(true);
               Filter filterCopy = Filter.makeCopy(filter);
               filterCopy.setInputFormat(copy);
               Instances newInstances = Filter.useFilter(copy, filterCopy);
-              m_StopBut.setEnabled(false);
               if (newInstances == null || newInstances.numAttributes() < 1) {
                 throw new Exception("Dataset is empty.");
               }
@@ -895,8 +866,8 @@ public class PreprocessPanel extends AbstractPerspective implements
               addUndoPoint();
               m_AttVisualizePanel.setColoringIndex(copy.classIndex());
               // if class was not set before, reset it again after use of filter
-              /* if (m_Instances.classIndex() < 0)
-                newInstances.setClassIndex(-1); */
+              if (m_Instances.classIndex() < 0)
+                newInstances.setClassIndex(-1);
               m_Instances = newInstances;
               setInstances(m_Instances);
               if (m_Log instanceof TaskLogger) {
@@ -915,7 +886,6 @@ public class PreprocessPanel extends AbstractPerspective implements
               "Apply Filter", JOptionPane.ERROR_MESSAGE);
             m_Log.logMessage("Problem filtering instances: " + ex.getMessage());
             m_Log.statusMessage("Problem filtering instances");
-            ex.printStackTrace();
           }
           m_IOThread = null;
         }
@@ -1144,12 +1114,10 @@ public class PreprocessPanel extends AbstractPerspective implements
             generateButton.setMnemonic('G');
             generateButton
               .setToolTipText("Generates the dataset according the settings.");
-            ActionListener al = new ActionListener() {
+            generateButton.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent evt) {
-                boolean showOutput = showOutputCheckBox.isSelected();
-
                 // generate
-                generatorPanel.execute(showOutput);
+                generatorPanel.execute();
                 boolean generated = (generatorPanel.getInstances() != null);
                 if (generated)
                   setInstances(generatorPanel.getInstances());
@@ -1161,34 +1129,15 @@ public class PreprocessPanel extends AbstractPerspective implements
                 m_DataGenerator = generatorPanel.getGenerator();
 
                 // display output?
-                if ((generated) && (showOutput))
+                if ((generated) && (showOutputCheckBox.isSelected()))
                   showGeneratedInstances(generatorPanel.getOutput());
-
-                generatorPanel.setLog(null);
               }
-            };
-            generateButton.addActionListener(al);
-            WindowListener wl = new WindowAdapter() {
-              @Override
-              public void windowClosing(WindowEvent w) {
-                dialog.dispose();
-              }
-              @Override
-              public void windowClosed(WindowEvent w) {
-                dialog.removeWindowListener(this);
-                dialog.setContentPane(new JPanel());
-                generateButton.removeActionListener(al);
-              }
-            };
-            dialog.addWindowListener(wl);
+            });
             dialog.setTitle("DataGenerator");
             dialog.getContentPane().add(generatorPanel, BorderLayout.CENTER);
             dialog.getContentPane().add(generateButton, BorderLayout.EAST);
             dialog.getContentPane().add(showOutputCheckBox, BorderLayout.SOUTH);
             dialog.pack();
-            dialog.setSize(1000,130);
-            dialog.setIconImage(((Frame) SwingUtilities.getWindowAncestor(PreprocessPanel.this)).getIconImage());
-            dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
 
             // display dialog
             dialog.setVisible(true);
@@ -1214,7 +1163,7 @@ public class PreprocessPanel extends AbstractPerspective implements
    * @param data the data to display
    */
   protected void showGeneratedInstances(String data) {
-    final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
+    final JDialog dialog = new JDialog();
     final JButton saveButton = new JButton("Save");
     final JButton closeButton = new JButton("Close");
     final JTextArea textData = new JTextArea(data);
@@ -1228,7 +1177,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     saveButton.setToolTipText("Saves the output to a file");
     saveButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
-        WekaFileChooser filechooser = new WekaFileChooser();
+        JFileChooser filechooser = new JFileChooser();
         int result = filechooser.showSaveDialog(dialog);
         if (result == JFileChooser.APPROVE_OPTION) {
           try {
@@ -1272,8 +1221,6 @@ public class PreprocessPanel extends AbstractPerspective implements
       dialog.getHeight() > screen.getHeight() * 0.8 ? (int) (screen.getHeight() * 0.8)
         : dialog.getHeight();
     dialog.setSize(width, height);
-    dialog.pack();
-    dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
 
     // display dialog
     dialog.setVisible(true);
@@ -1288,38 +1235,27 @@ public class PreprocessPanel extends AbstractPerspective implements
     final GenericObjectEditor convEd = new GenericObjectEditor(true);
 
     try {
-      convEd.setClassType(Loader.class);
+      convEd.setClassType(weka.core.converters.Loader.class);
       convEd.setValue(new weka.core.converters.CSVLoader());
-      ActionListener al = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          tryConverter((Loader) convEd.getValue(), f);
-        }
-      };
-      ((GenericObjectEditor.GOEPanel) convEd.getCustomEditor()).addOkListener(al);
-
-      PropertyDialog pd;
-      if (PropertyDialog.getParentDialog(this) != null)
-        pd =
-                new PropertyDialog(PropertyDialog.getParentDialog(this), convEd, -1, -1);
-      else
-        pd =
-                new PropertyDialog(PropertyDialog.getParentFrame(this), convEd, -1, -1);
-      pd.addWindowListener(new WindowAdapter() {
-        @Override
-        public void windowClosing(WindowEvent e) {
-          ((GenericObjectEditor.GOEPanel) convEd.getCustomEditor()).removeOkListener(al);
-          pd.dispose();
-        }
-        @Override
-        public void windowClosed(WindowEvent e) {
-          pd.setContentPane(new JPanel());
-          pd.removeWindowListener(this);
-        }
-      });
-      pd.setVisible(true);
+      ((GenericObjectEditor.GOEPanel) convEd.getCustomEditor())
+        .addOkListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            tryConverter((Loader) convEd.getValue(), f);
+          }
+        });
     } catch (Exception ex) {
-
     }
+
+    PropertyDialog pd;
+    if (PropertyDialog.getParentDialog(this) != null)
+      pd =
+        new PropertyDialog(PropertyDialog.getParentDialog(this), convEd, 100,
+          100);
+    else
+      pd =
+        new PropertyDialog(PropertyDialog.getParentFrame(this), convEd, 100,
+          100);
+    pd.setVisible(true);
   }
 
   /**
@@ -1624,10 +1560,6 @@ public class PreprocessPanel extends AbstractPerspective implements
     copy = new Instances(m_Instances);
     copy.setClassIndex(classIndex);
     dialog = new ViewerDialog(null);
-    dialog.pack();
-    dialog.setSize(1000, 600);
-    dialog.setIconImage(((Frame) SwingUtilities.getWindowAncestor(PreprocessPanel.this)).getIconImage());
-    dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
     result = dialog.showDialog(copy);
     if (result == ViewerDialog.APPROVE_OPTION) {
       try {

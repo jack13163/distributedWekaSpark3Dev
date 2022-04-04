@@ -30,8 +30,13 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 import weka.core.xml.XMLInstances;
 
 /**
@@ -69,10 +74,10 @@ import weka.core.xml.XMLInstances;
  * <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14861 $
+ * @version $Revision: 10203 $
  * @see Saver
  */
-public class XRFFSaver extends AbstractFileSaver implements BatchConverter, WeightedInstancesHandler {
+public class XRFFSaver extends AbstractFileSaver implements BatchConverter {
 
   /** for serialization */
   private static final long serialVersionUID = -7226404765213522043L;
@@ -410,7 +415,7 @@ public class XRFFSaver extends AbstractFileSaver implements BatchConverter, Weig
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14861 $");
+    return RevisionUtils.extract("$Revision: 10203 $");
   }
 
   /**

@@ -136,7 +136,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
-   * @see Color
+   * @see java.awt.Color
    */
   public Element writeColor(Element parent, Object o, String name)
     throws Exception {
@@ -164,7 +164,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
-   * @see Color
+   * @see java.awt.Color
    */
   public Object readColor(Element node) throws Exception {
 
@@ -194,7 +194,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
-   * @see DefaultListModel
+   * @see javax.swing.DefaultListModel
    */
   public Element writeDefaultListModel(Element parent, Object o, String name)
     throws Exception {
@@ -226,7 +226,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
-   * @see DefaultListModel
+   * @see javax.swing.DefaultListModel
    */
   public Object readDefaultListModel(Element node) throws Exception {
     DefaultListModel model;
@@ -276,7 +276,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
-   * @see Collection
+   * @see java.util.Collection
    */
   public Element writeCollection(Element parent, Object o, String name)
     throws Exception {
@@ -310,7 +310,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
-   * @see Collection
+   * @see java.util.Collection
    */
   public Object readCollection(Element node) throws Exception {
     Collection<Object> coll;
@@ -366,7 +366,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param name the name of the object
    * @return the node that was created
    * @throws Exception if the DOM creation fails
-   * @see Map
+   * @see java.util.Map
    */
   public Element writeMap(Element parent, Object o, String name)
     throws Exception {
@@ -404,7 +404,7 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
-   * @see Map
+   * @see java.util.Map
    */
   public Object readMap(Element node) throws Exception {
     Map<Object, Object> map;

@@ -31,8 +31,7 @@ import weka.filters.SimpleBatchFilter;
 
 /**
  * <!-- globalinfo-start -->
- * A filter for performing the Cartesian product of a set of nominal attributes. The weight of the new Cartesian
- * product attribute is the sum of the weights of the combined attributes.
+ * A filter for performing the Cartesian product of a set of nominal attributes.
  * <br><br>
  * <!-- globalinfo-end -->
  * 
@@ -72,8 +71,7 @@ public class CartesianProduct extends SimpleBatchFilter {
    */
   @Override
   public String globalInfo() {
-    return "A filter for performing the Cartesian product of a set of nominal attributes. " +
-            "The weight of the new Cartesian product attribute is the sum of the weights of the combined attributes.";
+    return "A filter for performing the Cartesian product of a set of nominal attributes.";
   }
 
   /**
@@ -214,7 +212,6 @@ public class CartesianProduct extends SimpleBatchFilter {
     result.disableAll();
 
     // attributes
-    result.enable(Capability.MISSING_VALUES);
     result.enableAllAttributes();
 
     // class
@@ -248,11 +245,9 @@ public class CartesianProduct extends SimpleBatchFilter {
     ArrayList<String> values = new ArrayList<String>();
 
     String name = "";
-    double sumOfWeights = 0;
     for (int i = 0; i < inputFormat.numAttributes(); i++) {
       atts.add(inputFormat.attribute(i)); // Can just copy reference because index remains unchanged.
       if (inputFormat.attribute(i).isNominal() && m_Attributes.isInRange(i) && i != inputFormat.classIndex()) {
-        sumOfWeights += inputFormat.attribute(i).weight();
         if (values.size() == 0) {
           values = new ArrayList<String>(inputFormat.attribute(i).numValues());
           for (int j = 0; j < inputFormat.attribute(i).numValues(); j++) {
@@ -272,9 +267,7 @@ public class CartesianProduct extends SimpleBatchFilter {
       }
     }
     if (values.size() > 0) {
-      Attribute a = new Attribute(name, values);
-      a.setWeight(sumOfWeights);
-      atts.add(a);
+      atts.add(new Attribute(name, values));
     }
 
     // generate header
@@ -323,11 +316,12 @@ public class CartesianProduct extends SimpleBatchFilter {
         } else {
           newVals[newVals.length - 1] = result.attribute(result.numAttributes() - 1).indexOfValue(value);;
         }
-        Instance newInst = inst.copy(newVals);
-        copyValues(newInst, false, inst.dataset(), result);
-        result.add(newInst);
+        if (inst instanceof DenseInstance) {
+          result.add(new DenseInstance(inst.weight(), newVals));
+        } else {
+          result.add(new SparseInstance(inst.weight(), newVals));
+        }
       } else {
-        copyValues(inst, false, inst.dataset(), result);
         result.add(inst);
       }
     }

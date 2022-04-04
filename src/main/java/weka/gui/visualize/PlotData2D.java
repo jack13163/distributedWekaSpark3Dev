@@ -35,7 +35,7 @@ import weka.filters.unsupervised.attribute.Add;
  * 1 with the instances) can also be provided.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15073 $
+ * @version $Revision: 10220 $
  */
 public class PlotData2D implements Serializable {
 
@@ -129,9 +129,8 @@ public class PlotData2D implements Serializable {
     m_connectPoints = new boolean[m_plotInstances.numInstances()];
     for (int i = 0; i < m_plotInstances.numInstances(); i++) {
       m_shapeSize[i] = Plot2D.DEFAULT_SHAPE_SIZE; // default shape size
-      // default (automatic shape assignment) or -ve weight indicates hack to make
-      // point invisible
-      m_shapeType[i] = m_plotInstances.instance(i).weight() >= 0 ? Plot2D.CONST_AUTOMATIC_SHAPE : -2;
+      m_shapeType[i] = Plot2D.CONST_AUTOMATIC_SHAPE; // default (automatic shape
+                                                     // assignment)
     }
     determineBounds();
   }
@@ -264,7 +263,7 @@ public class PlotData2D implements Serializable {
    */
   public void setShapeSize(int[] ss) throws Exception {
     m_shapeSize = ss;
-    if (m_shapeSize.length != m_plotInstances.numInstances()) {
+    if (m_shapeType.length != m_plotInstances.numInstances()) {
       throw new Exception("PlotData2D: Shape size array must have the same "
         + "number of entries as number of data points!");
     }
@@ -323,7 +322,7 @@ public class PlotData2D implements Serializable {
         + "same number of entries as number of data points!");
     }
     // System.err.println("Setting connect points ");
-    m_connectPoints = new boolean[cp.size()];
+    m_shapeSize = new int[cp.size()];
     for (int i = 0; i < cp.size(); i++) {
       m_connectPoints[i] = cp.get(i).booleanValue();
     }

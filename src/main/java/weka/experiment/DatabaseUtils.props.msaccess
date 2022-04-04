@@ -1,11 +1,11 @@
 # Database settings for ODBC in conjunction with MS Access 2000
 #
 # General information on database access can be found here:
-# https://waikato.github.io/weka-wiki/databases/
+# http://weka.wikispaces.com/Databases
 #
-# url:     https://waikato.github.io/weka-wiki/windows_databases/
+# url:     http://weka.wikispaces.com/Windows+Databases
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 15257 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver

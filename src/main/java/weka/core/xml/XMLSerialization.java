@@ -260,7 +260,7 @@ public class XMLSerialization implements RevisionHandler {
     // - Win32: sun.awt.shell.Win32ShellFolder2
     // - Linux: sun.awt.shell.DefaultShellFolder
     // -> we set it to "java.io.File"
-    m_ClassnameOverride.put(File.class, File.class.getName());
+    m_ClassnameOverride.put(java.io.File.class, java.io.File.class.getName());
 
     setVersion(Version.VERSION);
 
@@ -323,7 +323,7 @@ public class XMLSerialization implements RevisionHandler {
    * returns a hashtable with PropertyDescriptors that have "get" and "set"
    * methods indexed by the property name.
    * 
-   * @see PropertyDescriptor
+   * @see java.beans.PropertyDescriptor
    * @param o the object to retrieve the descriptors from
    * @return the PropertyDescriptors indexed by name of the property
    * @throws Exception if the introspection fails
@@ -963,7 +963,7 @@ public class XMLSerialization implements RevisionHandler {
             tmpStr = tmpStr.replaceAll("\n", "&#10;").replaceAll("\r", "&#13;")
               .replaceAll("\t", "&#9;");
 
-            if (o instanceof File) {
+            if (o instanceof java.io.File) {
               // hack to force separators to be always saved as /
               tmpStr = tmpStr.replace('\\', '/');
             }

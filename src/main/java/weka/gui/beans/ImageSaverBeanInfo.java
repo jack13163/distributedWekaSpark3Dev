@@ -50,7 +50,7 @@ public class ImageSaverBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(ImageSaver.class,
+    return new BeanDescriptor(weka.gui.beans.ImageSaver.class,
                               ImageSaverCustomizer.class);
   }
 }

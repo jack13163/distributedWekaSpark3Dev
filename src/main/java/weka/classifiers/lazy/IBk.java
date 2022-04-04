@@ -110,7 +110,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14826 $
+ * @version $Revision: 10141 $
  */
 public class IBk 
   extends AbstractClassifier 
@@ -626,7 +626,7 @@ public class IBk
     newVector.addElement(new Option(
 	      "\tThe nearest neighbour search algorithm to use "+
           "(default: weka.core.neighboursearch.LinearNNSearch).\n",
-	      "A", 1, "-A"));
+	      "A", 0, "-A"));
 
     newVector.addAll(Collections.list(super.listOptions()));
     
@@ -1055,7 +1055,7 @@ public class IBk
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14826 $");
+    return RevisionUtils.extract("$Revision: 10141 $");
   }
   
   /**

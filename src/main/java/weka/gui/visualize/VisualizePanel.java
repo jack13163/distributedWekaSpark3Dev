@@ -27,7 +27,6 @@ import weka.core.Instances;
 import weka.core.Settings;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.Logger;
-import weka.gui.WekaFileChooser;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -86,7 +85,7 @@ import java.util.Random;
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 15104 $
+ * @version $Revision: 12391 $
  */
 public class VisualizePanel extends PrintablePanel {
 
@@ -537,7 +536,6 @@ public class VisualizePanel extends PrintablePanel {
 
               int[] nSizes = null;
               int[] nTypes = null;
-              boolean[] connect = null;
               int x = m_xIndex;
               int y = m_yIndex;
 
@@ -550,7 +548,6 @@ public class VisualizePanel extends PrintablePanel {
               if (count > 0) {
                 nTypes = new int[count];
                 nSizes = new int[count];
-                connect = new boolean[count];
                 count = 0;
                 for (int noa = 0; noa < m_plot2D.getMasterPlot().m_plotInstances
                   .numInstances(); noa++) {
@@ -559,7 +556,6 @@ public class VisualizePanel extends PrintablePanel {
 
                     nTypes[count] = m_plot2D.getMasterPlot().m_shapeType[noa];
                     nSizes[count] = m_plot2D.getMasterPlot().m_shapeSize[noa];
-                    connect[count] = m_plot2D.getMasterPlot().m_connectPoints[noa];
                     count++;
                   }
                 }
@@ -571,7 +567,6 @@ public class VisualizePanel extends PrintablePanel {
               try {
                 newPlot.setShapeSize(nSizes);
                 newPlot.setShapeType(nTypes);
-                newPlot.setConnectPoints(connect);
 
                 m_plot2D.removeAllPlots();
 
@@ -1575,7 +1570,7 @@ public class VisualizePanel extends PrintablePanel {
     m_saveBut.getPreferredSize().height);
 
   /** file chooser for saving instances */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** Filter to ensure only arff files are selected */
@@ -2507,8 +2502,8 @@ public class VisualizePanel extends PrintablePanel {
 
       weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
         "Logging started");
-      final JFrame jf =
-        new JFrame("Weka Explorer: Visualize");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
@@ -2527,7 +2522,7 @@ public class VisualizePanel extends PrintablePanel {
         for (int j = 0; j < args.length; j++) {
           System.err.println("Loading instances from " + args[j]);
           java.io.Reader r =
-            new BufferedReader(new FileReader(args[j]));
+            new java.io.BufferedReader(new java.io.FileReader(args[j]));
           Instances i = new Instances(r);
           i.setClassIndex(i.numAttributes() - 1);
           PlotData2D pd1 = new PlotData2D(i);

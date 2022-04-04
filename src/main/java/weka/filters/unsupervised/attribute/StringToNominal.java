@@ -25,8 +25,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -43,8 +52,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -R &lt;col&gt;
- *  Sets the range of attribute indices ("first" and "last" are valid values
- *  and ranges and lists can also be used) (default "last").
+ *  Sets the range of attribute indices (default last).
  * </pre>
  * 
  * <pre>
@@ -55,10 +63,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class StringToNominal extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4864084427902797605L;
@@ -148,7 +156,8 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
       for (int i = 0; i < newInstance.numAttributes(); i++) {
         if (newInstance.attribute(i).isString() && !newInstance.isMissing(i)
           && m_AttIndices.isInRange(i)) {
-          Attribute outAtt = outputFormatPeek().attribute(i);
+          Attribute outAtt = getOutputFormat().attribute(
+            newInstance.attribute(i).name());
           String inVal = newInstance.stringValue(i);
           int outIndex = outAtt.indexOfValue(inVal);
           if (outIndex < 0) {
@@ -206,8 +215,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-      "\tSets which attributes to process (\"first\" and \"last\" are valid values "
-              + "and ranges and lists can also be used) (default \"last\").", "R", 1,
+      "\tSets the range of attribute indices (default last).", "R", 1,
       "-R <col>"));
 
     newVector.addElement(new Option("\tInvert the range specified by -R.", "V",
@@ -225,8 +233,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -R &lt;col&gt;
-   * Sets the range of attribute indices ("first" and "last" are valid values
-   * and ranges and lists can also be used) (default "last").
+   *  Sets the range of attribute indices (default last).
    * </pre>
    * 
    * <pre>
@@ -289,8 +296,9 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    */
   public String attributeRangeTipText() {
 
-    return "Sets which attributes to process (\"first\" and \"last\" are valid values "
-      + "and ranges and lists can also be used).";
+    return "Sets which attributes to process. This attributes "
+      + "must be string attributes (\"first\" and \"last\" are valid values "
+      + "as well as ranges and lists)";
   }
 
   /**
@@ -359,7 +367,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

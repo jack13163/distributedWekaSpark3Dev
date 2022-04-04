@@ -47,7 +47,7 @@ public interface DataGenerator {
    * @return an <code>Instance</code> value
    * @exception Exception if an error occurs
    */
-  double [][] generateInstances(int[] indices) throws Exception;
+  double [][] generateInstances(int [] indices) throws Exception;
 
   /**
    * Get weights
@@ -61,7 +61,7 @@ public interface DataGenerator {
    * @param dimensions an array of booleans specifying the dimensions to
    * be used when computing instance weights
    */
-  void setWeightingDimensions(boolean[] dimensions);
+  void setWeightingDimensions(boolean [] dimensions);
 
   /**
    * Set the values of the dimensions (chosen via setWeightingDimensions)
@@ -69,7 +69,7 @@ public interface DataGenerator {
    *
    * @param vals a <code>double[]</code> value
    */
-  void setWeightingValues(double[] vals);
+  void setWeightingValues(double [] vals);
 
   /**
    * Returns the number of generating models used by this DataGenerator

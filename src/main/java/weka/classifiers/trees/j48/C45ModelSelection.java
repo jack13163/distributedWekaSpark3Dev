@@ -32,7 +32,7 @@ import weka.core.Utils;
  * Class for selecting a C4.5-type split for a given dataset.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15122 $
+ * @version $Revision: 10531 $
  */
 public class C45ModelSelection extends ModelSelection {
 
@@ -83,7 +83,7 @@ public class C45ModelSelection extends ModelSelection {
    * Selects C4.5-type split for the given dataset.
    */
   @Override
-  public ClassifierSplitModel selectModel(Instances data) {
+  public final ClassifierSplitModel selectModel(Instances data) {
 
     double minResult;
     C45Split[] currentModel;
@@ -216,6 +216,6 @@ public class C45ModelSelection extends ModelSelection {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15122 $");
+    return RevisionUtils.extract("$Revision: 10531 $");
   }
 }

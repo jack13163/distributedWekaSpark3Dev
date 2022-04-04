@@ -48,7 +48,7 @@ import weka.gui.scripting.event.TitleUpdatedListener;
  * Abstract ancestor for scripting panels.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15290 $
+ * @version $Revision: 8034 $
  */
 public abstract class ScriptingPanel
   extends JPanel
@@ -68,28 +68,7 @@ public abstract class ScriptingPanel
 
   /** The thread that sends output from m_POE to the output box. */
   protected ReaderToTextPane m_ErrRedirector;
-
-  /** The Tee that the output stream will be part of. We need a reference to
-   * it at the class level so that we can remove the stream from it when
-   * the panel is terminated. */
-  protected Tee m_Tee;
-
-  /** The print stream that is wrapped around the piped output stream. We need a
-   * a reference to it at the class level so that we can remove it from the tee
-   * when the panel is terminated.
-   */
-  protected PrintStream m_PrintStream;
-
-  /** The Tee that the err stream will be part of. We need a reference to
-   * it at the class level so that we can remove the stream from it when
-   * the panel is terminated. */
-  protected Tee m_ErrTee;
-
-  /** The print stream that is wrapped around the piped error output stream. We need a
-   * a reference to it at the class level so that we can remove it from the tee
-   * when the panel is terminated.
-   */
-  protected PrintStream m_ErrPrintStream;
+  
   /** whether debug mode is on. */
   protected boolean m_Debug;
   
@@ -139,10 +118,9 @@ public abstract class ScriptingPanel
     // Redirect System.out to the text area
     try {
       PipedInputStream pio = new PipedInputStream(m_POO);
-      m_Tee = new Tee(System.out);
-      System.setOut(m_Tee);
-      m_PrintStream = new PrintStream(m_POO);
-      m_Tee.add(m_PrintStream);
+      Tee teeOut = new Tee(System.out);
+      System.setOut(teeOut);
+      teeOut.add(new PrintStream(m_POO));
       Reader reader = new InputStreamReader(pio);
       m_OutRedirector = new ReaderToTextPane(reader, getOutput(), Color.BLACK);
       m_OutRedirector.start();
@@ -156,10 +134,9 @@ public abstract class ScriptingPanel
     // Redirect System.err to the text area
     try {
       PipedInputStream pie = new PipedInputStream(m_POE);
-      m_ErrTee = new Tee(System.err);
-      System.setErr(m_ErrTee);
-      m_ErrPrintStream = new PrintStream(m_POE);
-      m_ErrTee.add(m_ErrPrintStream);
+      Tee teeErr = new Tee(System.err);
+      System.setErr(teeErr);
+      teeErr.add(new PrintStream(m_POE));
       Reader reader = new InputStreamReader(pie);
       m_ErrRedirector = new ReaderToTextPane(reader, getOutput(), Color.RED);
       m_ErrRedirector.start();
@@ -172,20 +149,7 @@ public abstract class ScriptingPanel
 
     addTitleUpdatedListener(this);
   }
-
-  /**
-   * Terminates this panel, i.e., terminates the output threads it started. Removes
-   * the output and error streams from the corresponding tees as well so that garbage collection succeeds.
-   */
-  public void terminate() {
-
-    m_ErrRedirector.interrupt();
-    m_OutRedirector.interrupt();
-    m_Tee.remove(m_PrintStream);
-    m_ErrTee.remove(m_ErrPrintStream);
-
-  }
-
+  
   /**
    * Returns an icon to be used in a frame.
    * 

@@ -20,14 +20,15 @@
 
 package weka.gui.experiment;
 
-import weka.core.PluginManager;
 import weka.experiment.Experiment;
+import weka.gui.GenericObjectEditor;
 
 import javax.swing.JPanel;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Ancestor for setup panels for experiments.
@@ -117,12 +118,12 @@ public abstract class AbstractSetupPanel
    */
   public static AbstractSetupPanel[] getPanels() {
     List<AbstractSetupPanel>	result;
-    List<String> 		names;
+    Vector<String> 		names;
     Class			cls;
     AbstractSetupPanel		panel;
 
     result = new ArrayList<AbstractSetupPanel>();
-    names  = PluginManager.getPluginNamesOfTypeList(AbstractSetupPanel.class.getName());
+    names  = GenericObjectEditor.getClassnames(AbstractSetupPanel.class.getName());
     for (String name: names) {
       try {
 	cls   = Class.forName(name);
@@ -139,9 +140,4 @@ public abstract class AbstractSetupPanel
 
     return result.toArray(new AbstractSetupPanel[result.size()]);
   }
-
-  /**
-   * Terminates this panel. To be implemented by actual concrete classes.
-   */
-  public abstract void terminate();
 }

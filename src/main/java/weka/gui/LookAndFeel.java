@@ -79,7 +79,7 @@ public class LookAndFeel {
   public static List<String> getAvailableLookAndFeelClasses() {
     List<String> lafs = new LinkedList<String>();
 
-    for (LookAndFeelInfo i : UIManager.getInstalledLookAndFeels()) {
+    for (UIManager.LookAndFeelInfo i : UIManager.getInstalledLookAndFeels()) {
       lafs.add(i.getClassName());
     }
 

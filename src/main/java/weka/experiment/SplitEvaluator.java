@@ -49,7 +49,7 @@ public interface SplitEvaluator extends Serializable {
    * in SplitEvaluators.
    * @param additionalMeasures a list of method names
    */
-  void setAdditionalMeasures(String[] additionalMeasures);
+  void setAdditionalMeasures(String [] additionalMeasures);
 
   /**
    * Gets the names of each of the key columns produced for a single run.

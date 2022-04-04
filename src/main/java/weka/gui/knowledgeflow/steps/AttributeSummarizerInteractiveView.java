@@ -101,8 +101,8 @@ public class AttributeSummarizerInteractiveView extends BaseInteractiveViewer {
       }
 
       @Override
-      public void entriesDeleted(List<String> names,
-                                 List<Integer> indexes) {
+      public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
         List<Data> ds = ((AttributeSummarizer) getStep()).getDatasets();
         List<Data> toRemove = new ArrayList<Data>();
         for (int i : indexes) {

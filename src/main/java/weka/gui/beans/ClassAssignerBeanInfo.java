@@ -84,7 +84,7 @@ public class ClassAssignerBeanInfo
   }
 
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(ClassAssigner.class,
+    return new BeanDescriptor(weka.gui.beans.ClassAssigner.class,
 			      ClassAssignerCustomizer.class);
   }
 }

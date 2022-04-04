@@ -66,7 +66,7 @@ public class ClustererBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Clusterer.class,
+    return new BeanDescriptor(weka.gui.beans.Clusterer.class, 
 			      ClustererCustomizer.class);
   }
 }

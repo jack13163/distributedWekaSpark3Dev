@@ -122,9 +122,9 @@ public interface Tester
    * @exception Exception if an error occurs
    */
   public PairedStats calculateStatistics(Instance datasetSpecifier,
-                                         int resultset1Index,
-                                         int resultset2Index,
-                                         int comparisonColumn) throws Exception;
+					 int resultset1Index,
+					 int resultset2Index,
+					 int comparisonColumn) throws Exception;
   
   /**
    * Creates a key that maps resultset numbers to their descriptions.
@@ -150,7 +150,7 @@ public interface Tester
    * j performed significantly better than resultset i.
    * @exception Exception if an error occurs
    */
-  public int [][] multiResultsetWins(int comparisonColumn, int[][] nonSigWin)
+  public int [][] multiResultsetWins(int comparisonColumn, int [][] nonSigWin)
     throws Exception;
   
   /**
@@ -178,7 +178,7 @@ public interface Tester
    * @exception Exception if an error occurs
    */
   public String multiResultsetFull(int baseResultset,
-                                   int comparisonColumn) throws Exception;
+				   int comparisonColumn) throws Exception;
 
   /**
    * Get the value of ResultsetKeyColumns.

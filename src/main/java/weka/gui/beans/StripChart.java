@@ -36,7 +36,9 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import weka.core.Instance;
@@ -50,7 +52,7 @@ import weka.gui.visualize.VisualizeUtils;
  * multiple plots simultaneously
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 14495 $
+ * @version $Revision: 12008 $
  */
 public class StripChart extends JPanel implements ChartListener,
   InstanceListener, Visible, BeanCommon, UserRequestAcceptor {
@@ -462,7 +464,7 @@ public class StripChart extends JPanel implements ChartListener,
    */
   public void showChart() {
     if (m_outputFrame == null) {
-      m_outputFrame = Utils.getWekaJFrame("Strip Chart", m_visual);
+      m_outputFrame = new JFrame("Strip Chart");
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
       JPanel panel = new JPanel(new BorderLayout());
       new PrintableComponent(panel);
@@ -497,7 +499,6 @@ public class StripChart extends JPanel implements ChartListener,
       m_outputFrame.pack();
       m_outputFrame.setSize(600, 150);
       m_outputFrame.setResizable(false);
-      m_outputFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_outputFrame.setVisible(true);
       m_outputFrame.setAlwaysOnTop(true);
       // m_outputFrame.setLocationByPlatform(true);
@@ -634,7 +635,7 @@ public class StripChart extends JPanel implements ChartListener,
       precision = 1;
     }
 
-    String numString = Utils.doubleToString(num, nondecimal + 1
+    String numString = weka.core.Utils.doubleToString(num, nondecimal + 1
       + precision, precision);
 
     return numString;
@@ -908,8 +909,8 @@ public class StripChart extends JPanel implements ChartListener,
   public static void main(String[] args) {
 
     try {
-      final JFrame jf = new JFrame(
-        "Weka Knowledge Flow : StripChart");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(
+        "Weka Knowledge Flow : StipChart");
       jf.getContentPane().setLayout(new BorderLayout());
       final StripChart jd = new StripChart();
       jf.getContentPane().add(jd, BorderLayout.CENTER);

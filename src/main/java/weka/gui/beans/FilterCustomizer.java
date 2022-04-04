@@ -55,7 +55,7 @@ public class FilterCustomizer extends JPanel implements BeanCustomizer,
   private final PropertyChangeSupport m_pcSupport = new PropertyChangeSupport(
       this);
 
-  private Filter m_filter;
+  private weka.gui.beans.Filter m_filter;
   /*
    * private GenericObjectEditor m_filterEditor = new GenericObjectEditor(true);
    */
@@ -129,7 +129,7 @@ public class FilterCustomizer extends JPanel implements BeanCustomizer,
    */
   @Override
   public void setObject(Object object) {
-    m_filter = (Filter) object;
+    m_filter = (weka.gui.beans.Filter) object;
     try {
       m_backup = (weka.filters.Filter) GenericObjectEditor.makeCopy(m_filter
           .getFilter());

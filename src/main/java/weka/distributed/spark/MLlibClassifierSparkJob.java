@@ -516,7 +516,7 @@ public class MLlibClassifierSparkJob extends SparkJob implements
       WDDataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
       // dataSet =
       // m_randomizeSparkJob.getRandomizedStratifiedRDD();
-      dataSet = (JavaRDD<weka.core.Instance>) d.getRDD();
+      dataSet = (JavaRDD<Instance>) d.getRDD();
       headerWithSummary = d.getHeaderWithSummary();
       setDataset(TRAINING_DATA, new WDDataset(dataSet, headerWithSummary));
     }

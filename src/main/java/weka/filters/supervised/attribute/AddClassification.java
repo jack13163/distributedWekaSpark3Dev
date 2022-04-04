@@ -31,8 +31,17 @@ import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.misc.InputMappedClassifier;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.SimpleBatchFilter;
 
 /**
@@ -95,10 +104,9 @@ import weka.filters.SimpleBatchFilter;
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
-public class AddClassification extends SimpleBatchFilter
-        implements WeightedAttributesHandler, WeightedInstancesHandler {
+public class AddClassification extends SimpleBatchFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = -1931467132568441909L;
@@ -365,9 +373,7 @@ public class AddClassification extends SimpleBatchFilter
       try {
         file = getSerializedClassifierFile();
         if (!file.isDirectory()) {
-          // ois = new ObjectInputStream(new FileInputStream(file));
-          ois =
-            SerializationHelper.getObjectInputStream(new FileInputStream(file));
+          ois = new ObjectInputStream(new FileInputStream(file));
           m_ActualClassifier = (Classifier) ois.readObject();
           m_SerializedHeader = null;
           // let's see whether there's an Instances header stored as well
@@ -389,25 +395,6 @@ public class AddClassification extends SimpleBatchFilter
     }
 
     return m_ActualClassifier;
-  }
-
-  /**
-   * Need to override this to deal with InputMappedClassifier case.
-   * (If InputMappedClassifier is applied to test data that is different in some important aspects: we
-   * need to test capabilities with respect to format of data used to train the classifier.)
-   *
-   * @param instanceInfo the data to test
-   * @throws Exception if the test fails
-   */
-  protected void testInputFormat(Instances instanceInfo) throws Exception {
-
-    Classifier classifier = getActualClassifier();
-    if (classifier instanceof InputMappedClassifier) {
-      Instances trainingData = ((InputMappedClassifier)classifier).getModelHeader(new Instances(instanceInfo, 0));
-      getCapabilities(trainingData).testWithFail(trainingData);
-    } else {
-      getCapabilities(instanceInfo).testWithFail(instanceInfo);
-    }
   }
 
   /**
@@ -652,20 +639,6 @@ public class AddClassification extends SimpleBatchFilter
 
     classindex = -1;
 
-    // Need to get actual class attribute from saved model if we are working with a saved model and it
-    // is an InputMappedClassifier.
-    Attribute classAttribute = inputFormat.classIndex() >= 0 ? inputFormat.classAttribute() : null;
-    Classifier classifier = getActualClassifier();
-    if (!getSerializedClassifierFile().isDirectory()) {
-      if (classifier instanceof InputMappedClassifier) {
-        classAttribute = ((InputMappedClassifier) classifier).getModelHeader(new Instances(inputFormat, 0)).classAttribute();
-      }
-    } else {
-      if ((classAttribute == null) && (!(classifier instanceof InputMappedClassifier))) {
-        throw new IllegalArgumentException("AddClassification: class must be set if InputMappedClassifier is not used.");
-      }
-    }
-
     // copy old attributes
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     for (i = 0; i < inputFormat.numAttributes(); i++) {
@@ -687,15 +660,15 @@ public class AddClassification extends SimpleBatchFilter
       if (classindex == -1) {
         classindex = atts.size();
       }
-      atts.add(classAttribute.copy("classification"));
+      atts.add(inputFormat.classAttribute().copy("classification"));
     }
 
     // 2. distribution?
     if (getOutputDistribution()) {
-      if (classAttribute.isNominal()) {
-        for (i = 0; i < classAttribute.numValues(); i++) {
+      if (inputFormat.classAttribute().isNominal()) {
+        for (i = 0; i < inputFormat.classAttribute().numValues(); i++) {
           atts.add(new Attribute("distribution_"
-            + classAttribute.value(i)));
+            + inputFormat.classAttribute().value(i)));
         }
       } else {
         atts.add(new Attribute("distribution"));
@@ -704,7 +677,7 @@ public class AddClassification extends SimpleBatchFilter
 
     // 2. error flag?
     if (getOutputErrorFlag()) {
-      if (classAttribute.isNominal()) {
+      if (inputFormat.classAttribute().isNominal()) {
         values = new ArrayList<String>();
         values.add("no");
         values.add("yes");
@@ -736,6 +709,7 @@ public class AddClassification extends SimpleBatchFilter
     double[] newValues;
     double[] oldValues;
     int i;
+    int start;
     int n;
     Instance newInstance;
     Instance oldInstance;
@@ -747,7 +721,7 @@ public class AddClassification extends SimpleBatchFilter
       if (!getSerializedClassifierFile().isDirectory()) {
         // same dataset format?
         if ((m_SerializedHeader != null)
-          && (!m_SerializedHeader.equalHeaders(instances)) && (!(m_ActualClassifier instanceof InputMappedClassifier))) {
+          && (!m_SerializedHeader.equalHeaders(instances))) {
           throw new WekaException(
             "Training header of classifier and filter dataset don't match:\n"
               + m_SerializedHeader.equalHeadersMsg(instances));
@@ -765,15 +739,13 @@ public class AddClassification extends SimpleBatchFilter
       oldValues = oldInstance.toDoubleArray();
       newValues = new double[result.numAttributes()];
 
-      // copy values
-      int start = 0;
-      for (int j = 0; j < oldValues.length; j++) {
-        // remove class?
-        if ((j == inputFormatPeek().classIndex()) && (getRemoveOldClass())) {
-          continue;
-        }
-        newValues[start++] = oldValues[j];
+      start = oldValues.length;
+      if (getRemoveOldClass()) {
+        start--;
       }
+
+      // copy old values
+      System.arraycopy(oldValues, 0, newValues, 0, start);
 
       // add new values:
       // 1. classification?
@@ -793,20 +765,16 @@ public class AddClassification extends SimpleBatchFilter
 
       // 3. error flag?
       if (getOutputErrorFlag()) {
-        Instance inst = oldInstance;
-        if (m_ActualClassifier instanceof InputMappedClassifier) {
-          inst = ((InputMappedClassifier)m_ActualClassifier).constructMappedInstance(inst);
-        }
-        if (instances.classIndex() < 0) {
-          newValues[start] = Utils.missingValue();
-        } else if (result.classAttribute().isNominal()) {
-          if (inst.classValue() == m_ActualClassifier.classifyInstance(oldInstance)) {
+        if (result.classAttribute().isNominal()) {
+          if (oldInstance.classValue() == m_ActualClassifier
+            .classifyInstance(oldInstance)) {
             newValues[start] = 0;
           } else {
             newValues[start] = 1;
           }
         } else {
-          newValues[start] = m_ActualClassifier.classifyInstance(oldInstance) - inst.classValue();
+          newValues[start] = m_ActualClassifier.classifyInstance(oldInstance)
+            - oldInstance.classValue();
         }
         start++;
       }
@@ -834,7 +802,7 @@ public class AddClassification extends SimpleBatchFilter
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

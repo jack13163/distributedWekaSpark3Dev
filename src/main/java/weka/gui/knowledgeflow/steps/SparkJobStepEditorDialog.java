@@ -637,7 +637,7 @@ public class SparkJobStepEditorDialog extends StepEditorDialog {
   /**
    * Helper class for hiding a few of the options in CSVToARFFHeaderMapTask that
    * are not necessary now that DataFrames are used for handling CSV files.
-   * 
+   *
    * Note that the simple way of doing this would be to extend
    * CSVToARFFHeaderMapTask and override the set/get methods to be hidden,
    * adding @ProgramaticProperty annotations to hide them. This works in Java

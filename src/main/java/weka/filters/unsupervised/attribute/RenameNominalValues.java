@@ -28,8 +28,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -70,10 +81,10 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14864 $
+ * @version $Revision: 12037 $
  */
 public class RenameNominalValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  StreamableFilter, OptionHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -2121767582746512209L;
@@ -196,16 +207,14 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
 
             String replace = m_ignoreCase ? m_renameMap
               .get(origV.toLowerCase()) : m_renameMap.get(origV);
-            if (replace != null) {
-              if (!valsForAtt.contains(replace)) {
-                valsForAtt.add(replace);
-              }
+            if (replace != null && !valsForAtt.contains(replace)) {
+              valsForAtt.add(replace);
             } else {
               valsForAtt.add(origV);
             }
           }
-          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(), valsForAtt);
-          newAtt.setWeight(instanceInfo.attribute(i).weight());
+          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(),
+            valsForAtt);
           attributes.add(newAtt);
         } else {
           // ignore any selected attributes that are not nominal
@@ -513,7 +522,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14864 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

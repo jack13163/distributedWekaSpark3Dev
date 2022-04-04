@@ -35,17 +35,17 @@ import weka.core.expressionlanguage.common.Primitives.DoubleExpression;
  * 
  * The following functions are being exposed through macros:</br>
  * <ul>
- * <li>{@link Math.abs(double)} as abs</li>
- * <li>{@link Math.sqrt(double)} as sqrt</li>
- * <li>{@link Math.log(double)} as log</li>
- * <li>{@link Math.exp(double)} as exp</li>
- * <li>{@link Math.sin(double)} as sin</li>
- * <li>{@link Math.cos(double)} as cos</li>
- * <li>{@link Math.tan(double)} as tan</li>
- * <li>{@link Math.rint(double)} as rint</li>
- * <li>{@link Math.floor(double)} as floor</li>
- * <li>{@link Math.ceil(double)} as ceil</li>
- * <li>{@link Math.pow(double)} as pow</li>
+ * <li>{@link java.lang.Math.abs(double)} as abs</li>
+ * <li>{@link java.lang.Math.sqrt(double)} as sqrt</li>
+ * <li>{@link java.lang.Math.log(double)} as log</li>
+ * <li>{@link java.lang.Math.exp(double)} as exp</li>
+ * <li>{@link java.lang.Math.sin(double)} as sin</li>
+ * <li>{@link java.lang.Math.cos(double)} as cos</li>
+ * <li>{@link java.lang.Math.tan(double)} as tan</li>
+ * <li>{@link java.lang.Math.rint(double)} as rint</li>
+ * <li>{@link java.lang.Math.floor(double)} as floor</li>
+ * <li>{@link java.lang.Math.ceil(double)} as ceil</li>
+ * <li>{@link java.lang.Math.pow(double)} as pow</li>
  * </ul>
  * 
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )

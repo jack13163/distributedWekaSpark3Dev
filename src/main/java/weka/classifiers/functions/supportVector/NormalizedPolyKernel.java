@@ -38,7 +38,11 @@ import weka.core.RevisionUtils;
  * <pre> -D
  *  Enables debugging output (if available) to be printed.
  *  (default: off)</pre>
- *
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
  * <pre> -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
  *  -1 to turn it off.
@@ -55,7 +59,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14512 $
+ * @version $Revision: 8034 $
  */
 public class NormalizedPolyKernel 
   extends PolyKernel {
@@ -160,7 +164,7 @@ public class NormalizedPolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14512 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }
 

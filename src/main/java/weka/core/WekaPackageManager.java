@@ -28,7 +28,6 @@ import weka.core.packageManagement.Package;
 import weka.core.packageManagement.PackageConstraint;
 import weka.core.packageManagement.PackageManager;
 import weka.core.packageManagement.VersionPackageConstraint;
-import weka.gui.ConverterFileChooser;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.BeansProperties;
@@ -44,14 +43,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -74,9 +71,9 @@ import java.util.zip.ZipInputStream;
 /**
  * Class providing package management and manipulation routines. Also provides a
  * command line interface for package management.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 15422 $
+ * @version $Revision: 13882 $
  */
 public class WekaPackageManager {
 
@@ -94,28 +91,6 @@ public class WekaPackageManager {
 
   /** Package metadata key for package preclusion */
   public static final String PRECLUDES_KEY = "Precludes";
-
-  /**
-   * Package metadata key for OS name. Entries in this list are checked against
-   * the java property os.name using a String.contains() operation - any match
-   * in the list is taken as passing the test.
-   */
-  public static final String OS_NAME_KEY = "OSName";
-
-  /**
-   * Package metadata key for OS architecture. Entries in this list are checked
-   * against the java property os.arch using a String.equalsIgnoreCase()
-   * operation, with the exception of entries that are either "64" or "32" in
-   * which case the os.arch is checked to see if it contains these numbers. Any
-   * match in the list is considered as passing the test.
-   */
-  public static final String OS_ARCH_KEY = "OSArch";
-
-  /**
-   * Package metadata key for JVM version. Values can be prefixed by a less-than
-   * or greater-than sign. Otherwise, equality is assumed.
-   */
-  public static final String VM_VERSION_KEY = "JVMVersion";
 
   /**
    * Package metadata key for preventing load if an environment variable is not
@@ -197,7 +172,7 @@ public class WekaPackageManager {
 
   /** Primary repository */
   private static String PRIMARY_REPOSITORY =
-    "https://weka.sourceforge.io/packageMetaData";
+    "http://weka.sourceforge.net/packageMetaData";
 
   /** Backup mirror of the repository */
   private static String REP_MIRROR;
@@ -240,12 +215,6 @@ public class WekaPackageManager {
 
   /** The set of packages that the user has requested not to load */
   public static Set<String> m_doNotLoadList;
-
-  /**
-   * Holds how many times we've failed to establish the repository backup mirror
-   * URL
-   */
-  protected static int m_mirrorFailureCount;
 
   static {
     establishWekaHome();
@@ -348,7 +317,7 @@ public class WekaPackageManager {
       if (repURL == null || repURL.length() == 0) {
         repURL = PRIMARY_REPOSITORY;
       } else {
-        log(Logger.Level.INFO,
+        log(weka.core.logging.Logger.Level.INFO,
           "[WekaPackageManager] weka.core.WekaPackageRepositoryURL = " + repURL);
         // System.err.println("[WekaPackageManager]
         // weka.core.WekaPackageRepositoryURL = "
@@ -365,7 +334,7 @@ public class WekaPackageManager {
     }
 
     PACKAGE_MANAGER.setBaseSystemName("weka");
-    PACKAGE_MANAGER.setBaseSystemVersion(Version.VERSION);
+    PACKAGE_MANAGER.setBaseSystemVersion(weka.core.Version.VERSION);
 
     // Now check the cache and establish it if necessary
     File cacheDir =
@@ -395,7 +364,7 @@ public class WekaPackageManager {
         System.err.println("Unable to create repository cache directory ("
           + cacheDir.getAbsolutePath() + ")");
         log(
-          Logger.Level.WARNING,
+          weka.core.logging.Logger.Level.WARNING,
           "Unable to create repository cache directory ("
             + cacheDir.getAbsolutePath() + ")");
         CACHE_URL = null;
@@ -499,7 +468,7 @@ public class WekaPackageManager {
 
     try {
       String mirrorListURL =
-        "https://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
+        "http://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
 
       URLConnection conn = null;
       URL connURL = new URL(mirrorListURL);
@@ -525,7 +494,7 @@ public class WekaPackageManager {
         // property
         if (!REP_MIRROR.equals(PRIMARY_REPOSITORY) && !USER_SET_REPO) {
 
-          log(Logger.Level.INFO,
+          log(weka.core.logging.Logger.Level.INFO,
             "[WekaPackageManager] Package manager using repository mirror: "
               + REP_MIRROR);
 
@@ -533,10 +502,9 @@ public class WekaPackageManager {
         }
       }
     } catch (Exception ex) {
-      log(Logger.Level.WARNING,
+      log(weka.core.logging.Logger.Level.WARNING,
         "[WekaPackageManager] The repository meta data mirror file seems "
           + "to be unavailable (" + ex.getMessage() + ")");
-      m_mirrorFailureCount++;
     }
   }
 
@@ -547,7 +515,7 @@ public class WekaPackageManager {
    * @param message message to write
    */
   protected static void
-    log(Logger.Level level, String message) {
+    log(weka.core.logging.Logger.Level level, String message) {
     try {
       File logFile =
         new File(WEKA_HOME.toString() + File.separator + "weka.log");
@@ -769,8 +737,8 @@ public class WekaPackageManager {
       /*
        * for (File content : contents) { if (content.isFile() &&
        * content.getPath().endsWith(".jar")) { if (verbose) {
-       * System.out.println("[WekaPackageManager] loading " +
-       * content.getPath()); } ClassloaderUtil.addFile(content.getPath());
+       * System.out.println("[WekaPackageManager] loading " + content.getPath()); }
+       * ClassloaderUtil.addFile(content.getPath());
        * 
        * } else if (content.isDirectory() &&
        * content.getName().equalsIgnoreCase("lib")) { // add any jar files in
@@ -872,8 +840,7 @@ public class WekaPackageManager {
         }
         if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
           for (PrintStream p : progress) {
-            p.println("[WekaPackageManager] Skipping package "
-              + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
               + " because it has been marked as disabled at the repository");
           }
           return false;
@@ -882,15 +849,7 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       // Ignore - we will get an exception when checking for an unofficial
       // package
-      // return true;
-    }
-
-    if (!osAndArchCheck(toLoad, progress)) {
-      return false;
-    }
-
-    if (!vmVersionCheck(toLoad, progress)) {
-      return false;
+      return true;
     }
 
     // check for precludes
@@ -901,8 +860,7 @@ public class WekaPackageManager {
         List<Package> preclusions = toLoad.getPrecludedPackages(installed);
         if (preclusions.size() > 0) {
           for (PrintStream p : progress) {
-            p.println("[WekaPackageManager] Skipping package "
-              + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
               + " because it precludes one or more packages that are "
               + "already installed: ");
             for (Package prec : preclusions) {
@@ -955,8 +913,8 @@ public class WekaPackageManager {
         if (d.getTarget().getPackage().isInstalled()) {
           if (!loadCheck(d.getTarget().getPackage(), packageRoot, progress)) {
             for (PrintStream p : progress) {
-              p.println("[WekaPackageManager] Can't load " + toLoad.getName()
-                + " because " + d.getTarget() + " can't be loaded.");
+              p.println("[WekaPackageManager] Can't load " + toLoad.getName() + " because "
+                + d.getTarget() + " can't be loaded.");
             }
             return false;
           }
@@ -978,164 +936,6 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       ex.printStackTrace();
       return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Checks the supplied package against the JVM version running Weka. Packages
-   * that don't specify a JVM version are assumed to be OK. The entry in the
-   * JVMVersion key are expected to be a floating point number, optionally
-   * prefixed by either a greater-than or less-than symbol. Absence of either
-   * of these symbols imply equality as the test.
-   *
-   * @param toLoad the package to check
-   * @param progress PrintStream for progress info
-   * @return true if the supplied package passes the JVM version test.
-   */
-  public static boolean vmVersionCheck(Package toLoad, PrintStream... progress) {
-    String thisVMVersion = System.getProperty("java.specification.version");
-    if (thisVMVersion != null && thisVMVersion.length() > 0) {
-      double actualVM = -1;
-      try {
-        actualVM = Double.parseDouble(thisVMVersion);
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-        return true;
-      }
-
-      try {
-        Object reqVMS = toLoad.getPackageMetaDataElement(VM_VERSION_KEY);
-        if (reqVMS != null) {
-          String vm = reqVMS.toString();
-
-          String op = "=";
-          if (vm.charAt(0) == '>') {
-            op = ">";
-            vm = vm.substring(1);
-          } else if (vm.charAt(0) == '<') {
-            op = "<";
-            vm = vm.substring(1);
-          }
-          double requestedVM = -1;
-          try {
-            requestedVM = Double.parseDouble(vm);
-          } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return true;
-          }
-
-          boolean result = true;
-          String failureMessage = "";
-          if (op.equals("=")) {
-            result = requestedVM == actualVM;
-            if (!result) {
-              failureMessage = "[WekaPackageManager] Unable to load '"
-                + toLoad.getName() + "' because "
-                + "JVM " + actualVM + " does not match requested JVM " + requestedVM;
-            }
-          } else if (op.equals("<")) {
-            result = actualVM < requestedVM;
-            if (!result) {
-              failureMessage = "[WekaPackageManager] Unable to load '"
-                + toLoad.getName() +"' because "
-                + "JVM " + actualVM + " is not < requested JVM " + requestedVM;
-            }
-          } else {
-            result = actualVM > requestedVM;
-            if (!result) {
-              failureMessage = "[WekaPackageManager] Unable to laod '"
-                + toLoad.getName() + "' because "
-                + "JVM " + actualVM + " is not > requested JVM " + requestedVM;
-            }
-          }
-          if (!result) {
-            for (PrintStream p : progress) {
-              p.println(failureMessage);
-            }
-          }
-
-          return result;
-        }
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Checks the supplied package against the current OS and architecture.
-   * Packages that don't specify OS and (optionally) architecture constraints
-   * are assumed to be OK. OS names in the OSName entry of the package's
-   * Description.props are checked against System.getProperty("os.name") via a
-   * String.contains() comparison. Any single match results in a pass. If
-   * supplied, the package's OSArch entries are checked against
-   * System.getProperty("os.arch") using a String.equalsIgnoreCase() comparison,
-   * with the exception of the values "64" and "32" which are checked for with
-   * String.contains().
-   * 
-   * @param toLoad the package to check
-   * @param progress PrintStream for progress info
-   * @return true if the supplied package passes OS/arch constraints.
-   */
-  public static boolean osAndArchCheck(Package toLoad, PrintStream... progress) {
-    // check for OS restrictions
-    try {
-      Object osNames = toLoad.getPackageMetaDataElement(OS_NAME_KEY);
-      Object archNames = toLoad.getPackageMetaDataElement(OS_ARCH_KEY);
-
-      if (osNames != null) {
-        boolean osCheck = false;
-        String[] osElements = osNames.toString().split(",");
-        String thisOs = System.getProperty("os.name");
-        if (thisOs != null) {
-          for (String osEntry : osElements) {
-            if (thisOs.toLowerCase().contains(osEntry.trim().toLowerCase())) {
-              osCheck = true;
-              break;
-            }
-          }
-
-          String thisArch = System.getProperty("os.arch");
-          if (osCheck && archNames != null) {
-            String[] archElements = archNames.toString().split(",");
-            if (thisArch != null) {
-              boolean archCheck = false;
-              for (String archEntry : archElements) {
-                if (archEntry.trim().equalsIgnoreCase("32")
-                  || archEntry.trim().equalsIgnoreCase("64")) {
-                  if (thisArch.toLowerCase().contains(archEntry.trim())) {
-                    archCheck = true;
-                    break;
-                  }
-                } else {
-                  if (thisArch.trim().equalsIgnoreCase(archEntry.trim())) {
-                    archCheck = true;
-                    break;
-                  }
-                }
-              }
-              osCheck = archCheck;
-            }
-          }
-
-          if (!osCheck) {
-            for (PrintStream p : progress) {
-              p.println("[WekaPackageManager] Skipping package "
-                + toLoad.getName() + " because the OS/arch (" + thisOs + " "
-                + (thisArch != null ? thisArch : "")
-                + ") does not meet package OS/arch constraints: "
-                + osNames.toString() + " "
-                + (archNames != null ? archNames.toString() : ""));
-            }
-            return false;
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
 
     return true;
@@ -1319,14 +1119,6 @@ public class WekaPackageManager {
   public static synchronized void loadPackages(boolean verbose,
     boolean avoidTriggeringFullClassDiscovery, boolean refreshGOEProperties) {
 
-    if (!verbose) {
-      // debug property overrides
-      String debug = System.getProperty("weka.core.classloader.debug", "false");
-      verbose = debug.equalsIgnoreCase("true");
-    } else {
-      System.setProperty("weka.core.classloader.debug", "true");
-    }
-
     List<File> goePropsFiles = new ArrayList<File>();
     if (!m_loadPackages) {
       return;
@@ -1346,8 +1138,7 @@ public class WekaPackageManager {
       // if we have a non-empty packages dir then check
       // the integrity of our cache first
       if (contents.length > 0) {
-        // establishCacheIfNeeded(System.out);
-        startupCheck(false, System.out);
+        establishCacheIfNeeded(System.out);
       }
 
       // dynamic injection of dependencies between packages
@@ -1357,18 +1148,20 @@ public class WekaPackageManager {
         if (content.isDirectory()) {
           try {
             Package toLoad = getInstalledPackageInfo(content.getName());
+            checkForInjectDependencies(toLoad, injectDependencies);
             boolean load;
             // Only perform the check against the current version of Weka if
             // there exists
             // a Description.props file
             if (toLoad != null) {
+
               load = loadCheck(toLoad, content, System.err);
+
               if (load) {
                 if (verbose) {
                   System.out.println("[WekaPackageManager] loading package "
                     + content.getName());
                 }
-                checkForInjectDependencies(toLoad, injectDependencies);
                 WekaPackageClassLoaderManager
                   .getWekaPackageClassLoaderManager().addPackageToClassLoader(
                     content);
@@ -1477,17 +1270,12 @@ public class WekaPackageManager {
         WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
           .getPackageClassLoader(source);
       if (sourceLoader != null) {
-        String debugS =
-          System.getProperty("weka.core.classloader.debug", "false");
-        boolean debug = debugS.equalsIgnoreCase("true");
         for (String targetPackage : targets) {
           if (WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
             .getPackageClassLoader(targetPackage) != null) {
-            if (debug) {
-              System.out
-                .println("[WekaPackageManager] Added a dependency between "
-                  + source + " and " + targetPackage);
-            }
+            System.out
+              .println("[WekaPackageManager] Added a dependency between "
+                + source + " and " + targetPackage);
             sourceLoader.addPackageDependency(targetPackage);
           }
         }
@@ -1504,7 +1292,6 @@ public class WekaPackageManager {
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
     GenericObjectEditor.determineClasses();
     ConverterUtils.initialize();
-    ConverterFileChooser.initDefaultFilters();
     KnowledgeFlowApp.disposeSingleton();
     KnowledgeFlowApp.reInitialize();
   }
@@ -1673,6 +1460,10 @@ public class WekaPackageManager {
       return null;
     }
 
+    if (REP_MIRROR == null) {
+      establishMirror();
+    }
+
     Exception problem = null;
     if (INITIAL_CACHE_BUILD_NEEDED) {
       for (PrintStream p : progress) {
@@ -1682,6 +1473,19 @@ public class WekaPackageManager {
       problem = refreshCache(progress);
 
       INITIAL_CACHE_BUILD_NEEDED = false;
+    } else {
+      // if no initial build needed then check for a server-side forced
+      // refresh...
+      try {
+        if (checkForForcedCacheRefresh()) {
+          for (PrintStream p : progress) {
+            p.println("Forced repository metadata refresh, please wait...");
+          }
+          problem = refreshCache(progress);
+        }
+      } catch (MalformedURLException ex) {
+        problem = ex;
+      }
     }
 
     return problem;
@@ -1934,11 +1738,8 @@ public class WekaPackageManager {
    * data
    */
   private static void useCacheOrOnlineRepository() {
-    if (REP_MIRROR == null && m_mirrorFailureCount < 3) {
+    if (REP_MIRROR == null) {
       establishMirror();
-      if (REP_MIRROR == null) {
-        m_mirrorFailureCount++;
-      }
     }
 
     if (CACHE_URL != null) {
@@ -2149,10 +1950,8 @@ public class WekaPackageManager {
    * Get the latest version of the named package that is compatible with the
    * base version of Weka being used.
    *
-   * @param packageName the name of the package to get the latest compatible
-   *          version of
-   * @return the latest compatible version or null if there is no compatible
-   *         package
+   * @param packageName the name of the package to get the latest compatible version of
+   * @return the latest compatible version or null if there is no compatible package
    * @throws Exception if a problem occurs
    */
   public static Package getLatestCompatibleVersion(String packageName)
@@ -2521,13 +2320,13 @@ public class WekaPackageManager {
   }
 
   private static String queryUser() {
-    BufferedReader br =
-      new BufferedReader(new InputStreamReader(System.in));
+    java.io.BufferedReader br =
+      new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     String result = null;
     try {
       result = br.readLine();
-    } catch (IOException ex) {
+    } catch (java.io.IOException ex) {
       // ignore
     }
 
@@ -2647,14 +2446,6 @@ public class WekaPackageManager {
         return;
       }
 
-      if (!osAndArchCheck(toInstall, System.out)) {
-        return; // bail out here
-      }
-
-      if (!vmVersionCheck(toInstall, System.out)) {
-        return; // bail out
-      }
-
       if (toInstall.isInstalled()) {
         Package installedVersion = getInstalledPackageInfo(packageName);
         if (!toInstall.equals(installedVersion)) {
@@ -2733,7 +2524,7 @@ public class WekaPackageManager {
           if (!toCheck.getTarget().checkConstraint(installedVersion)) {
             needsUpgrade.add(toCheck.getTarget());
             Package mostRecent = toCheck.getTarget().getPackage();
-            if (toCheck.getTarget() instanceof VersionPackageConstraint) {
+            if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
               mostRecent =
                 WekaPackageManager
                   .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
@@ -2742,7 +2533,7 @@ public class WekaPackageManager {
           }
         } else {
           Package mostRecent = toCheck.getTarget().getPackage();
-          if (toCheck.getTarget() instanceof VersionPackageConstraint) {
+          if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
             mostRecent =
               WekaPackageManager
                 .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
@@ -2905,8 +2696,7 @@ public class WekaPackageManager {
     } else if (arg.equals("installed")) {
       packageList = PACKAGE_MANAGER.getInstalledPackages();
     } else if (arg.equals("available")) {
-      // packageList = PACKAGE_MANAGER.getAvailablePackages();
-      packageList = getAvailableCompatiblePackages();
+      packageList = PACKAGE_MANAGER.getAvailablePackages();
     } else {
       System.err.println("[WekaPackageManager] Unknown argument " + arg);
       printUsage();
@@ -2962,70 +2752,6 @@ public class WekaPackageManager {
     System.out.println(result.toString());
   }
 
-  public static Exception startupCheck(boolean force, PrintStream... progress) {
-
-    Exception problem = null;
-    BufferedReader br = null;
-    PrintWriter pw = null;
-    File newPackageLastTimeCheckFile =
-      new File(WEKA_HOME.toString() + File.separator + "new_package_check.txt");
-    try {
-      // first check against last time that new packages were checked for
-      boolean doChecks = false;
-      long currentTime = System.currentTimeMillis();
-      if (!newPackageLastTimeCheckFile.exists()) {
-        doChecks = true;
-      } else if (!force) {
-        br = new BufferedReader(new FileReader(newPackageLastTimeCheckFile));
-        String t = br.readLine();
-        long lastTime = Long.parseLong(t);
-        doChecks = (currentTime - lastTime > 720L * 60L * 1000L);
-      }
-
-      if (doChecks || force) {
-
-        if (REP_MIRROR == null) {
-          establishMirror();
-        }
-
-        establishCacheIfNeeded(progress);
-        boolean forcedCacheRefresh = false;
-        try {
-          if (forcedCacheRefresh = checkForForcedCacheRefresh()) {
-            for (PrintStream p : progress) {
-              p.println("Forced repository metadata refresh, please wait...");
-            }
-            problem = refreshCache(progress);
-          }
-        } catch (MalformedURLException ex) {
-          problem = ex;
-        }
-
-        if (!forcedCacheRefresh) {
-          checkForNewPackages(progress);
-        }
-        pw = new PrintWriter(new FileWriter(newPackageLastTimeCheckFile));
-        pw.println(currentTime);
-        pw.flush();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (br != null) {
-        try {
-          br.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-      if (pw != null) {
-        pw.close();
-      }
-    }
-
-    return problem;
-  }
-
   private static void printUsage() {
     System.out
       .println("Usage: weka.core.WekaPackageManager [-offline] [option]");
@@ -3045,7 +2771,7 @@ public class WekaPackageManager {
    * @param args command line arguments
    */
   public static void main(String[] args) {
-    Logger.log(Logger.Level.INFO,
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
     try {
 
@@ -3062,9 +2788,8 @@ public class WekaPackageManager {
         }
       }
 
-      // establishCacheIfNeeded(System.out);
-      // checkForNewPackages(System.out);
-      startupCheck(true, System.out);
+      establishCacheIfNeeded(System.out);
+      checkForNewPackages(System.out);
 
       if (args.length == 0 || args[0].equalsIgnoreCase("-h")
         || args[0].equalsIgnoreCase("-help")) {
@@ -3120,7 +2845,6 @@ public class WekaPackageManager {
           }
           installPackageFromRepository(args[1], version, false);
         }
-        System.exit(0);
       } else if (args[0].equals("-uninstall-package")) {
         if (args.length < 2) {
           printUsage();
@@ -3165,7 +2889,7 @@ public class WekaPackageManager {
         printUsage();
       }
 
-      // System.exit(0);
+      System.exit(0);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

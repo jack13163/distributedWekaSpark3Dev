@@ -44,14 +44,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -72,7 +69,7 @@ import static weka.core.WekaPackageManager.DISABLE_KEY;
  * A GUI interface the the package management system.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14903 $
+ * @version $Revision: 13878 $
  */
 public class PackageManager extends JPanel {
 
@@ -254,7 +251,7 @@ public class PackageManager extends JPanel {
     private int m_progressCount = 0;
     private Exception m_error = null;
 
-    private ProgressMonitor m_progress;
+    private javax.swing.ProgressMonitor m_progress;
 
     @Override
     public void makeProgress(String progressMessage) {
@@ -280,11 +277,10 @@ public class PackageManager extends JPanel {
         numPackages = 100;
       }
       m_progress =
-        new ProgressMonitor(PackageManager.this,
+        new javax.swing.ProgressMonitor(PackageManager.this,
           "Establising cache...", "", 0, numPackages);
       ProgressPrintStream pps = new ProgressPrintStream(this);
-      // m_error = WekaPackageManager.establishCacheIfNeeded(pps);
-      m_error = WekaPackageManager.startupCheck(true, pps);
+      m_error = WekaPackageManager.establishCacheIfNeeded(pps);
 
       m_cacheEstablished = true;
       return null;
@@ -325,7 +321,7 @@ public class PackageManager extends JPanel {
         .keySet().size()) {
         // package(s) have disappeared from the repository.
         // Force a cache refresh...
-        RefreshCache r = new RefreshCache(true);
+        RefreshCache r = new RefreshCache();
         r.execute();
 
         return null;
@@ -357,7 +353,8 @@ public class PackageManager extends JPanel {
 
       if (newPackagesBuff.length() > 0 || updatedPackagesBuff.length() > 0) {
         String information =
-          "<html><font size=-2>New and/or updated packages: ";
+          "<html><font size=-2>There are new and/or updated packages available "
+            + "on the server (do a cache refresh for more " + "information):";
         if (newPackagesBuff.length() > 0) {
           information += "<br><br><b>New:</b><br>" + newPackagesBuff.toString();
         }
@@ -370,11 +367,6 @@ public class PackageManager extends JPanel {
         m_newPackagesAvailableL.setToolTipText(information);
         m_browserTools.add(m_newPackagesAvailableL);
 
-        // force a cache refresh (to match command line package manager client
-        // behaviour)
-        RefreshCache r = new RefreshCache(false);
-        r.execute();
-
         m_browserTools.revalidate();
       }
 
@@ -385,11 +377,6 @@ public class PackageManager extends JPanel {
   class RefreshCache extends SwingWorker<Void, Void> implements Progressable {
     private int m_progressCount = 0;
     private Exception m_error = null;
-    private boolean m_removeUpdateIcon;
-
-    public RefreshCache(boolean removeUpdateIcon) {
-      m_removeUpdateIcon = removeUpdateIcon;
-    }
 
     @Override
     public void makeProgress(String progressMessage) {
@@ -467,10 +454,8 @@ public class PackageManager extends JPanel {
       updateTable();
 
       try {
-        if (m_removeUpdateIcon) {
-          m_browserTools.remove(m_newPackagesAvailableL);
-          m_browserTools.revalidate();
-        }
+        m_browserTools.remove(m_newPackagesAvailableL);
+        m_browserTools.revalidate();
       } catch (Exception ex) {
       }
 
@@ -1011,21 +996,6 @@ public class PackageManager extends JPanel {
                 "Weka Package Manager", JOptionPane.ERROR_MESSAGE);
               // bail out here
               // return null;
-              m_unsuccessfulInstalls.add(packageToInstall);
-              continue;
-            }
-
-            // Check for any os/arch constraints
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(baos);
-            if (!WekaPackageManager.osAndArchCheck(packageToInstall, ps)) {
-              String probString = new String(baos.toByteArray());
-              probString =
-                probString
-                  .replace("[WekaPackageManager] Skipping package ", "");
-              JOptionPane.showMessageDialog(PackageManager.this,
-                "Unable to install package\n" + probString,
-                "Weka Package Manager", JOptionPane.ERROR_MESSAGE);
               m_unsuccessfulInstalls.add(packageToInstall);
               continue;
             }
@@ -1661,7 +1631,7 @@ public class PackageManager extends JPanel {
     m_refreshCacheBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        RefreshCache r = new RefreshCache(true);
+        RefreshCache r = new RefreshCache();
         r.execute();
       }
     });
@@ -1704,9 +1674,7 @@ public class PackageManager extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (m_unofficialFrame == null) {
-          final JFrame jf =
-            Utils.getWekaJFrame("Unofficial package install",
-              PackageManager.this);
+          final JFrame jf = new JFrame("Unofficial package install");
           jf.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1725,8 +1693,6 @@ public class PackageManager extends JPanel {
           jf.add(m_unofficialChooser, BorderLayout.CENTER);
           jf.add(butHolder, BorderLayout.SOUTH);
           jf.pack();
-          jf.setSize(600, 150);
-          jf.setLocationRelativeTo(PackageManager.this);
           jf.setVisible(true);
           m_unofficialFrame = jf;
           m_unofficialBut.setEnabled(false);
@@ -2168,14 +2134,6 @@ public class PackageManager extends JPanel {
     // create the new packages available icon
     m_newPackagesAvailableL =
       new JLabel(new ImageIcon(loadImage("weka/gui/images/information.gif")));
-    m_newPackagesAvailableL.addMouseListener(new MouseAdapter() {
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        super.mouseClicked(e);
-        m_browserTools.remove(m_newPackagesAvailableL);
-        m_browserTools.revalidate();
-      }
-    });
 
     // Start loading the home page
     Thread homePageThread = new HomePageThread();
@@ -2607,7 +2565,7 @@ public class PackageManager extends JPanel {
   }
 
   private void displayErrorDialog(String message, Exception e) {
-    StringWriter sw = new StringWriter();
+    java.io.StringWriter sw = new java.io.StringWriter();
     e.printStackTrace(new java.io.PrintWriter(sw));
 
     String result = sw.toString();
@@ -2662,13 +2620,13 @@ public class PackageManager extends JPanel {
       if (WekaPackageManager.m_offline) {
         offline = " (offline)";
       }
-      final JFrame jf =
-        new JFrame("Weka Package Manager" + offline);
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Package Manager" + offline);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(pm, BorderLayout.CENTER);
-      jf.addWindowListener(new WindowAdapter() {
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }

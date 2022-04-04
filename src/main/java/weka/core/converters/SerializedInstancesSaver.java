@@ -28,7 +28,6 @@ import java.io.OutputStream;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.RevisionUtils;
-import weka.core.WeightedInstancesHandler;
 
 /**
  <!-- globalinfo-start -->
@@ -48,12 +47,12 @@ import weka.core.WeightedInstancesHandler;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 14861 $
+ * @version $Revision: 8034 $
  * @see Saver
  */
 public class SerializedInstancesSaver 
   extends AbstractFileSaver 
-  implements BatchConverter, WeightedInstancesHandler {
+  implements BatchConverter {
 
   /** for serialization. */
   static final long serialVersionUID = -7717010648500658872L;
@@ -168,7 +167,7 @@ public class SerializedInstancesSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14861 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**

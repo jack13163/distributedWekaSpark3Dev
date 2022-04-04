@@ -78,14 +78,14 @@ public class ClassValuePickerCustomizer
   private JTextField m_valueTextBox;
 
   public ClassValuePickerCustomizer() {
-    setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+    setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
     m_ClassValueCombo.setEditable(true);
     m_ClassValueCombo.setToolTipText("Class label. /first, /last and /<num> " +
       "can be used to specify the first, last or specific index " +
       "of the label to use respectively.");
 
     setLayout(new BorderLayout());
-    add(new JLabel("ClassValuePickerCustomizer"),
+    add(new javax.swing.JLabel("ClassValuePickerCustomizer"),
       BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
     m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class value"));

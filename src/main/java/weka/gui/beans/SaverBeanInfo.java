@@ -37,7 +37,7 @@ public class SaverBeanInfo extends AbstractDataSinkBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Saver.class,
+    return new BeanDescriptor(weka.gui.beans.Saver.class,
 			      SaverCustomizer.class);
   }
 }

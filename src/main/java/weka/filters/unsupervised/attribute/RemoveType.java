@@ -24,8 +24,17 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -53,10 +62,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 15309 $
+ * @version $Revision: 10215 $
  */
 public class RemoveType extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3563999462782486279L;
@@ -123,10 +132,14 @@ public class RemoveType extends Filter implements UnsupervisedFilter,
     int numToDelete = 0;
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (i == instanceInfo.classIndex()) {
-        if (m_invert) {
-          attsToDelete[numToDelete++] = i; // Need to make sure to keep the class even if selection is inverted
+        if (!m_invert) {
+          continue; // skip class
+        } else {
+          attsToDelete[numToDelete++] = i; // Need to keep the class even if
+                                           // selection is inverted
         }
-      } else if (instanceInfo.attribute(i).type() == m_attTypeToDelete) {
+      }
+      if (instanceInfo.attribute(i).type() == m_attTypeToDelete) {
         attsToDelete[numToDelete++] = i;
       }
     }
@@ -429,7 +442,7 @@ public class RemoveType extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15309 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**

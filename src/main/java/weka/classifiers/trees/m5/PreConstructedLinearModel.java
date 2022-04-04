@@ -37,7 +37,7 @@ import weka.core.Utils;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15357 $
+ * @version $Revision: 8034 $
  */
 public class PreConstructedLinearModel 
   extends AbstractClassifier 
@@ -149,20 +149,20 @@ public class PreConstructedLinearModel
       if (m_coefficients[i] != 0.0) {
 	double c = m_coefficients[i];
 	if (first) {
-	  b.append("\n\t" + Utils.doubleToString(c, 12, getNumDecimalPlaces()).trim() + " * "
+	  b.append("\n\t" + Utils.doubleToString(c, 12, 4).trim() + " * " 
 		   + m_instancesHeader.attribute(i).name() + " ");
 	  first = false;
 	} else {
 	  b.append("\n\t" + ((m_coefficients[i] < 0) ? 
-			   "- " + Utils.doubleToString(Math.abs(c), 12, getNumDecimalPlaces()).trim() : "+ "
-		   + Utils.doubleToString(Math.abs(c), 12, getNumDecimalPlaces()).trim()) + " * "
+			   "- " + Utils.doubleToString(Math.abs(c), 12, 4).trim() : "+ "
+		   + Utils.doubleToString(Math.abs(c), 12, 4).trim()) + " * "
 		   + m_instancesHeader.attribute(i).name() + " ");
 	}
       }
     }
     
     b.append("\n\t" + ((m_intercept < 0) ? "- " : "+ ")
-	     + Utils.doubleToString(Math.abs(m_intercept), 12, getNumDecimalPlaces()).trim());
+	     + Utils.doubleToString(Math.abs(m_intercept), 12, 4).trim());
     return b.toString();
   }
   
@@ -172,6 +172,6 @@ public class PreConstructedLinearModel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15357 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }

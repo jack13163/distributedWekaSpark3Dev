@@ -25,8 +25,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -57,10 +66,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class SwapValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6155834679414275855L;
@@ -160,9 +169,11 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
     }
     Instance newInstance = (Instance) instance.copy();
     if (!newInstance.isMissing(m_AttIndex.getIndex())) {
-      if ((int) newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex.getIndex()) {
+      if ((int) newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex
+        .getIndex()) {
         newInstance.setValue(m_AttIndex.getIndex(), m_FirstIndex.getIndex());
-      } else if ((int) newInstance.value(m_AttIndex.getIndex()) == m_FirstIndex.getIndex()) {
+      } else if ((int) newInstance.value(m_AttIndex.getIndex()) == m_FirstIndex
+        .getIndex()) {
         newInstance.setValue(m_AttIndex.getIndex(), m_SecondIndex.getIndex());
       }
     }
@@ -308,8 +319,8 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
    */
   public String firstValueIndexTipText() {
 
-    return "The index of the first value "
-      + "(\"first\" and \"last\" are valid values).";
+    return "The index of the first value."
+      + "(\"first\" and \"last\" are valid values)";
   }
 
   /**
@@ -338,8 +349,8 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
    */
   public String secondValueIndexTipText() {
 
-    return "The index of the second value "
-      + "(\"first\" and \"last\" are valid values).";
+    return "The index of the second value."
+      + "(\"first\" and \"last\" are valid values)";
   }
 
   /**
@@ -413,7 +424,7 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -74,7 +74,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * Build regression tree/rule rather than model tree/rule
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15357 $
+ * @version $Revision: 12641 $
  */
 public abstract class M5Base extends AbstractClassifier implements
   AdditionalMeasureProducer, TechnicalInformationHandler {
@@ -145,7 +145,21 @@ public abstract class M5Base extends AbstractClassifier implements
     m_unsmoothedPredictions = false;
     m_useUnpruned = false;
     m_minNumInstances = 4;
-    m_numDecimalPlaces = 4;
+  }
+
+  /**
+   * returns information about the classifier
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
+   */
+  public String globalInfo() {
+    return "M5Base. Implements base routines for generating M5 Model trees and "
+      + "rules\n"
+      + "The original algorithm M5 was invented by R. Quinlan and Yong Wang "
+      + "made improvements.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
@@ -416,22 +430,7 @@ public abstract class M5Base extends AbstractClassifier implements
    */
   @Override
   public Capabilities getCapabilities() {
-
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
-    result.enable(Capabilities.Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capabilities.Capability.NUMERIC_CLASS);
-    result.enable(Capabilities.Capability.DATE_CLASS);
-    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
-
-    return result;
+    return new LinearRegression().getCapabilities();
   }
 
   /**
@@ -479,7 +478,6 @@ public abstract class M5Base extends AbstractClassifier implements
         tempRule.setUnpruned(m_useUnpruned);
         tempRule.setSaveInstances(false);
         tempRule.setMinNumInstances(m_minNumInstances);
-        tempRule.setNumDecimalPlaces(getNumDecimalPlaces());
         tempRule.buildClassifier(tempInst);
         m_ruleSet.add(tempRule);
         // System.err.println("Built rule : "+tempRule.toString());
@@ -497,7 +495,6 @@ public abstract class M5Base extends AbstractClassifier implements
       tempRule.setRegressionTree(m_regressionTree);
       tempRule.setUnpruned(m_useUnpruned);
       tempRule.setMinNumInstances(m_minNumInstances);
-      tempRule.setNumDecimalPlaces(getNumDecimalPlaces());
 
       Instances temp_train;
 

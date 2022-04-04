@@ -75,7 +75,7 @@ public interface ExecutionEnvironment {
    * @handler the handler to use
    */
   void setGraphicalEnvironmentCommandHandler(
-          GraphicalEnvironmentCommandHandler handler);
+    GraphicalEnvironmentCommandHandler handler);
 
   /**
    * Get the environment for performing commands at the application-level in a

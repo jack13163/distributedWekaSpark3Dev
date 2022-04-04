@@ -35,7 +35,7 @@ public interface SplitEvaluate {
    * makes a copy of the SplitEvaluate object
    * @return a copy of the object
    */
-  SplitEvaluate copy() throws Exception;
+  SplitEvaluate copy () throws Exception;
 
   /** 
    * Finds the best splitting point for an attribute in the instances
@@ -43,7 +43,7 @@ public interface SplitEvaluate {
    * @param inst the instances
    * @exception Exception if something goes wrong
    */
-   void attrSplit(int attr, Instances inst) throws Exception;
+   void attrSplit (int attr, Instances inst) throws Exception;
 
   /**
    * Returns the impurity of this split

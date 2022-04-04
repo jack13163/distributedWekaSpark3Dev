@@ -45,7 +45,7 @@ public class ScatterPlotMatrix extends DataVisualizer implements
   protected MatrixPanel m_matrixPanel;
 
   public ScatterPlotMatrix() {
-    GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!GraphicsEnvironment.isHeadless()) {
       appearanceFinal();
     }
@@ -244,11 +244,11 @@ public class ScatterPlotMatrix extends DataVisualizer implements
         args[0]));
       Instances inst = new Instances(r);
       final javax.swing.JFrame jf = new javax.swing.JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
       final ScatterPlotMatrix as = new ScatterPlotMatrix();
       as.setInstances(inst);
 
-      jf.getContentPane().add(as, BorderLayout.CENTER);
+      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

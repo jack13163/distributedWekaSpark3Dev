@@ -50,7 +50,7 @@ public class SerializedModelSaverBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(SerializedModelSaver.class,
+    return new BeanDescriptor(weka.gui.beans.SerializedModelSaver.class,
 			      SerializedModelSaverCustomizer.class);
   }
 }

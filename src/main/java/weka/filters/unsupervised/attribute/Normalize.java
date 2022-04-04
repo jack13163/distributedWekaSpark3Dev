@@ -25,14 +25,22 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> Normalizes all numeric values in the given dataset
- * (apart from the class attribute, if set). By default, the resulting values are
+ * (apart from the class attribute, if set). The resulting values are by default
  * in [0,1] for the data used to compute the normalization intervals. But with
  * the scale and translation parameters one can change that, e.g., with scale =
  * 2.0 and translation = -1.0 you get values in the range [-1,+1].
@@ -65,10 +73,10 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class Normalize extends PotentialClassIgnorer implements
-  UnsupervisedFilter, Sourcable, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  UnsupervisedFilter, Sourcable, OptionHandler {
 
   /** for serialization. */
   static final long serialVersionUID = -8158531150984362898L;
@@ -93,7 +101,7 @@ public class Normalize extends PotentialClassIgnorer implements
    */
   public String globalInfo() {
     return "Normalizes all numeric values in the given dataset (apart from the "
-      + "class attribute, if set). By default, the resulting values are "
+      + "class attribute, if set). The resulting values are by default "
       + "in [0,1] for the data used to compute the normalization intervals. "
       + "But with the scale and translation parameters one can change that, "
       + "e.g., with scale = 2.0 and translation = -1.0 you get values in the "
@@ -584,7 +592,7 @@ public class Normalize extends PotentialClassIgnorer implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

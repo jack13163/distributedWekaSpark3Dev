@@ -75,7 +75,7 @@ public interface ResultListener extends Serializable {
    * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if the result could not be accepted.
    */
-  void acceptResult(ResultProducer rp, Object[] key, Object[] result)
+  void acceptResult(ResultProducer rp, Object [] key, Object [] result)
     throws Exception;
 
   /**
@@ -89,7 +89,7 @@ public interface ResultListener extends Serializable {
    * @exception Exception if it could not be determined if the result 
    * is needed.
    */
-  boolean isResultRequired(ResultProducer rp, Object[] key)
+  boolean isResultRequired(ResultProducer rp, Object [] key) 
     throws Exception;
 
 }

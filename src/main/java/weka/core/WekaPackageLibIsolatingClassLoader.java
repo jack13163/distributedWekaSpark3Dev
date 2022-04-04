@@ -188,20 +188,6 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
   }
 
   /**
-   * Gets a list of class loaders for the packages that this one depends on
-   *
-   * @return a list of class loaders for the packages that this one depends on
-   */
-  public List<WekaPackageLibIsolatingClassLoader> getPackageClassLoadersForDependencies() {
-    List<WekaPackageLibIsolatingClassLoader> result = new ArrayList<>();
-    for (String d : m_packageDependencies) {
-      result.add(m_classloaderRepo.getPackageClassLoader(d));
-    }
-
-    return result;
-  }
-
-  /**
    * Checks for native libraries and any native library loader classes, as
    * specified by the presence of "NativeLibs" and "InjectLoader" entries in the
    * package's Description.props file respectively. Native libraries are copied
@@ -686,12 +672,6 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * Try to clear classloader file locks under Windows
    */
   protected void closeClassLoader() {
-    try {
-      super.close();
-    } catch (Exception ex) {
-      System.err.println("Failed to close class loader.");
-      ex.printStackTrace();
-    }
     HashSet<String> closedFiles = new HashSet<String>();
     try {
       Object obj = getFieldObject(URLClassLoader.class, "ucp", this);
@@ -868,7 +848,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
       return false;
     }
 
-    if (!checkForUnsetEnvVar(p)) {
+    if (!checkForUnsetEnvVar(p, System.err)) {
       return false;
     }
 
@@ -900,10 +880,8 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
         if (keyVals.length == 2) {
           String key = keyVals[0].trim();
           String val = keyVals[1].trim();
-          if (m_debug) {
-            for (PrintStream p : progress) {
-              p.println("[" + toString() + "] setting property: " + prop);
-            }
+          for (PrintStream p : progress) {
+            p.println("[" + toString() + "] setting property: " + prop);
           }
           System.setProperty(key, val);
         }
@@ -1043,7 +1021,8 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * @param toLoad the package to check
    * @return true if good to go
    */
-  protected static boolean checkForUnsetEnvVar(Package toLoad) {
+  protected static boolean checkForUnsetEnvVar(Package toLoad,
+    PrintStream... progress) {
     Object doNotLoadIfUnsetVar =
       toLoad.getPackageMetaDataElement(DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_KEY);
 
@@ -1056,11 +1035,11 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
 
       for (String var : elements) {
         if (env.getVariableValue(var.trim()) == null) {
-
-            System.err.println("[Weka] " + toLoad.getName()
+          for (PrintStream p : progress) {
+            p.println("[Weka] " + toLoad.getName()
               + " can't be loaded because " + "the environment variable " + var
               + " is not set.");
-
+          }
 
           result = false;
           break;
@@ -1074,14 +1053,15 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
         toLoad
           .getPackageMetaDataElement(DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_MESSAGE_KEY);
       if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
-
+        for (PrintStream p : progress) {
           String dnlM = doNotLoadMessage.toString();
           try {
             dnlM = Environment.getSystemWide().substitute(dnlM);
           } catch (Exception e) {
             // quietly ignore
           }
-          System.err.println("[Weka] " + dnlM);
+          p.println("[Weka] " + dnlM);
+        }
       }
     }
 

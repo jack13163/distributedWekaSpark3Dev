@@ -178,7 +178,13 @@ import weka.core.WeightedInstancesHandler;
  *  Enables debugging output (if available) to be printed.
  *  (default: off)
  * </pre>
- *
+ * 
+ * <pre>
+ * -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)
+ * </pre>
+ * 
  * <pre>
  * -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
@@ -199,7 +205,7 @@ import weka.core.WeightedInstancesHandler;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14516 $
+ * @version $Revision: 11247 $
  * @see TestInstances
  */
 public class CheckKernel extends CheckScheme {
@@ -212,7 +218,7 @@ public class CheckKernel extends CheckScheme {
    */
 
   /*** The kernel to be examined */
-  protected Kernel m_Kernel = new RBFKernel();
+  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.RBFKernel();
 
   /**
    * Returns an enumeration describing the available options.
@@ -321,7 +327,13 @@ public class CheckKernel extends CheckScheme {
    *  Enables debugging output (if available) to be printed.
    *  (default: off)
    * </pre>
-
+   * 
+   * <pre>
+   * -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)
+   * </pre>
+   * 
    * <pre>
    * -C &lt;num&gt;
    *  The size of the cache (a prime number), 0 for full cache and 
@@ -348,7 +360,7 @@ public class CheckKernel extends CheckScheme {
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0) {
-      tmpStr = RBFKernel.class
+      tmpStr = weka.classifiers.functions.supportVector.RBFKernel.class
         .getName();
     }
     setKernel((Kernel) forName("weka.classifiers.functions.supportVector",
@@ -1057,7 +1069,6 @@ public class CheckKernel extends CheckScheme {
     }
     try {
       Instances trainCopy = new Instances(train);
-      kernel.getCapabilities().testWithFail(train);
       kernel.buildKernel(trainCopy);
       compareDatasets(train, trainCopy);
 
@@ -1155,7 +1166,6 @@ public class CheckKernel extends CheckScheme {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
-      kernel.getCapabilities().testWithFail(train);
       kernel.buildKernel(train);
       println("yes");
       result[0] = true;
@@ -1356,7 +1366,7 @@ public class CheckKernel extends CheckScheme {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14516 $");
+    return RevisionUtils.extract("$Revision: 11247 $");
   }
 
   /**

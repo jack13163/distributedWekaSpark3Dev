@@ -92,7 +92,7 @@ public class PredictionAppenderBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(PredictionAppender.class,
+    return new BeanDescriptor(weka.gui.beans.PredictionAppender.class,
 			      PredictionAppenderCustomizer.class);
   }
 }

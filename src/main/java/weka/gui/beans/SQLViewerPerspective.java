@@ -21,12 +21,14 @@
 
 package weka.gui.beans;
 
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.beancontext.BeanContextSupport;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import weka.core.Instances;
 import weka.core.converters.DatabaseLoader;
@@ -39,7 +41,7 @@ import weka.gui.sql.event.ConnectionListener;
  * Simple Knowledge Flow perspective that wraps the SqlViewer class
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14494 $
+ * @version $Revision: 11286 $
  */
 public class SQLViewerPerspective extends JPanel implements
   KnowledgeFlowApp.KFPerspective {
@@ -191,15 +193,15 @@ public class SQLViewerPerspective extends JPanel implements
    */
   @Override
   public Icon getPerspectiveIcon() {
-    Image pic = null;
+    java.awt.Image pic = null;
     java.net.URL imageURL = this.getClass().getClassLoader()
       .getResource("weka/gui/beans/icons/database.png");
 
     if (imageURL == null) {
     } else {
-      pic = Toolkit.getDefaultToolkit().getImage(imageURL);
+      pic = java.awt.Toolkit.getDefaultToolkit().getImage(imageURL);
     }
-    return new ImageIcon(pic);
+    return new javax.swing.ImageIcon(pic);
   }
 
   /**
@@ -247,8 +249,8 @@ public class SQLViewerPerspective extends JPanel implements
    * @param args command line arguments
    */
   public static void main(String[] args) {
-    final JFrame jf = new JFrame();
-    jf.getContentPane().setLayout(new BorderLayout());
+    final javax.swing.JFrame jf = new javax.swing.JFrame();
+    jf.getContentPane().setLayout(new java.awt.BorderLayout());
     SQLViewerPerspective p = new SQLViewerPerspective();
 
     jf.getContentPane().add(p, BorderLayout.CENTER);

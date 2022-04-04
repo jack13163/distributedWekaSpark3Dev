@@ -98,7 +98,7 @@ public class VisibleLayout extends JPanel {
   protected FlowExecutor m_flowExecutor;
 
   /** Environment variables to use */
-  protected Environment m_env = new Environment();
+  protected Environment m_env = Environment.getSystemWide();
 
   /** True if this flow is executing */
   protected boolean m_isExecuting;
@@ -891,7 +891,7 @@ public class VisibleLayout extends JPanel {
       new HashMap<String, List<StepManagerImpl[]>>();
 
     for (StepManagerImpl sourceManager : m_flow.getSteps()) {
-      for (Entry<String, List<StepManager>> outCons : sourceManager
+      for (Map.Entry<String, List<StepManager>> outCons : sourceManager
         .getOutgoingConnections().entrySet()) {
         List<StepManager> targetsOfConnType = outCons.getValue();
         for (StepManager target : targetsOfConnType) {
@@ -1031,13 +1031,13 @@ public class VisibleLayout extends JPanel {
     int returnVal = JFileChooser.APPROVE_OPTION;
     File sFile = getFilePath();
     if (showDialog || sFile.getName().equals("-NONE-")) {
-      returnVal = m_mainPerspective.m_saveFileChooser.showSaveDialog(this);
+      returnVal = m_mainPerspective.m_FileChooser.showSaveDialog(this);
       shownDialog = true;
     }
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       if (shownDialog) {
-        sFile = m_mainPerspective.m_saveFileChooser.getSelectedFile();
+        sFile = m_mainPerspective.m_FileChooser.getSelectedFile();
       }
 
       // add extension if necessary

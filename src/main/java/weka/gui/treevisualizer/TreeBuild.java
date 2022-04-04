@@ -34,7 +34,7 @@ import java.util.Vector;
  * with Edge's and Node's
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 14489 $
+ * @version $Revision: 11247 $
  */
 public class TreeBuild {
   // this class will parse the tree into relevant strings
@@ -196,7 +196,7 @@ public class TreeBuild {
 
       if (t.m_color == null) {
         if (m_noObj.m_color == null) {
-          color = Color.lightGray;
+          color = Color.gray;
         } else {
           color = m_colorTable.get(m_noObj.m_color.toLowerCase());
         }
@@ -204,7 +204,7 @@ public class TreeBuild {
         color = m_colorTable.get(t.m_color.toLowerCase());
       }
       if (color == null) {
-        color = Color.lightGray;
+        color = Color.gray;
       }
 
       m_aNodes.addElement(new Node(label, id, style.intValue(), shape

@@ -28,7 +28,7 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 14911 $
+ * @version $Revision: 8034 $
  */
 public class AttributeStats
   implements Serializable, RevisionHandler {
@@ -72,24 +72,24 @@ public class AttributeStats
    * @param weight the weight mass of the value
    */
   protected void addDistinct(double value, int count, double weight) {
-
+    
     if (count > 0) {
       if (count == 1) {
-        uniqueCount++;
-      }
-      if (value == (int)value) {
-        intCount += count;
+	uniqueCount++;
+	}
+      if (Utils.eq(value, (double)((int)value))) {
+	intCount += count;
       } else {
-        realCount += count;
+	realCount += count;
       }
       if (nominalCounts != null) {
-        nominalCounts[(int) value] = count;
-        nominalWeights[(int) value] = weight;
+	nominalCounts[(int)value] = count;
+	nominalWeights[(int)value] = weight;
       }
       if (numericStats != null) {
-        //numericStats.add(value, count);
-        numericStats.add(value, weight);
-        numericStats.calculateDerived();
+	  //numericStats.add(value, count);
+          numericStats.add(value, weight);
+	  numericStats.calculateDerived();
       }
     }
     distinctCount++;
@@ -151,6 +151,6 @@ public class AttributeStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14911 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }

@@ -144,9 +144,9 @@ public class SimpleVariableDeclarations implements VariableDeclarations {
      * 
      * Requires that the var parameter is one of
      * <ul>
-     * <li>{@link BooleanVariable}</li>
-     * <li>{@link DoubleVariable}</li>
-     * <li>{@link StringVariable}</li>
+     * <li>{@link Primitives.BooleanVariable}</li>
+     * <li>{@link Primitives.DoubleVariable}</li>
+     * <li>{@link Primitives.StringVariable}</li>
      * </ul>
      * 
      * @param var an AST node representing the variable

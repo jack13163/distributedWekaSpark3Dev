@@ -62,7 +62,7 @@ import java.util.Vector;
 
 /**
  * Job for building a classifier in Spark.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: 12253 $
  */
@@ -914,7 +914,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
       WDDataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
       // dataSet =
       // m_randomizeSparkJob.getRandomizedStratifiedRDD();
-      dataSet = (JavaRDD<weka.core.Instance>) d.getRDD();
+      dataSet = (JavaRDD<Instance>) d.getRDD();
       headerWithSummary = d.getHeaderWithSummary();
       setDataset(TRAINING_DATA, new WDDataset(dataSet, headerWithSummary));
     }

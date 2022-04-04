@@ -38,7 +38,7 @@ import javax.swing.JInternalFrame;
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15302 $
+ * @version $Revision: 8034 $
  */
 public class PropertyDialog
   extends JDialog {
@@ -119,18 +119,7 @@ public class PropertyDialog
     
     initialize(pe, x, y);
   }
-
-  /**
-   * We need to extend the dispose method so that the member variables are set to null and
-   * the corresponding objects can be garbage collected.
-   */
-  @Override
-  public void dispose() {
-    m_Editor = null;
-    m_EditorComponent = null;
-    super.dispose();
-  }
-
+  
   /**
    * Initializes the dialog.
    *
@@ -160,7 +149,7 @@ public class PropertyDialog
       setSize(getWidth(), (int) ((double) screenHeight * 0.95));
     
     if ((x == -1) && (y == -1)) {
-      setLocationRelativeTo(getOwner());
+      setLocationRelativeTo(null);
     }
     else {
       // adjust position if necessary

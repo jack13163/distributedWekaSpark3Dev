@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * change of an instance's attribute values must not affect any other instances.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15069 $
+ * @version $Revision: 12472 $
  */
 public interface Instance extends Copyable {
 
@@ -478,7 +478,7 @@ public interface Instance extends Copyable {
   public String stringValue(Attribute att);
 
   /**
-   * Returns the values of each attribute as an array of doubles. Creates a fresh array object for this.
+   * Returns the values of each attribute as an array of doubles.
    * 
    * @return an array containing all the instance attribute values
    */

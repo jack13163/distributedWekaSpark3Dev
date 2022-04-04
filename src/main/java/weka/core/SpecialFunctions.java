@@ -26,7 +26,7 @@ package weka.core;
  * Class implementing some mathematical functions.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14911 $
+ * @version $Revision: 8034 $
  */
 public final class SpecialFunctions
   implements RevisionHandler {
@@ -54,7 +54,7 @@ public final class SpecialFunctions
    */
   public static double log2Binomial(double a, double b) {
     
-    if (b > a) {
+    if (Utils.gr(b,a)) {
       throw new ArithmeticException("Can't compute binomial coefficient.");
     }
     return (lnFactorial(a)-lnFactorial(b)-lnFactorial(a-b))/log2;
@@ -67,20 +67,21 @@ public final class SpecialFunctions
    * @param bs lower part
    * @return multinomial coefficient of a over the bs
    */
-  public static double log2Multinomial(double a, double[] bs) {
-
+  public static double log2Multinomial(double a, double[] bs)
+       {
+    
     double sum = 0;
     int i;
-
-    for (i = 0; i < bs.length; i++) {
-      if (bs[i] > a) {
-        throw
-                new ArithmeticException("Can't compute multinomial coefficient.");
+    
+    for (i=0;i<bs.length;i++) {
+      if (Utils.gr(bs[i],a)) {
+	throw 
+	  new ArithmeticException("Can't compute multinomial coefficient.");
       } else {
-        sum = sum + lnFactorial(bs[i]);
+	sum = sum+lnFactorial(bs[i]);
       }
     }
-    return (lnFactorial(a) - sum) / log2;
+    return (lnFactorial(a)-sum)/log2;
   }
   
   /**
@@ -89,7 +90,7 @@ public final class SpecialFunctions
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14911 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**

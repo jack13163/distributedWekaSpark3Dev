@@ -48,7 +48,7 @@ import weka.core.xml.XStream;
  * A bean that saves serialized models
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 15230 $
+ * @version $Revision: 11077 $
  */
 @KFStep(category = "DataSinks",
   toolTipText = "Save a batch or incremental model to file")
@@ -318,7 +318,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       return;
     }
 
-    Instances trainHeader = ce.getTestSet().getDataSet().stringFreeStructure();
+    Instances trainHeader = new Instances(ce.getTestSet().getDataSet(), 0);
     String titleString = ce.getClusterer().getClass().getName();
     titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
       titleString.length());

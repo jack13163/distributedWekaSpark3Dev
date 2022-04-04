@@ -248,11 +248,11 @@ public class MLlibDecisionTree extends MLlibClassifier {
     m_classAtt = headerWithSummary.attribute(m_datasetMaker.getClassIndex());
 
     if (m_classAtt.isNumeric()
-      && m_impurity != MLlibDecisionTree.Impurity.Variance) {
+      && m_impurity != Impurity.Variance) {
       throw new DistributedWekaException(
         "Impurity must be set to Variance for " + "regression problems");
     } else if (m_classAtt.isNominal()
-      && m_impurity == MLlibDecisionTree.Impurity.Variance) {
+      && m_impurity == Impurity.Variance) {
       throw new DistributedWekaException(
         "Impurity can't be set to Variance for classification problems");
     }

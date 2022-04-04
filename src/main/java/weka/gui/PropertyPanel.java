@@ -55,7 +55,7 @@ import weka.gui.GenericObjectEditorHistory.HistorySelectionListener;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 14496 $
+ * @version $Revision: 13771 $
  */
 public class PropertyPanel extends JPanel {
 
@@ -265,17 +265,16 @@ public class PropertyPanel extends JPanel {
 
     if (m_Editor.getValue() != null) {
       if (m_PD == null) {
+        int x = getLocationOnScreen().x;
+        int y = getLocationOnScreen().y;
         if (PropertyDialog.getParentDialog(this) != null)
-          m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this), m_Editor, -1, -1);
+          m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
+              m_Editor, x, y);
         else
-          m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this), m_Editor, -1, -1);
+          m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
+              m_Editor, x, y);
         m_PD.setVisible(true);
       } else {
-        if (PropertyDialog.getParentDialog(this) != null) {
-          m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
-        } else {
-          m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
-        }
         m_PD.setVisible(true);
       }
       // make sure that m_Backup is correctly initialized!

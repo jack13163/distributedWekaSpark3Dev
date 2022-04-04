@@ -21,11 +21,16 @@
 
 package weka.gui.experiment;
 
-import weka.core.PluginManager;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,23 +43,17 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.List;
-import java.util.Vector;
+
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
 
 /**
  * A dialog for setting various output format parameters.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14291 $
+ * @version $Revision: 11247 $
  */
 public class OutputFormatDialog extends JDialog {
 
@@ -147,7 +146,7 @@ public class OutputFormatDialog extends JDialog {
    * initializes the member variables.
    */
   protected void initialize() {
-    List<String> classes;
+    Vector<String> classes;
     int i;
     Class<?> cls;
     ResultMatrix matrix;
@@ -155,7 +154,7 @@ public class OutputFormatDialog extends JDialog {
     m_Result = CANCEL_OPTION;
 
     if (m_OutputFormatClasses == null) {
-      classes = PluginManager.getPluginNamesOfTypeList(ResultMatrix.class.getName());
+      classes = GenericObjectEditor.getClassnames(ResultMatrix.class.getName());
 
       // set names and classes
       m_OutputFormatClasses = new Vector<Class<?>>();

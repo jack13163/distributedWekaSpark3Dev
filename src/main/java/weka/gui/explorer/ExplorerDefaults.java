@@ -33,7 +33,7 @@ import weka.core.Utils;
  * file <code>weka/gui/explorer/Explorer.props</code>.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15276 $
+ * @version $Revision: 10222 $
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults implements Serializable {
@@ -246,15 +246,6 @@ public class ExplorerDefaults implements Serializable {
   }
 
   /**
-   * returns whether the models built for the training set are output
-   *
-   * @return true if the models built for the training set are output
-   */
-  public static boolean getClassifierOutputModelsForTrainingSplits() {
-    return Boolean.parseBoolean(get("ClassifierOutputModelsForTrainingSplits", "false"));
-  }
-
-  /**
    * returns whether additional per-class stats of the classifier are output.
    * 
    * @return true if stats are output
@@ -303,25 +294,14 @@ public class ExplorerDefaults implements Serializable {
   }
 
   /**
-   * returns whether the test data and the predictions of the classifier are stored for
+   * returns whether the predictions of the classifier are stored for
    * visualization.
    * 
-   * @return true if test data and predictions are stored
+   * @return true if predictions are stored
    */
-  public static boolean getClassifierStoreTestDataAndPredictionsForVis() {
+  public static boolean getClassifierStorePredictionsForVis() {
     return Boolean
-      .parseBoolean(get("ClassifierStoreTestDataAndPredictionsForVis", "true"));
-  }
-
-  /**
-   * returns whether the predictions of the classifier are collected for calculating performance statistics
-   * such as AUROC.
-   *
-   * @return true if predictions are collected
-   */
-  public static boolean getClassifierCollectPredictionsForEvaluation() {
-    return Boolean
-            .parseBoolean(get("ClassifierCollectPredictionsForEvaluation", "true"));
+      .parseBoolean(get("ClassifierStorePredictionsForVis", "true"));
   }
 
   /**

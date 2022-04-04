@@ -536,12 +536,12 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   m_visual.setStatic();
                   EventObject ne;
                   if (e instanceof TrainingSetEvent) {
-                    ne = new TrainingSetEvent(Filter.this,
+                    ne = new TrainingSetEvent(weka.gui.beans.Filter.this,
                       filteredData);
                     ((TrainingSetEvent) ne).m_setNumber = ((TrainingSetEvent) e).m_setNumber;
                     ((TrainingSetEvent) ne).m_maxSetNumber = ((TrainingSetEvent) e).m_maxSetNumber;
                   } else {
-                    ne = new DataSetEvent(Filter.this,
+                    ne = new DataSetEvent(weka.gui.beans.Filter.this,
                       filteredData);
                   }
 
@@ -625,7 +625,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   m_testingSet, m_Filter);
                 // m_visual.setText(oldText);
                 m_visual.setStatic();
-                TestSetEvent ne = new TestSetEvent(Filter.this,
+                TestSetEvent ne = new TestSetEvent(weka.gui.beans.Filter.this,
                   filteredTest);
                 ne.m_setNumber = e.m_setNumber;
                 ne.m_maxSetNumber = e.m_maxSetNumber;

@@ -36,7 +36,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import weka.core.Utils;
 import weka.experiment.Experiment;
 import weka.experiment.RemoteExperiment;
 
@@ -45,7 +44,7 @@ import weka.experiment.RemoteExperiment;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 14496 $
+ * @version $Revision: 12590 $
  */
 public class DistributeExperimentPanel
   extends JPanel {
@@ -187,7 +186,7 @@ public class DistributeExperimentPanel
    */
   private void popupHostPanel() {
     try {
-      final JFrame jf = Utils.getWekaJFrame("Edit host names", this);
+      final JFrame jf = new JFrame("Edit host names");
       
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_hostList,
@@ -198,7 +197,6 @@ public class DistributeExperimentPanel
 	  }
 	});
       jf.pack();
-      jf.setLocationRelativeTo(this);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();

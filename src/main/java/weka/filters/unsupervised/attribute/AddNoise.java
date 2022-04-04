@@ -24,16 +24,22 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> An instance filter that changes a percentage of a
- * given attribute's values. The attribute must be nominal. Missing value can be
- * treated as a distinct separate value.
+ * given attributes values. The attribute must be nominal. Missing value can be
+ * treated as value itself.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -53,7 +59,8 @@ import weka.gui.ProgrammaticProperty;
  * 
  * <pre>
  * -P &lt;num&gt;
- *  Specify the percentage of values that are changed (default 10)
+ *  Specify the percentage of noise introduced 
+ *  to the data (default 10)
  * </pre>
  * 
  * <pre>
@@ -64,10 +71,10 @@ import weka.gui.ProgrammaticProperty;
  * <!-- options-end -->
  * 
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class AddNoise extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable, WeightedAttributesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8499673222857299082L;
@@ -93,8 +100,8 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   public String globalInfo() {
 
     return "An instance filter that changes a percentage of a given"
-      + " attribute's values. The attribute must be nominal."
-      + " Missing value can be treated as as a distinct separate value.";
+      + " attributes values. The attribute must be nominal."
+      + " Missing value can be treated as value itself.";
   }
 
   /**
@@ -112,7 +119,8 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     newVector.addElement(new Option(
       "\tTreat missing values as an extra value \n", "M", 1, "-M"));
     newVector.addElement(new Option(
-      "\tSpecify the percentage of values that are changed (default 10)", "P", 1, "-P <num>"));
+      "\tSpecify the percentage of noise introduced \n"
+        + "\tto the data (default 10)", "P", 1, "-P <num>"));
     newVector.addElement(new Option(
       "\tSpecify the random number seed (default 1)", "S", 1, "-S <num>"));
 
@@ -139,7 +147,8 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -P &lt;num&gt;
-   *  Specify the percentage of values that are changed (default 10)
+   *  Specify the percentage of noise introduced 
+   *  to the data (default 10)
    * </pre>
    * 
    * <pre>
@@ -217,7 +226,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public String useMissingTipText() {
 
-    return "Flag to set if missing values are treated as separate values.";
+    return "Flag to set if missing values are used.";
   }
 
   /**
@@ -271,16 +280,6 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     m_RandomSeed = newSeed;
   }
 
-  @ProgrammaticProperty
-  public void setSeed(int seed) {
-    setRandomSeed(seed);
-  }
-
-  @ProgrammaticProperty
-  public int getSeed() {
-    return getRandomSeed();
-  }
-
   /**
    * Returns the tip text for this property
    * 
@@ -289,7 +288,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public String percentTipText() {
 
-    return "Percentage of values that are changed.";
+    return "Percentage of introduced noise to data.";
   }
 
   /**
@@ -464,10 +463,10 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   /**
    * add noise to the dataset
    * 
-   * a given percentage of the instances are changed in the way that a set of
+   * a given percentage of the instances are changed in the way, that a set of
    * instances are randomly selected using seed. The attribute given by its
    * index is changed from its current value to one of the other possibly ones,
-   * also randomly. This is done while leaving the proportion the same. If
+   * also randomly. This is done with leaving the apportion the same. if
    * m_UseMissing is true, missing value is used as a value of its own
    * 
    * @param instances is the dataset
@@ -508,9 +507,9 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     partition_count = new int[numValues];
     partition_max = new int[numValues];
     int missing_count = 0;
-
+    ;
     int missing_max = 0;
-
+    ;
 
     for (int i = 0; i < numValues; i++) {
       partition_count[i] = 0;
@@ -638,7 +637,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

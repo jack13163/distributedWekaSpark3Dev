@@ -32,7 +32,7 @@ import weka.core.Utils;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15122 $
+ * @version $Revision: 11006 $
  */
 
 public class C45PruneableClassifierTree 
@@ -84,12 +84,40 @@ public class C45PruneableClassifierTree
   }
 
   /**
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return      the capabilities of this classifier tree
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Method for building a pruneable classifier tree.
    *
    * @param data the data for building the tree
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
+
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
@@ -217,7 +245,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the estimated errors
    */
-  protected double getEstimatedErrors(){
+  private double getEstimatedErrors(){
 
     double errors = 0;
     int i;
@@ -238,7 +266,7 @@ public class C45PruneableClassifierTree
    * @return the estimated errors
    * @throws Exception if something goes wrong
    */
-  protected double getEstimatedErrorsForBranch(Instances data)
+  private double getEstimatedErrorsForBranch(Instances data) 
        throws Exception {
 
     Instances [] localInstances;
@@ -265,7 +293,7 @@ public class C45PruneableClassifierTree
    * @param theDistribution the distribution to use
    * @return the estimated errors
    */
-  protected double getEstimatedErrorsForDistribution(Distribution
+  private double getEstimatedErrorsForDistribution(Distribution 
 						   theDistribution){
 
     if (Utils.eq(theDistribution.total(),0))
@@ -281,7 +309,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the training errors
    */
-  protected double getTrainingErrors(){
+  private double getTrainingErrors(){
 
     double errors = 0;
     int i;
@@ -300,7 +328,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the local split model
    */
-  protected ClassifierSplitModel localModel(){
+  private ClassifierSplitModel localModel(){
     
     return (ClassifierSplitModel)m_localModel;
   }
@@ -312,7 +340,7 @@ public class C45PruneableClassifierTree
    * @param data the data to compute the distributions for
    * @throws Exception if something goes wrong
    */
-  protected void newDistribution(Instances data) throws Exception {
+  private void newDistribution(Instances data) throws Exception {
 
     Instances [] localInstances;
 
@@ -335,7 +363,7 @@ public class C45PruneableClassifierTree
   /**
    * Method just exists to make program easier to read.
    */
-  protected C45PruneableClassifierTree son(int index){
+  private C45PruneableClassifierTree son(int index){
 
     return (C45PruneableClassifierTree)m_sons[index];
   }
@@ -346,6 +374,6 @@ public class C45PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15122 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 }

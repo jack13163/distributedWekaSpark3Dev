@@ -259,7 +259,7 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
   public final static int NO_CLASS = -1;
 
   /*** The associator to be examined */
-  protected Associator m_Associator = new Apriori();
+  protected Associator m_Associator = new weka.associations.Apriori();
 
   /**
    * Returns an enumeration describing the available options.
@@ -438,7 +438,7 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0) {
-      tmpStr = Apriori.class.getName();
+      tmpStr = weka.associations.Apriori.class.getName();
     }
     setAssociator((Associator) forName("weka.associations", Associator.class,
       tmpStr, Utils.partitionOptions(options)));

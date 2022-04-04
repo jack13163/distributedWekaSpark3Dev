@@ -83,7 +83,7 @@ public class ASSearchStrategy extends WekaAlgorithmWrapper {
    */
   @Override
   public Class getWrappedAlgorithmClass() {
-    return ASSearch.class;
+    return weka.attributeSelection.ASSearch.class;
   }
 
   /**

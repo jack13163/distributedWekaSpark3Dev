@@ -60,7 +60,7 @@ public class CrossValidationFoldMakerBeanInfo
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(CrossValidationFoldMaker.class,
+    return new BeanDescriptor(weka.gui.beans.CrossValidationFoldMaker.class,
 			      CrossValidationFoldMakerCustomizer.class);
   }
 }

@@ -1090,7 +1090,7 @@ public class CostBenefitAnalysis extends JPanel implements BeanCommon,
         if (!m_framePoppedUp) {
           m_framePoppedUp = true;
 
-          final JFrame jf = new JFrame(
+          final javax.swing.JFrame jf = new javax.swing.JFrame(
             "Cost/Benefit Analysis");
           jf.setSize(1000, 600);
           jf.getContentPane().setLayout(new BorderLayout());
@@ -1276,7 +1276,7 @@ public class CostBenefitAnalysis extends JPanel implements BeanCommon,
       Instances train = new Instances(new java.io.BufferedReader(
         new java.io.FileReader(args[0])));
       train.setClassIndex(train.numAttributes() - 1);
-      ThresholdCurve tc = new ThresholdCurve();
+      weka.classifiers.evaluation.ThresholdCurve tc = new weka.classifiers.evaluation.ThresholdCurve();
       weka.classifiers.evaluation.EvaluationUtils eu = new weka.classifiers.evaluation.EvaluationUtils();
       // weka.classifiers.Classifier classifier = new
       // weka.classifiers.functions.Logistic();
@@ -1293,11 +1293,11 @@ public class CostBenefitAnalysis extends JPanel implements BeanCommon,
         connectPoints[i] = true;
       }
       pd.setConnectPoints(connectPoints);
-      final JFrame jf = new JFrame("CostBenefitTest");
+      final javax.swing.JFrame jf = new javax.swing.JFrame("CostBenefitTest");
       jf.setSize(1000, 600);
       // jf.pack();
       jf.getContentPane().setLayout(new BorderLayout());
-      final AnalysisPanel analysisPanel = new AnalysisPanel();
+      final CostBenefitAnalysis.AnalysisPanel analysisPanel = new CostBenefitAnalysis.AnalysisPanel();
 
       jf.getContentPane().add(analysisPanel, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

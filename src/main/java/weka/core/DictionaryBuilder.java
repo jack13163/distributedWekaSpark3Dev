@@ -76,7 +76,7 @@ import weka.gui.ProgrammaticProperty;
  * is the number of documents that the term has occurred in.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14442 $
+ * @version $Revision: 13715 $
  */
 public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
   OptionHandler, Serializable {
@@ -1076,7 +1076,7 @@ public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
       String stemmerName = stemmerSpec[0];
       stemmerSpec[0] = "";
       Stemmer stemmer =
-        (Stemmer) Utils.forName(Stemmer.class, stemmerName,
+        (Stemmer) Utils.forName(weka.core.stemmers.Stemmer.class, stemmerName,
           stemmerSpec);
       setStemmer(stemmer);
     }
@@ -1095,7 +1095,7 @@ public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
       stopwordsHandlerSpec[0] = "";
       StopwordsHandler stopwordsHandler =
         (StopwordsHandler) Utils.forName(
-          StopwordsHandler.class, stopwordsHandlerName,
+          weka.core.stopwords.StopwordsHandler.class, stopwordsHandlerName,
           stopwordsHandlerSpec);
       setStopwordsHandler(stopwordsHandler);
     }
@@ -1111,7 +1111,7 @@ public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
       String tokenizerName = tokenizerSpec[0];
       tokenizerSpec[0] = "";
       Tokenizer tokenizer =
-        (Tokenizer) Utils.forName(Tokenizer.class,
+        (Tokenizer) Utils.forName(weka.core.tokenizers.Tokenizer.class,
           tokenizerName, tokenizerSpec);
 
       setTokenizer(tokenizer);
@@ -1186,16 +1186,9 @@ public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
     // Prevent the user from converting non-string fields
     StringBuffer fields = new StringBuffer();
     for (int j = 0; j < inputFormat.numAttributes(); j++) {
-      if (m_selectedRange.getInvert()) {
-        if (!m_selectedRange.isInRange(j) ||
-                inputFormat.attribute(j).type() != Attribute.STRING) {
-          fields.append((j + 1) + ",");
-        }
-      } else {
-        if (m_selectedRange.isInRange(j)
-                && inputFormat.attribute(j).type() == Attribute.STRING) {
-          fields.append((j + 1) + ",");
-        }
+      if (m_selectedRange.isInRange(j)
+        && inputFormat.attribute(j).type() == Attribute.STRING) {
+        fields.append((j + 1) + ",");
       }
     }
     m_selectedRange.setRanges(fields.toString());

@@ -71,7 +71,7 @@ public class ClassifierBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Classifier.class,
+    return new BeanDescriptor(weka.gui.beans.Classifier.class, 
 			      ClassifierCustomizer.class);
   }
 }

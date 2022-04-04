@@ -63,7 +63,7 @@ public class DataVisualizerBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(DataVisualizer.class,
+    return new BeanDescriptor(weka.gui.beans.DataVisualizer.class,
                               DataVisualizerCustomizer.class);
   }
 }

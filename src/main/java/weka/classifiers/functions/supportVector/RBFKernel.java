@@ -15,53 +15,77 @@
 
 /*
  *    RBFKernel.java
- *    Copyright (C) 1999-2017 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 J. Lindgren
  *
  */
 
 package weka.classifiers.functions.supportVector;
 
-import weka.core.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start -->
- * The RBF kernel : K(x, y) = exp(-gamma*(x-y)^2)
- * <br><br>
+ * <!-- globalinfo-start --> The RBF kernel. K(x, y) = e^-(gamma * &lt;x-y,
+ * x-y&gt;)
+ * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start -->
- * Valid options are: <p>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -C &lt;num&gt;
+ * <pre>
+ * -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)
+ * </pre>
+ * 
+ * <pre>
+ * -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)
+ * </pre>
+ * 
+ * <pre>
+ * -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
  *  -1 to turn it off.
- *  (default: 250007)</pre>
+ *  (default: 250007)
+ * </pre>
  * 
- * <pre> -G &lt;double&gt;
- *  The value to use for the gamma parameter (default: 0.01).</pre>
+ * <pre>
+ * -G &lt;num&gt;
+ *  The Gamma parameter.
+ *  (default: 0.01)
+ * </pre>
  * 
- * <pre> -output-debug-info
- *  Enables debugging output (if available) to be printed.
- *  (default: off)</pre>
- *
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 14512 $
+ * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
+ * @version $Revision: 12518 $
  */
 public class RBFKernel extends CachedKernel {
 
-  /** for serialization (value needs to be consistent with J. Lindgren's implementation) */
+  /** for serialization */
   static final long serialVersionUID = 5247117544316387852L;
 
-  /** The gamma parameter for the RBF kernel. */
-  protected double m_gamma = 0.01;
+  /** The precalculated dotproducts of &lt;inst_i,inst_i&gt; */
+  protected double m_kernelPrecalc[];
 
-  /** The diagonal values of the dot product matrix (name needs to be consistent with J. Lindgren's implementation). */
-  protected double[] m_kernelPrecalc;
+  /** Gamma for the RBF kernel. */
+  protected double m_gamma = 0.01;
 
   /**
    * default constructor - does nothing.
@@ -71,11 +95,11 @@ public class RBFKernel extends CachedKernel {
   }
 
   /**
-   * Creates a new <code>RBFKernel</code> instance.
+   * Constructor. Initializes m_kernelPrecalc[].
    * 
-   * @param data the training dataset used.
-   * @param cacheSize the size of the cache (a prime number)
-   * @param gamma the gamma to use
+   * @param data the data to use
+   * @param cacheSize the size of the cache
+   * @param gamma the bandwidth
    * @throws Exception if something goes wrong
    */
   public RBFKernel(Instances data, int cacheSize, double gamma) throws Exception {
@@ -89,26 +113,6 @@ public class RBFKernel extends CachedKernel {
   }
 
   /**
-   * Builds the kernel. Calls the super class method and then also initializes the cache for
-   * the diagonal of the dot product matrix.
-   */
-  public void buildKernel(Instances data) throws Exception {
-    super.buildKernel(data);
-
-    m_kernelPrecalc = new double[data.numInstances()];
-    for (int i = 0; i < data.numInstances(); i++) {
-      double sum = 0;
-      Instance inst = data.instance(i);
-      for (int j = 0; j < inst.numValues(); j++) {
-        if (inst.index(j) != data.classIndex()) {
-          sum += inst.valueSparse(j) * inst.valueSparse(j);
-        }
-      }
-      m_kernelPrecalc[i] = sum;
-    }
-  }
-
-  /**
    * Returns a string describing the kernel
    * 
    * @return a description suitable for displaying in the explorer/experimenter
@@ -116,7 +120,93 @@ public class RBFKernel extends CachedKernel {
    */
   @Override
   public String globalInfo() {
-    return "The RBF kernel : K(x, y) = exp(-gamma*(x-y)^2)";
+    return "The RBF kernel. K(x, y) = e^-(gamma * <x-y, x-y>)";
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   * 
+   * @return an enumeration of all the available options.
+   */
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
+
+    result.addElement(new Option("\tThe Gamma parameter.\n"
+      + "\t(default: 0.01)", "G", 1, "-G <num>"));
+
+    result.addAll(Collections.list(super.listOptions()));
+
+    return result.elements();
+  }
+
+  /**
+   * Parses a given list of options.
+   * <p/>
+   * 
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)
+   * </pre>
+   * 
+   * <pre>
+   * -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)
+   * </pre>
+   * 
+   * <pre>
+   * -C &lt;num&gt;
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
+   *  (default: 250007)
+   * </pre>
+   * 
+   * <pre>
+   * -G &lt;num&gt;
+   *  The Gamma parameter.
+   *  (default: 0.01)
+   * </pre>
+   * 
+   * <!-- options-end -->
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  @Override
+  public void setOptions(String[] options) throws Exception {
+    String tmpStr;
+
+    tmpStr = Utils.getOption('G', options);
+    if (tmpStr.length() != 0) {
+      setGamma(Double.parseDouble(tmpStr));
+    } else {
+      setGamma(0.01);
+    }
+
+    super.setOptions(options);
+  }
+
+  /**
+   * Gets the current settings of the Kernel.
+   * 
+   * @return an array of strings suitable for passing to setOptions
+   */
+  @Override
+  public String[] getOptions() {
+
+    Vector<String> result = new Vector<String>();
+
+    result.add("-G");
+    result.add("" + getGamma());
+
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -133,14 +223,58 @@ public class RBFKernel extends CachedKernel {
     if (id1 == id2) {
       return 1.0;
     } else {
+      double precalc1;
       if (id1 == -1) {
-        return Math.exp(-m_gamma * (dotProd(inst1, inst1) - 2 * dotProd(inst1, m_data.instance(id2))
-                + m_kernelPrecalc[id2]));
+        precalc1 = dotProd(inst1, inst1);
       } else {
-        return Math.exp(-m_gamma * (m_kernelPrecalc[id1] - 2 * dotProd(inst1, m_data.instance(id2))
-                + m_kernelPrecalc[id2]));
+        precalc1 = m_kernelPrecalc[id1];
       }
+      Instance inst2 = m_data.instance(id2);
+      double result = Math.exp(m_gamma
+        * (2. * dotProd(inst1, inst2) - precalc1 - m_kernelPrecalc[id2]));
+
+      return result;
     }
+  }
+
+  /**
+   * Sets the gamma value.
+   * 
+   * @param value the gamma value
+   */
+  public void setGamma(double value) {
+    m_gamma = value;
+  }
+
+  /**
+   * Gets the gamma value.
+   * 
+   * @return the gamma value
+   */
+  public double getGamma() {
+    return m_gamma;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String gammaTipText() {
+    return "The Gamma value.";
+  }
+
+  /**
+   * initializes variables etc.
+   * 
+   * @param data the data to use
+   */
+  @Override
+  protected void initVars(Instances data) {
+    super.initVars(data);
+
+    m_kernelPrecalc = new double[data.numInstances()];
   }
 
   /**
@@ -163,34 +297,24 @@ public class RBFKernel extends CachedKernel {
   }
 
   /**
-   * Sets the gamma value.
+   * builds the kernel with the given data. Initializes the kernel cache. The
+   * actual size of the cache in bytes is (64 * cacheSize).
    * 
-   * @param value the gamma value
+   * @param data the data to base the kernel on
+   * @throws Exception if something goes wrong
    */
-  @OptionMetadata(description = "The value to use for the gamma parameter (default: 0.01).",
-          displayName = "gamma", commandLineParamName = "G",
-          commandLineParamSynopsis = "-G <double>", displayOrder = 1)
-  public void setGamma(double value) {
-    m_gamma = value;
-  }
+  @Override
+  public void buildKernel(Instances data) throws Exception {
+    // does kernel handle the data?
+    if (!getChecksTurnedOff()) {
+      getCapabilities().testWithFail(data);
+    }
 
-  /**
-   * Gets the gamma value.
-   * 
-   * @return the gamma value
-   */
-  public double getGamma() {
-    return m_gamma;
-  }
+    initVars(data);
 
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String gammaTipText() {
-    return "The gamma value.";
+    for (int i = 0; i < data.numInstances(); i++) {
+      m_kernelPrecalc[i] = dotProd(data.instance(i), data.instance(i));
+    }
   }
 
   /**
@@ -200,7 +324,7 @@ public class RBFKernel extends CachedKernel {
    */
   @Override
   public String toString() {
-    return "RBF Kernel: K(x,y) = exp(-" + m_gamma + "*(x-y)^2)";
+    return "RBF kernel: K(x,y) = e^-(" + getGamma() + "* <x-y,x-y>^2)";
   }
 
   /**
@@ -210,7 +334,6 @@ public class RBFKernel extends CachedKernel {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14512 $");
+    return RevisionUtils.extract("$Revision: 12518 $");
   }
 }
-

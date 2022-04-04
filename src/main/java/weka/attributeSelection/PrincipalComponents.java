@@ -76,7 +76,7 @@ import weka.filters.unsupervised.attribute.*;
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 15471 $
+ * @version $Revision: 12659 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   implements AttributeTransformer, OptionHandler {
@@ -466,14 +466,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     buildAttributeConstructor(data);
   }
 
-  /**
-   * Intializes the evaluator, filters the input data and computes the
-   * correlation/covariance matrix.
-   *
-   * @param data the instances to analyse
-   * @throws Exception if a problem occurs
-   */
-  public void initializeAndComputeMatrix(Instances data) throws Exception {
+  private void buildAttributeConstructor(Instances data) throws Exception {
     m_eigenvalues = null;
     m_outputNumAtts = -1;
     m_attributeFilter = null;
@@ -535,11 +528,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     m_numAttribs = m_trainInstances.numAttributes();
 
     fillCovariance();
-  }
 
-  private void buildAttributeConstructor(Instances data) throws Exception {
-
-    initializeAndComputeMatrix(data);
     SymmDenseEVD evd = SymmDenseEVD.factorize(m_correlation);
 
     m_eigenvectors = Matrices.getArray(evd.getEigenvectors());
@@ -1074,7 +1063,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15471 $");
+    return RevisionUtils.extract("$Revision: 12659 $");
   }
 
   /**

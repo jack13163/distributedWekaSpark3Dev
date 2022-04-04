@@ -246,7 +246,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
   private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
 
   protected static Evaluation adjustForInputMappedClassifier(Evaluation eval,
-    Classifier classifier, Instances inst,
+    weka.classifiers.Classifier classifier, Instances inst,
     ClassifierErrorsPlotInstances plotInstances) throws Exception {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {

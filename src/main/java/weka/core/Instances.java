@@ -71,7 +71,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14911 $
+ * @version $Revision: 12446 $
  */
 public class Instances extends AbstractList<Instance> implements Serializable,
 RevisionHandler {
@@ -155,7 +155,7 @@ RevisionHandler {
    *             <code>ArffLoader</code> or <code>DataSource</code> class
    *             instead.
    * @see weka.core.converters.ArffLoader
-   * @see DataSource
+   * @see weka.core.converters.ConverterUtils.DataSource
    */
   // @ requires capacity >= 0;
   // @ ensures classIndex() == -1;
@@ -349,45 +349,6 @@ RevisionHandler {
   }
 
   /**
-   * Returns true if all attribute weights are the same and false otherwise. Returns true if there are no attributes.
-   * The class attribute (if set) is skipped when this test is performed.
-   */
-  public boolean allAttributeWeightsIdentical() {
-
-    boolean foundOne = false;
-    double weight = 0;
-    for (int i = 0; i < numAttributes(); i++) {
-      if (i != classIndex()) {
-        if (foundOne && (attribute(i).weight() != weight)) {
-          return false;
-        } else if (!foundOne) {
-          foundOne = true;
-          weight = attribute(i).weight();
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Returns true if all instance weights are the same and false otherwise. Returns true if there are no instances.
-   */
-  public boolean allInstanceWeightsIdentical() {
-
-    if (numInstances() == 0) {
-      return true;
-    } else {
-      double weight = instance(0).weight();
-      for (int i = 1; i < numInstances(); i++) {
-        if (instance(i).weight() != weight) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
-
-  /**
    * Returns an attribute.
    * 
    * @param index the attribute's index (index starts with 0)
@@ -464,10 +425,10 @@ RevisionHandler {
       if (instance.isMissing(i)) {
         continue;
       } else if (attribute(i).isNominal() || attribute(i).isString()) {
-        if (instance.value(i) != (int) instance.value(i)) {
+        if (!(Utils.eq(instance.value(i), (int) instance.value(i)))) {
           return false;
-        } else if ((instance.value(i) < 0)
-          || (instance.value(i) > attribute(i).numValues() - 1)) {
+        } else if (Utils.sm(instance.value(i), 0)
+          || Utils.gr(instance.value(i), attribute(i).numValues())) {
           return false;
         }
       }
@@ -1042,7 +1003,7 @@ RevisionHandler {
    *             <code>ArffLoader</code> or <code>DataSource</code> class
    *             instead.
    * @see weka.core.converters.ArffLoader
-   * @see DataSource
+   * @see weka.core.converters.ConverterUtils.DataSource
    */
   @Deprecated
   public boolean readInstance(Reader reader) throws IOException {
@@ -1175,49 +1136,8 @@ RevisionHandler {
   }
 
   /**
-   * Sets the weight of an attribute. This change only affects this dataset.
-   * 
-   * @param att the attribute
-   * @param weight the new weight
-   */
-  public void setAttributeWeight(Attribute att, double weight) {
-
-    setAttributeWeight(att.index(), weight);
-  }
-
-  /**
-   * Sets the weight of an attribute. This change only affects this dataset.
-   *
-   * @param att the attribute's index (index starts with 0)
-   * @param weight the new weight
-   */
-  public void setAttributeWeight(int att, double weight) {
-
-    Attribute existingAtt = attribute(att);
-    if (existingAtt.weight() == weight) {
-      return;
-    }
-
-    Attribute newAtt = (Attribute)existingAtt.copy();
-    newAtt.setWeight(weight);
-    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
-    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int)(numAttributes() / 0.75));
-    for (Attribute attr : m_Attributes) {
-      if (attr.index() == att) {
-        newVec.add(newAtt);
-        newMap.put(newAtt.name(), att);
-      } else {
-        newVec.add(attr);
-        newMap.put(attr.name(), attr.index());
-      }
-    }
-    m_Attributes = newVec;
-    m_NamesToAttributeIndices = newMap;
-  }
-
-  /**
    * Renames an attribute. This change only affects this dataset.
-   *
+   * 
    * @param att the attribute
    * @param name the new name
    */
@@ -1268,7 +1188,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
+   * Creates a new dataset of the same size using random sampling with
    * replacement.
    * 
    * @param random a random number generator
@@ -1284,7 +1204,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
+   * Creates a new dataset of the same size using random sampling with
    * replacement according to the current instance weights. The weights of the
    * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
@@ -1298,7 +1218,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
+   * Creates a new dataset of the same size using random sampling with
    * replacement according to the current instance weights. The weights of the
    * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
@@ -1313,8 +1233,9 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
-   * replacement according to the current instance weights. See also
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the current instance weights. The weights of the
+   * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1329,8 +1250,9 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
-   * replacement according to the current instance weights. See also
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the current instance weights. The weights of the
+   * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1342,41 +1264,16 @@ RevisionHandler {
   public Instances resampleWithWeights(Random random, boolean[] sampled,
     boolean representUsingWeights) {
 
-    return resampleWithWeights(random, sampled, representUsingWeights, 100.0);
-  }
-
-  /**
-   * Creates a new dataset from this dataset using random sampling with
-   * replacement according to current instance weights. The size of the sample
-   * can be specified as a percentage of this dataset. See also
-   * resampleWithWeights(Random, double[], boolean[]).
-   *
-   * @param random a random number generator
-   * @param sampled an array indicating what has been sampled, can be null
-   * @param representUsingWeights if true, copies are represented using weights
-   *          in resampled data
-   * @param sampleSize size of the new dataset as a percentage of the size of this
-   *                   dataset
-   * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
-   *           length or contains negative weights.
-   */
-  public Instances resampleWithWeights(Random random,
-                                       boolean[] sampled, boolean representUsingWeights, double sampleSize) {
-
     double[] weights = new double[numInstances()];
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights, sampled, representUsingWeights, sampleSize);
+    return resampleWithWeights(random, weights, sampled, representUsingWeights);
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
-   * replacement according to the given weight vector. The weights of the
-   * instances in the new dataset are set to one. The length of the weight
-   * vector has to be the same as the number of instances in the dataset, and
-   * all weights have to be positive. See also
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the given weight vector. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1391,7 +1288,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
+   * Creates a new dataset of the same size using random sampling with
    * replacement according to the given weight vector. The weights of the
    * instances in the new dataset are set to one. The length of the weight
    * vector has to be the same as the number of instances in the dataset, and
@@ -1412,55 +1309,27 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size as this dataset using random sampling with
-   * replacement according to the given weight vector. The length of the weight
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the given weight vector. The weights of the
+   * instances in the new dataset are set to one. The length of the weight
    * vector has to be the same as the number of instances in the dataset, and
    * all weights have to be positive. Uses Walker's method, see pp. 232 of
    * "Stochastic Simulation" by B.D. Ripley (1987).
-   *
-   * @param random a random number generator
-   * @param weights the weight vector
-   * @param sampled an array indicating what has been sampled, can be null
-   * @param representUsingWeights if true, copies are represented using weights
-   *          in resampled data
-   * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
-   *           length or contains negative weights.
-   */
-  public Instances resampleWithWeights(Random random, double[] weights,
-                                       boolean[] sampled, boolean representUsingWeights) {
-
-    return resampleWithWeights(random, weights, sampled, representUsingWeights, 100.0);
-  }
-
-  /**
-   * Creates a new dataset from this dataset using random sampling with
-   * replacement according to the given weight vector. The length of the weight
-   * vector has to be the same as the number of instances in the dataset, and
-   * all weights have to be positive. Uses Walker's method, see pp. 232 of
-   * "Stochastic Simulation" by B.D. Ripley (1987). The size of the sample
-   * can be specified as a percentage of this dataset.
    * 
    * @param random a random number generator
    * @param weights the weight vector
    * @param sampled an array indicating what has been sampled, can be null
    * @param representUsingWeights if true, copies are represented using weights
    *          in resampled data
-   * @param sampleSize size of the new dataset as a percentage of the size of this
-   *                   dataset
    * @return the new dataset
    * @throws IllegalArgumentException if the weights array is of the wrong
    *           length or contains negative weights.
    */
   public Instances resampleWithWeights(Random random, double[] weights,
-    boolean[] sampled, boolean representUsingWeights, double sampleSize) {
+    boolean[] sampled, boolean representUsingWeights) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
-    }
-
-    if ((sampleSize < 0) || (sampleSize > 100)) {
-      throw new IllegalArgumentException("Sample size must be a percentage.");
     }
 
     Instances newData = new Instances(this, numInstances());
@@ -1515,9 +1384,7 @@ RevisionHandler {
       counts = new int[M];
     }
 
-    int numToBeSampled = (int) (numInstances() * (sampleSize / 100.0));
-
-    for (int i = 0; i < numToBeSampled; i++) {
+    for (int i = 0; i < numInstances(); i++) {
       int ALRV;
       double U = M * random.nextDouble();
       int I = (int) U;
@@ -2671,6 +2538,6 @@ RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14911 $");
+    return RevisionUtils.extract("$Revision: 12446 $");
   }
 }

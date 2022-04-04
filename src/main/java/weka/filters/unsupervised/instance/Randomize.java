@@ -25,11 +25,16 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> Randomly shuffles the order of instances passed
@@ -49,10 +54,10 @@ import weka.gui.ProgrammaticProperty;
  * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class Randomize extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable, WeightedInstancesHandler, WeightedAttributesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8854479785121877582L;
@@ -169,16 +174,6 @@ public class Randomize extends Filter implements UnsupervisedFilter,
     m_Seed = newRandomSeed;
   }
 
-  @ProgrammaticProperty
-  public void setSeed(int seed) {
-    setRandomSeed(seed);
-  }
-
-  @ProgrammaticProperty
-  public int getSeed() {
-    return getRandomSeed();
-  }
-
   /**
    * Returns the Capabilities of this filter.
    * 
@@ -285,7 +280,7 @@ public class Randomize extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

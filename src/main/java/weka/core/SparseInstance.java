@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * will be stored explicitly.
  * 
  * @author Eibe Frank
- * @version $Revision: 15069 $
+ * @version $Revision: 12472 $
  */
 public class SparseInstance extends AbstractInstance {
 
@@ -127,7 +127,7 @@ public class SparseInstance extends AbstractInstance {
   }
 
   /**
-   * Constructor that initializes instance variable with given values.
+   * Constructor that inititalizes instance variable with given values.
    * Reference to the dataset is set to null. (ie. the instance doesn't have
    * access to information about the attribute types) Note that the indices need
    * to be sorted in ascending order. Otherwise things won't work properly.
@@ -136,7 +136,7 @@ public class SparseInstance extends AbstractInstance {
    * @param attValues a vector of attribute values (just the ones to be stored)
    * @param indices the indices of the given values in the full vector (need to
    *          be sorted in ascending order)
-   * @param maxNumValues the maximum number of values that can be stored
+   * @param maxNumValues the maximium number of values that can be stored
    */
   public SparseInstance(double weight, double[] attValues, int[] indices,
     int maxNumValues) {
@@ -427,7 +427,7 @@ public class SparseInstance extends AbstractInstance {
   }
 
   /**
-   * Returns the values of each attribute as an array of doubles. Creates a fresh array object for this.
+   * Returns the values of each attribute as an array of doubles.
    * 
    * @return an array containing all the instance attribute values
    */
@@ -829,6 +829,6 @@ public class SparseInstance extends AbstractInstance {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15069 $");
+    return RevisionUtils.extract("$Revision: 12472 $");
   }
 }

@@ -28,8 +28,14 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.misc.InputMappedClassifier;
-import weka.core.*;
+import weka.core.BatchPredictor;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
@@ -80,7 +86,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * </pre>
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14068 $
+ * @version $Revision: 11958 $
  */
 public abstract class AbstractOutput implements Serializable, OptionHandler {
 
@@ -540,23 +546,36 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     int index) throws Exception;
 
   /**
-   * Preprocesses an input instance. Basically this only does something
+   * Preprocesses an input instance and its copy (that will get its class value
+   * set to missing for prediction purposes). Basically this only does something
    * special in the case when the classifier is an InputMappedClassifier.
    * 
    * @param inst the original instance to predict
+   * @param withMissing a copy of the instance to predict
    * @param classifier the classifier that will be used to make the prediction
    * @return the original instance unchanged or mapped (in the case of an
-   *         InputMappedClassifier) .
+   *         InputMappedClassifier) and the withMissing copy with the class
+   *         attribute set to missing value.
    * @throws Exception if a problem occurs.
    */
-  protected Instance preProcessInstance(Instance inst, Classifier classifier) throws Exception {
+  protected Instance preProcessInstance(Instance inst, Instance withMissing,
+    Classifier classifier) throws Exception {
 
-    if (classifier instanceof InputMappedClassifier) {
-      return ((InputMappedClassifier) classifier).constructMappedInstance(inst);
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      inst = (Instance) inst.copy();
+      inst =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .constructMappedInstance(inst);
+      int mappedClass =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getMappedClassIndex();
+      withMissing.setMissing(mappedClass);
     } else {
-      return inst;
+      withMissing.setMissing(withMissing.classIndex());
     }
- }
+
+    return inst;
+  }
 
   /**
    * Prints the classification to the buffer.
@@ -575,7 +594,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       throw new WekaException(error);
     }
 
-    doPrintClassification(classifier.distributionForInstance(inst), preProcessInstance(inst, classifier), index);
+    doPrintClassification(classifier, inst, index);
   }
 
   /**
@@ -617,37 +636,17 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
 
     if (classifier instanceof BatchPredictor
       && ((BatchPredictor) classifier).implementsMoreEfficientBatchPrediction()) {
-      test = testset.getDataSet();
-      if (!(classifier instanceof InputMappedClassifier)) {
-        try {
-          test.setClassIndex(m_Header.classIndex());
-        } catch (Exception e) {
-          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
-        }
-        if (!(test.equalHeaders(m_Header))) {
-          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
-        }
-      }
+      test = testset.getDataSet(m_Header.classIndex());
       double[][] predictions =
         ((BatchPredictor) classifier).distributionsForInstances(test);
       for (i = 0; i < test.numInstances(); i++) {
-        printClassification(predictions[i], preProcessInstance(test.instance(i), classifier), i);
+        printClassification(predictions[i], test.instance(i), i);
       }
     } else {
-      test = testset.getStructure();
-      if (!(classifier instanceof InputMappedClassifier)) {
-        try {
-          test.setClassIndex(m_Header.classIndex());
-        } catch (Exception e) {
-          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
-        }
-        if (!(test.equalHeaders(m_Header))) {
-          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
-        }
-      }
+      test = testset.getStructure(m_Header.classIndex());
       while (testset.hasMoreElements(test)) {
         inst = testset.nextElement(test);
-        printClassification(classifier.distributionForInstance(inst), preProcessInstance(inst, classifier), i);
+        doPrintClassification(classifier, inst, i);
         i++;
       }
     }
@@ -670,12 +669,11 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       double[][] predictions =
         ((BatchPredictor) classifier).distributionsForInstances(testset);
       for (i = 0; i < testset.numInstances(); i++) {
-        printClassification(predictions[i], preProcessInstance(testset.instance(i), classifier), i);
+        printClassification(predictions[i], testset.instance(i), i);
       }
     } else {
       for (i = 0; i < testset.numInstances(); i++) {
-        printClassification(classifier.distributionForInstance(testset.instance(i)),
-                preProcessInstance(testset.instance(i), classifier), i);
+        doPrintClassification(classifier, testset.instance(i), i);
       }
     }
   }

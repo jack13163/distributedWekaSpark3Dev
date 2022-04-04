@@ -238,7 +238,7 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
           Object r =
             PluginManager.getPluginInstance(
               "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
-          if (r != null && r instanceof OffscreenChartRenderer) {
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default

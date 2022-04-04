@@ -142,7 +142,7 @@ import weka.core.Instances;
  * <p/>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14804 $
+ * @version $Revision: 12037 $
  * @see SimpleStreamFilter
  * @see #input(Instance)
  * @see #batchFinished()
@@ -203,45 +203,6 @@ public abstract class SimpleBatchFilter extends SimpleFilter {
     }
 
     bufferInput(instance); // bufferInput() makes a copy of the instance.
-
-    if (isFirstBatchDone()) {
-      Instances inst = new Instances(getInputFormat());
-      inst = process(inst);
-      for (int i = 0; i < inst.numInstances(); i++) {
-        push(inst.instance(i), false); // No need to copy instance
-      }
-      flushInput();
-    }
-
-    return m_FirstBatchDone;
-  }
-
-  /**
-   * A version of the input(Instance) method that enables input of a whole
-   * dataset represented as an Instances object into the filter. This method is
-   * more efficient when processing batches other than the first
-   * batch of data because it can apply the process(Instances) method
-   * to the full batch and does not have to process individual instances independently.
-   *
-   * @param instances the input instances
-   * @return true if the filtered instances may now be collected with output().
-   * @throws IllegalStateException if no input structure has been defined
-   * @throws Exception if something goes wrong
-   * @see #batchFinished()
-   */
-  public boolean input(Instances instances) throws Exception {
-    if (getInputFormat() == null) {
-      throw new IllegalStateException("No input instance format defined");
-    }
-
-    if (m_NewBatch) {
-      resetQueue();
-      m_NewBatch = false;
-    }
-
-    for (Instance instance : instances) {
-      bufferInput(instance); // bufferInput() makes a copy of the instance.
-    }
 
     if (isFirstBatchDone()) {
       Instances inst = new Instances(getInputFormat());

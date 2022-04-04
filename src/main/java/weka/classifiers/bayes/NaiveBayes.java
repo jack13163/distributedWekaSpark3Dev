@@ -26,10 +26,21 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
-import weka.core.*;
+import weka.core.Aggregateable;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.estimators.DiscreteEstimator;
 import weka.estimators.Estimator;
 import weka.estimators.KernelEstimator;
@@ -92,10 +103,10 @@ import weka.estimators.NormalEstimator;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15232 $
+ * @version $Revision: 11741 $
  */
 public class NaiveBayes extends AbstractClassifier implements OptionHandler,
-  WeightedInstancesHandler, WeightedAttributesHandler, TechnicalInformationHandler,
+  WeightedInstancesHandler, TechnicalInformationHandler,
   Aggregateable<NaiveBayes> {
 
   /** for serialization */
@@ -216,9 +227,6 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
   @Override
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (getUseKernelEstimator() && getUseSupervisedDiscretization()) {
-      throw new IllegalArgumentException("Cannot use both kernel density estimation and discretization!");
-    }
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
@@ -445,6 +453,10 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
     super.setOptions(options);
     boolean k = Utils.getFlag('K', options);
     boolean d = Utils.getFlag('D', options);
+    if (k && d) {
+      throw new IllegalArgumentException("Can't use both kernel density "
+        + "estimation and discretization!");
+    }
     setUseSupervisedDiscretization(d);
     setUseKernelEstimator(k);
     setDisplayModelInOldFormat(Utils.getFlag('O', options));
@@ -469,10 +481,6 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
 
     if (m_UseDiscretization) {
       options.add("-D");
-    }
-
-    if (m_UseDiscretization && m_UseKernelEstimator) {
-      System.err.println("WARNING: Turning on both discretization and kernel density estimation is not supported.");
     }
 
     if (m_displayModelInOldFormat) {
@@ -875,6 +883,9 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
   public void setUseKernelEstimator(boolean v) {
 
     m_UseKernelEstimator = v;
+    if (v) {
+      setUseSupervisedDiscretization(false);
+    }
   }
 
   /**
@@ -901,11 +912,14 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
   /**
    * Set whether supervised discretization is to be used.
    * 
-   * @param s true if supervised discretization is to be used.
+   * @param newblah true if supervised discretization is to be used.
    */
-  public void setUseSupervisedDiscretization(boolean s) {
+  public void setUseSupervisedDiscretization(boolean newblah) {
 
-    m_UseDiscretization = s;
+    m_UseDiscretization = newblah;
+    if (newblah) {
+      setUseKernelEstimator(false);
+    }
   }
 
   /**
@@ -972,7 +986,7 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15232 $");
+    return RevisionUtils.extract("$Revision: 11741 $");
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })

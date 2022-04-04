@@ -66,7 +66,7 @@ public class AssociatorBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Associator.class,
+    return new BeanDescriptor(weka.gui.beans.Associator.class, 
 			      AssociatorCustomizer.class);
   }
 }

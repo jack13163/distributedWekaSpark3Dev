@@ -51,7 +51,7 @@ import weka.core.WeightedInstancesHandler;
  * 
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 14202 $
+ * @version $Revision: 11568 $
  */
 public class LogisticBase extends AbstractClassifier implements
   WeightedInstancesHandler {
@@ -1154,7 +1154,7 @@ public class LogisticBase extends AbstractClassifier implements
     double[][] coefficients = getCoefficients();
 
     for (int j = 0; j < m_numClasses; j++) {
-      s.append("\nClass " + m_train.classAttribute().value(j) + " :\n");
+      s.append("\nClass " + j + " :\n");
       // constant term
       s.append(Utils.doubleToString(coefficients[j][0], 2 + m_numDecimalPlaces, m_numDecimalPlaces) + " + \n");
       for (int i = 0; i < attributes[j].length; i++) {
@@ -1207,6 +1207,6 @@ public class LogisticBase extends AbstractClassifier implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14202 $");
+    return RevisionUtils.extract("$Revision: 11568 $");
   }
 }

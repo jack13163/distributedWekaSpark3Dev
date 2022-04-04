@@ -44,7 +44,7 @@ import weka.core.Utils;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 13955 $
+ * @version $Revision: 11542 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -1689,10 +1689,6 @@ public abstract class ResultMatrix implements Serializable, RevisionHandler,
     int i;
 
     result = Utils.doubleToString(d, prec);
-
-    if (prec <= 0 || Double.isInfinite(d) || Double.isNaN(d)) {
-      return result;
-    }
 
     // decimal point?
     if (result.indexOf(".") == -1) {

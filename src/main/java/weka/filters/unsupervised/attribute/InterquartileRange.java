@@ -25,8 +25,16 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 
 /**
@@ -108,9 +116,9 @@ import weka.filters.SimpleBatchFilter;
  * 
  * @author Dale Fletcher (dale at cs dot waikato dot ac dot nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15447 $
+ * @version $Revision: 12476 $
  */
-public class InterquartileRange extends SimpleBatchFilter implements WeightedAttributesHandler {
+public class InterquartileRange extends SimpleBatchFilter {
 
   /** for serialization */
   private static final long serialVersionUID = -227879653639723030L;
@@ -228,7 +236,7 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
         "\tGenerates an additional attribute 'Offset' per Outlier/ExtremeValue\n"
           + "\tpair that contains the multiplier that the value is off the median.\n"
           + "\t   value = median + 'multiplier' * IQR\n"
-          + "\tNote: implicitely sets '-P'." + "\t(default: off)", "M", 0, "-M"));
+          + "Note: implicitely sets '-P'." + "\t(default: off)", "M", 0, "-M"));
 
     result.addAll(Collections.list(super.listOptions()));
 
@@ -680,24 +688,18 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
         values = new ArrayList<String>();
         values.add("no");
         values.add("yes");
-        Attribute aO = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-                .name() + "_Outlier", values);
-        aO.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
-        atts.add(aO);
+        atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+          .name() + "_Outlier", values));
 
         values = new ArrayList<String>();
         values.add("no");
         values.add("yes");
-        Attribute aE = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-                .name() + "_ExtremeValue", values);
-        aE.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
-        atts.add(aE);
+        atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+          .name() + "_ExtremeValue", values));
 
         if (getOutputOffsetMultiplier()) {
-          Attribute aF = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-                  .name() + "_Offset");
-          aF.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
-          atts.add(aF);
+          atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+            .name() + "_Offset"));
         }
       }
     }
@@ -800,7 +802,7 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
    * not
    * 
    * @param inst the instance to test
-   * @param index the index of the attribute index in the list of selected attributes
+   * @param index the attribute index
    * @return true if the instance is an outlier
    */
   protected boolean isOutlier(Instance inst, int index) {
@@ -847,7 +849,7 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
    * attribute or not
    * 
    * @param inst the instance to test
-   * @param index the index of the attribute index in the list of selected attributes
+   * @param index the attribute index
    * @return true if the instance is an extreme value
    */
   protected boolean isExtremeValue(Instance inst, int index) {
@@ -894,7 +896,7 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
    * particular attribute.
    * 
    * @param inst the instance to test
-   * @param index the index of the attribute index in the list of selected attributes
+   * @param index the attribute index
    * @return the multiplier
    */
   protected double calculateMultiplier(Instance inst, int index) {
@@ -964,11 +966,11 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
           }
 
           // outlier?
-          if (isOutlier(instOld, i)) {
+          if (isOutlier(instOld, m_AttributeIndices[i])) {
             values[m_OutlierAttributePosition[i]] = 1;
           }
           // extreme value?
-          if (isExtremeValue(instOld, i)) {
+          if (isExtremeValue(instOld, m_AttributeIndices[i])) {
             values[m_OutlierAttributePosition[i] + 1] = 1;
             // tag extreme values also as outliers?
             if (getExtremeValuesAsOutliers()) {
@@ -977,7 +979,8 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
           }
           // add multiplier?
           if (getOutputOffsetMultiplier()) {
-            values[m_OutlierAttributePosition[i] + 2] = calculateMultiplier(instOld, i);
+            values[m_OutlierAttributePosition[i] + 2] =
+              calculateMultiplier(instOld, m_AttributeIndices[i]);
           }
         }
       }
@@ -1003,7 +1006,7 @@ public class InterquartileRange extends SimpleBatchFilter implements WeightedAtt
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15447 $");
+    return RevisionUtils.extract("$Revision: 12476 $");
   }
 
   /**

@@ -20,45 +20,54 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.*;
-import weka.core.Capabilities.Capability;
-import weka.filters.SimpleBatchFilter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Vector;
 
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.SimpleBatchFilter;
+
 /**
  * <!-- globalinfo-start --> A filter for turning numeric attributes into
  * nominal ones. Unlike discretization, it just takes all numeric values and
  * adds them to the list of nominal values of that attribute. Useful after CSV
- * imports, to force certain attributes to become nominal, e.g., the class
+ * imports, to enforce certain attributes to become nominal, e.g., the class
  * attribute, containing values from 1 to 5.
  * <p/>
  * <!-- globalinfo-end -->
- *
+ * 
  * <!-- options-start --> Valid options are:
  * <p/>
- *
+ * 
  * <pre>
  * -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to discretize. First and last are valid indexes.
+ *  Specifies list of columns to Discretize. First and last are valid indexes.
  *  (default: first-last)
  * </pre>
- *
+ * 
  * <pre>
  * -V
  *  Invert matching sense of column indexes.
  * </pre>
- *
+ * 
  * <!-- options-end -->
- *
+ * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
-public class NumericToNominal extends SimpleBatchFilter implements WeightedInstancesHandler, WeightedAttributesHandler {
+public class NumericToNominal extends SimpleBatchFilter {
 
   /** for serialization */
   private static final long serialVersionUID = -6614630932899796239L;
@@ -74,7 +83,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Returns a string describing this filter
-   *
+   * 
    * @return a description of the filter suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -83,13 +92,13 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
     return "A filter for turning numeric attributes into nominal ones. Unlike "
       + "discretization, it just takes all numeric values and adds them to "
       + "the list of nominal values of that attribute. Useful after CSV "
-      + "imports, to force certain attributes to become nominal, e.g., "
+      + "imports, to enforce certain attributes to become nominal, e.g., "
       + "the class attribute, containing values from 1 to 5.";
   }
 
   /**
    * Gets an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
   @Override
@@ -98,7 +107,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
     Vector<Option> result = new Vector<Option>(2);
 
     result.addElement(new Option(
-      "\tSpecifies list of columns to discretize. First"
+      "\tSpecifies list of columns to Discretize. First"
         + " and last are valid indexes.\n" + "\t(default: first-last)", "R", 1,
       "-R <col1,col2-col4,...>"));
 
@@ -111,23 +120,23 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
   /**
    * Parses a given list of options.
    * <p/>
-   *
+   * 
    * <!-- options-start --> Valid options are:
    * <p/>
-   *
+   * 
    * <pre>
    * -R &lt;col1,col2-col4,...&gt;
    *  Specifies list of columns to Discretize. First and last are valid indexes.
    *  (default: first-last)
    * </pre>
-   *
+   * 
    * <pre>
    * -V
    *  Invert matching sense of column indexes.
    * </pre>
-   *
+   * 
    * <!-- options-end -->
-   *
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -154,7 +163,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -178,7 +187,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -190,7 +199,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Gets whether the supplied columns are to be worked on or the others.
-   *
+   * 
    * @return true if the supplied columns will be worked on
    */
   public boolean getInvertSelection() {
@@ -201,7 +210,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
    * Sets whether selected columns should be worked on or all the others apart
    * from these. If true all the other columns are considered for
    * "nominalization".
-   *
+   * 
    * @param value the new invert setting
    */
   public void setInvertSelection(boolean value) {
@@ -210,7 +219,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Returns the tip text for this property
-   *
+   * 
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -223,7 +232,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Gets the current range selection
-   *
+   * 
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
@@ -233,7 +242,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
   /**
    * Sets which attributes are to be "nominalized" (only numeric attributes
    * among the selection will be transformed).
-   *
+   * 
    * @param value a string representing the list of attributes. Since the string
    *          will typically come from a user, attributes are indexed from 1. <br>
    *          eg: first-3,5,6-last
@@ -246,7 +255,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
   /**
    * Sets which attributes are to be transoformed to nominal. (only numeric
    * attributes among the selection will be transformed).
-   *
+   * 
    * @param value an array containing indexes of attributes to nominalize. Since
    *          the array will typically come from a program, attributes are
    *          indexed from 0.
@@ -258,7 +267,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
 
   /**
    * Returns the Capabilities of this filter.
-   *
+   * 
    * @return the capabilities of this object
    * @see Capabilities
    */
@@ -284,7 +293,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
    * case the output format cannot be returned immediately, i.e.,
    * immediateOutputFormat() returns false, then this method will be called from
    * batchFinished().
-   *
+   * 
    * @param inputFormat the input format to base the output format on
    * @return the output format
    * @throws Exception in case the determination goes wrong
@@ -342,9 +351,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
         if (isDate) {
           values.add(data.attribute(i).formatDate(o.doubleValue()));
         } else {
-          String label = Utils.doubleToString(o.doubleValue(), MAX_DECIMALS);
-          if (!values.contains(label))
-            values.add(label);
+          values.add(Utils.doubleToString(o.doubleValue(), MAX_DECIMALS));
         }
       }
       Attribute newAtt = new Attribute(data.attribute(i).name(), values);
@@ -432,7 +439,7 @@ public class NumericToNominal extends SimpleBatchFilter implements WeightedInsta
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

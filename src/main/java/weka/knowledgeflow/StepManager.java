@@ -21,7 +21,6 @@
 
 package weka.knowledgeflow;
 
-import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Settings;
 import weka.core.WekaException;
@@ -85,8 +84,6 @@ public interface StepManager {
   public static final String CON_AUX_DATA_INCREMENTAL_STREAM_END =
     "incremental_stream_end";
   public static final String CON_AUX_DATA_IS_INCREMENTAL = "incremental_stream";
-  public static final String CON_AUX_DATA_PRIMARY_PAYLOAD_NOT_THREAD_SAFE =
-    "aux_not_thread_safe";
 
   /**
    * Get the name of the step managed by this StepManager
@@ -162,7 +159,7 @@ public interface StepManager {
    *         given type
    */
   List<StepManager> getIncomingConnectedStepsOfConnectionType(
-          String connectionName);
+    String connectionName);
 
   /**
    * Get the named step that is connected with an incoming connection.
@@ -190,7 +187,7 @@ public interface StepManager {
    *         connection type
    */
   List<StepManager> getOutgoingConnectedStepsOfConnectionType(
-          String connectionName);
+    String connectionName);
 
   /**
    * Get a Map of all incoming connections. Map is keyed by connection type;
@@ -254,7 +251,7 @@ public interface StepManager {
    * Attempt to retrieve the structure (as a header-only set of instances) for
    * the named incoming connection type. Assumes that there is only one step
    * connected with the supplied incoming connection type.
-   *
+   * 
    * @param connectionName the type of the incoming connection to get the
    *          structure for
    * @return the structure of the data for the specified incoming connection, or
@@ -264,22 +261,6 @@ public interface StepManager {
    */
   Instances getIncomingStructureForConnectionType(String connectionName)
     throws WekaException;
-
-  /**
-   * Attempt to retrieve the structure (as a header-only set of instances) for
-   * the named incoming connection type. Assumes that there is only one step
-   * connected with the supplied incoming connection type.
-   *
-   * @param connectionName the type of the incoming connection to get the
-   *          structure for
-   * @param env the Environment to use
-   * @return the structure of the data for the specified incoming connection, or
-   *         null if the structure can't be determined (or represented as an
-   *         Instances object)
-   * @throws WekaException if a problem occurs
-   */
-  Instances getIncomingStructureForConnectionType(String connectionName,
-                                                  Environment env) throws WekaException;
 
   /**
    * Attempt to get the incoming structure (as a header-only set of instances)
@@ -294,7 +275,7 @@ public interface StepManager {
    * @throws WekaException if a problem occurs
    */
   Instances getIncomingStructureFromStep(StepManager sourceStep,
-                                         String connectionName) throws WekaException;
+    String connectionName) throws WekaException;
 
   /**
    * Returns true if, at this time, the step managed by this step manager is
@@ -310,13 +291,6 @@ public interface StepManager {
    * @return true if a stop has been requested
    */
   boolean isStopRequested();
-
-  /**
-   * Return true if the current step is finished.
-   *
-   * @return true if the current step is finished
-   */
-  boolean isStepFinished();
 
   /**
    * Step implementations processing batch data should call this to indicate

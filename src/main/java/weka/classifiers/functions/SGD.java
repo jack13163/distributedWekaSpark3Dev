@@ -98,7 +98,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * 
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14787 $
+ * @version $Revision: 11468 $
  * 
  */
 public class SGD extends RandomizableClassifier implements
@@ -837,7 +837,7 @@ public class SGD extends RandomizableClassifier implements
   /**
    * Computes the distribution for a given instance
    * 
-   * @param inst the instance for which distribution is computed
+   * @param instance the instance for which distribution is computed
    * @return the distribution
    * @throws Exception if the distribution can't be computed successfully
    */
@@ -908,7 +908,7 @@ public class SGD extends RandomizableClassifier implements
       buff.append("Hinge loss (SVM)\n\n");
     } else if (m_loss == LOGLOSS) {
       buff.append("Log loss (logistic regression)\n\n");
-    } else if (m_loss == EPSILON_INSENSITIVE) {
+    } if (m_loss == EPSILON_INSENSITIVE) {
       buff.append("Epsilon insensitive loss (SVM regression)\n\n");
     } else if (m_loss == HUBER) {
       buff.append("Huber loss (robust regression)\n\n");
@@ -953,7 +953,7 @@ public class SGD extends RandomizableClassifier implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14787 $");
+    return RevisionUtils.extract("$Revision: 11468 $");
   }
 
   protected int m_numModels = 0;

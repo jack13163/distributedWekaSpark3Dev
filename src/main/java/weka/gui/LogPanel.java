@@ -21,12 +21,21 @@
 
 package weka.gui;
 
-import weka.core.Utils;
-
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -43,7 +52,7 @@ import java.util.Date;
  * messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15300 $
+ * @version $Revision: 12358 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 
@@ -64,9 +73,6 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
 
   /** The panel for monitoring the number of running tasks (if supplied) */
   protected WekaTaskMonitor m_TaskMonitor = null;
-
-  /** The JFrame to use */
-  protected JFrame m_Frame;
 
   /**
    * Creates the log panel with no task monitor and the log always visible.
@@ -139,26 +145,21 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
     if (logHidden) {
 
       // create log window
-      m_Frame = Utils.getWekaJFrame("Log", this);
-      m_Frame.addWindowListener(new WindowAdapter() {
+      final JFrame jf = new JFrame("Log");
+      jf.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
-          m_Frame.setVisible(false);
+          jf.setVisible(false);
         }
       });
-      m_Frame.getContentPane().setLayout(new BorderLayout());
-      m_Frame.getContentPane().add(js, BorderLayout.CENTER);
-      m_Frame.pack();
-      m_Frame.setSize(800, 600);
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(js, BorderLayout.CENTER);
+      jf.pack();
+      jf.setSize(450, 350);
 
       // display log window on request
       m_logButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          Window windowAncestor = SwingUtilities.getWindowAncestor(LogPanel.this);
-          if (windowAncestor instanceof Frame) {
-            m_Frame.setIconImage(((Frame) windowAncestor).getIconImage());
-          }
-          m_Frame.setLocationRelativeTo(LogPanel.this);
-          m_Frame.setVisible(true);
+          jf.setVisible(true);
         }
       });
 
@@ -179,7 +180,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
         JPanel p2 = new JPanel();
         p2.setLayout(new BorderLayout());
         p2.add(p1, BorderLayout.CENTER);
-        p2.add((Component) m_TaskMonitor, BorderLayout.EAST);
+        p2.add((java.awt.Component) m_TaskMonitor, BorderLayout.EAST);
         add(p2, BorderLayout.SOUTH);
       }
     } else {
@@ -203,22 +204,12 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
           JPanel p2 = new JPanel();
           p2.setLayout(new BorderLayout());
           p2.add(m_StatusLab, BorderLayout.CENTER);
-          p2.add((Component) m_TaskMonitor, BorderLayout.EAST);
+          p2.add((java.awt.Component) m_TaskMonitor, BorderLayout.EAST);
           add(p2, BorderLayout.SOUTH);
         }
       }
     }
     addPopup();
-  }
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it terminates the frame that it may have
-   * created.
-   */
-  public void terminate() {
-
-    if (m_Frame != null) {
-      m_Frame.dispose();
-    }
   }
 
   /**
@@ -369,12 +360,12 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
   public static void main(String[] args) {
 
     try {
-      final JFrame jf = new JFrame("Log Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame("Log Panel");
       jf.getContentPane().setLayout(new BorderLayout());
       final LogPanel lp = new LogPanel();
       jf.getContentPane().add(lp, BorderLayout.CENTER);
-      jf.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent e) {
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }

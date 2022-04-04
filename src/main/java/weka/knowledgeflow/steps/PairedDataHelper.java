@@ -348,9 +348,9 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    */
   public interface PairedProcessor<P> {
     P processPrimary(Integer setNum, Integer maxSetNum, Data data,
-                     PairedDataHelper<P> helper) throws WekaException;
+      PairedDataHelper<P> helper) throws WekaException;
 
     void processSecondary(Integer setNum, Integer maxSetNum, Data data,
-                          PairedDataHelper<P> helper) throws WekaException;
+      PairedDataHelper<P> helper) throws WekaException;
   }
 }

@@ -21,76 +21,6 @@
 
 package weka.gui.explorer;
 
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
-import weka.clusterers.SimpleKMeans;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Defaults;
-import weka.core.Drawable;
-import weka.core.Environment;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.PluginManager;
-import weka.core.SerializationHelper;
-import weka.core.SerializedObject;
-import weka.core.Settings;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.WekaPackageClassLoaderManager;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.AbstractPerspective;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.ListSelectorDialog;
-import weka.gui.Logger;
-import weka.gui.PerspectiveInfo;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.WekaFileChooser;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.hierarchyvisualizer.HierarchyVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -120,8 +50,77 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
+
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.Clusterer;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
+import weka.core.Drawable;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
+import weka.core.SerializedObject;
+import weka.core.Settings;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AbstractPerspective;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.ListSelectorDialog;
+import weka.gui.Logger;
+import weka.gui.PerspectiveInfo;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.hierarchyvisualizer.HierarchyVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 /**
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -132,7 +131,7 @@ import java.util.zip.GZIPOutputStream;
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 15301 $
+ * @version $Revision: 13739 $
  */
 @PerspectiveInfo(ID = "weka.gui.explorer.clustererpanel", title = "Cluster",
   toolTipText = "Cluster instances",
@@ -256,7 +255,7 @@ public class ClustererPanel extends AbstractPerspective implements
     MODEL_FILE_EXTENSION, "Model object files");
 
   /** The file chooser for selecting model files */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** Whether startup settings have been applied yet or not */
@@ -505,13 +504,14 @@ public class ClustererPanel extends AbstractPerspective implements
     p2.add(m_StorePredictionsBut);
 
     // Any launcher plugins
-    List<String> pluginsVector =
-      PluginManager.getPluginNamesOfTypeList(ClustererPanelLaunchHandlerPlugin.class.getName());
+    Vector<String> pluginsVector =
+      GenericObjectEditor.getClassnames(ClustererPanelLaunchHandlerPlugin.class
+        .getName());
     JButton pluginBut = null;
     if (pluginsVector.size() == 1) {
       try {
         // display a single button
-        String className = pluginsVector.get(0);
+        String className = pluginsVector.elementAt(0);
         final ClustererPanelLaunchHandlerPlugin plugin =
           (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
             .objectForName(className);
@@ -535,7 +535,7 @@ public class ClustererPanel extends AbstractPerspective implements
       final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
 
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (pluginsVector.get(i));
+        String className = (pluginsVector.elementAt(i));
         try {
           final ClustererPanelLaunchHandlerPlugin plugin =
             (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
@@ -665,6 +665,9 @@ public class ClustererPanel extends AbstractPerspective implements
   protected void updateRadioLinks() {
 
     m_SetTestBut.setEnabled(m_TestSplitBut.isSelected());
+    if ((m_SetTestFrame != null) && (!m_TestSplitBut.isSelected())) {
+      m_SetTestFrame.setVisible(false);
+    }
     m_PercentText.setEnabled(m_PercentBut.isSelected());
     m_PercentLab.setEnabled(m_PercentBut.isSelected());
     m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
@@ -730,39 +733,25 @@ public class ClustererPanel extends AbstractPerspective implements
       sp.setReadIncrementally(false);
       m_Summary = sp.getSummary();
       if (m_TestInstances != null) {
-        sp.setInstances(m_TestInstances, false);
+        sp.setInstances(m_TestInstances);
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent e) {
           m_TestInstances = sp.getInstances();
           m_TestInstances.setClassIndex(-1); // make sure that no class
-          // attribute is set!
+                                             // attribute is set!
         }
       });
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
-      m_SetTestFrame = Utils.getWekaJFrame("Test Instances", this);
+      m_SetTestFrame = new JFrame("Test Instances");
       sp.setParentFrame(m_SetTestFrame); // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
-      m_SetTestFrame.addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent e) {
-          m_SetTestFrame.dispose();
-        }
-      });
-      m_SetTestFrame.addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosed(java.awt.event.WindowEvent e) {
-          m_SetTestFrame = null;
-        }
-      });
       m_SetTestFrame.pack();
-      m_SetTestFrame.setSize(400, 200);
-      m_SetTestFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
-      m_SetTestFrame.setVisible(true);
     }
+    m_SetTestFrame.setVisible(true);
   }
 
   /**
@@ -1182,8 +1171,9 @@ public class ClustererPanel extends AbstractPerspective implements
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String graphString, String treeName) {
-    final JFrame jf =
-      Utils.getWekaJFrame("Weka Cluster Tree Visualizer: " + treeName, this);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
+    jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     if (graphString.contains("digraph")) {
       TreeVisualizer tv =
@@ -1195,9 +1185,6 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
-      jf.pack();
-      jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
       tv.fitToScreen();
     } else if (graphString.startsWith("Newick:")) {
@@ -1210,9 +1197,6 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
-      jf.pack();
-      jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
       tv.fitToScreen();
     }
@@ -1226,8 +1210,9 @@ public class ClustererPanel extends AbstractPerspective implements
   protected void visualizeClusterAssignments(VisualizePanel sp) {
     if (sp != null) {
       String plotName = sp.getName();
-      final JFrame jf =
-        Utils.getWekaJFrame("Weka Clusterer Visualize: " + plotName, this);
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Clusterer Visualize: " + plotName);
+      jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -1236,10 +1221,6 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
-
-      jf.pack();
-      jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
       jf.setVisible(true);
     }
@@ -1441,10 +1422,10 @@ public class ClustererPanel extends AbstractPerspective implements
     // trees
     if (grph != null) {
       // trees
-      List<String> pluginsVector =
-        PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName());
+      Vector<String> pluginsVector =
+        GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (pluginsVector.get(i));
+        String className = (pluginsVector.elementAt(i));
         try {
           TreeVisualizePlugin plugin =
             (TreeVisualizePlugin) WekaPackageClassLoaderManager
@@ -1496,7 +1477,7 @@ public class ClustererPanel extends AbstractPerspective implements
   }
 
   private void setIgnoreColumns() {
-    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_ignoreKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_ignoreKeyList);
 
     // Open the dialog
     int result = jd.showDialog();
@@ -1534,9 +1515,7 @@ public class ClustererPanel extends AbstractPerspective implements
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
         objectOutputStream.writeObject(clusterer);
         if (trainHeader != null) {
-          Instances tmpSave = trainHeader.stringFreeStructure();
-          tmpSave.setClassIndex(-1);
-          objectOutputStream.writeObject(tmpSave);
+          objectOutputStream.writeObject(trainHeader);
         }
         if (ignoredAtts != null) {
           objectOutputStream.writeObject(ignoredAtts);
@@ -2089,8 +2068,8 @@ public class ClustererPanel extends AbstractPerspective implements
   public static void main(String[] args) {
 
     try {
-      final JFrame jf =
-        new JFrame("Weka Explorer: Cluster");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Cluster");
       jf.getContentPane().setLayout(new BorderLayout());
       final ClustererPanel sp = new ClustererPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

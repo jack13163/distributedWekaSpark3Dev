@@ -52,7 +52,7 @@ public class TextSaverBeanInfo extends SimpleBeanInfo {
    */
   @Override
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(TextSaver.class,
+    return new BeanDescriptor(weka.gui.beans.TextSaver.class,
         TextSaverCustomizer.class);
   }
 }

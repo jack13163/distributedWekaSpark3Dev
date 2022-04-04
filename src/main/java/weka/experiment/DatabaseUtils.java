@@ -574,7 +574,7 @@ public class DatabaseUtils implements Serializable, RevisionHandler {
    * @throws Exception if a problem occurs
    */
   protected void connectViaPackageLoadedDriver() throws Exception {
-    Properties info = new Properties();
+    java.util.Properties info = new java.util.Properties();
     if (m_userName.length() > 0) {
       info.put("user", m_userName);
     }
@@ -623,7 +623,7 @@ public class DatabaseUtils implements Serializable, RevisionHandler {
       if (m_userName.equals("")) {
         try {
           m_Connection = DriverManager.getConnection(m_DatabaseURL);
-        } catch (SQLException e) {
+        } catch (java.sql.SQLException e) {
 
           // Try loading the drivers
           for (int i = 0; i < DRIVERS.size(); i++) {
@@ -640,7 +640,7 @@ public class DatabaseUtils implements Serializable, RevisionHandler {
         try {
           m_Connection =
             DriverManager.getConnection(m_DatabaseURL, m_userName, m_password);
-        } catch (SQLException e) {
+        } catch (java.sql.SQLException e) {
 
           // Try loading the drivers
           for (int i = 0; i < DRIVERS.size(); i++) {

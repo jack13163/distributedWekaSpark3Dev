@@ -69,7 +69,7 @@ public class InteractiveTablePanel extends JPanel {
   public void initComponent() {
     m_tableModel = new InteractiveTableModel(m_columnNames);
     m_tableModel
-      .addTableModelListener(new InteractiveTableModelListener());
+      .addTableModelListener(new InteractiveTablePanel.InteractiveTableModelListener());
     m_table = new JTable();
     m_table.setModel(m_tableModel);
     m_table.setSurrendersFocusOnKeystroke(true);
@@ -78,7 +78,7 @@ public class InteractiveTablePanel extends JPanel {
     }
 
     InteractiveTableModel model = (InteractiveTableModel) m_table.getModel();
-    m_scroller = new JScrollPane(m_table);
+    m_scroller = new javax.swing.JScrollPane(m_table);
     m_table.setPreferredScrollableViewportSize(new java.awt.Dimension(500, 80));
     TableColumn hidden =
       m_table.getColumnModel().getColumn(model.m_hidden_index);

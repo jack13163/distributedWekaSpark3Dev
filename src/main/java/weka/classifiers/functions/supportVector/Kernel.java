@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Copyable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -36,7 +37,6 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.gui.ProgrammaticProperty;
 
 /**
  * Abstract kernel. Kernels implementing this class must respect Mercer's
@@ -44,10 +44,11 @@ import weka.gui.ProgrammaticProperty;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14516 $
+ * @version $Revision: 11013 $
  */
 public abstract class Kernel implements Serializable, OptionHandler,
-  CapabilitiesHandler, RevisionHandler {
+  CapabilitiesHandler, CapabilitiesIgnorer,
+  RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6102771099905817064L;
@@ -58,22 +59,44 @@ public abstract class Kernel implements Serializable, OptionHandler,
   /** enables debugging output */
   protected boolean m_Debug = false;
 
-  /** This value is now ignored. Checks are always turned off as they are the responsibility
-   * of the class using the kernel. We are keeping this to allow deserialization. */
+  /** Turns off all checks */
   protected boolean m_ChecksTurnedOff = false;
 
-  /** This value is now ignored. Checks are always turned off as they are the responsibility
-   * of the class using the kernel. We are keeping this to allow deserialization. */
+  /** Whether capabilities should not be checked */
   protected boolean m_DoNotCheckCapabilities = false;
 
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, associator capabilities are not checked before associator is built"
+      + " (Use with caution to reduce runtime).";
+  }
 
   /**
-   * These methods remain for backwards compatibility. The first one does nothing, the second one
-   * always returns true. Checking capabilities is the responsibility of the class using the kernel.
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
    */
-  @ProgrammaticProperty
-  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) { }
-  public boolean getDoNotCheckCapabilities() { return true; }
+  @Override
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  @Override
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
 
   /**
    * Returns a string describing the kernel
@@ -125,11 +148,14 @@ public abstract class Kernel implements Serializable, OptionHandler,
    */
   @Override
   public Enumeration<Option> listOptions() {
-    Vector<Option> result = Option.listOptionsForClassHierarchy(this.getClass(), Kernel.class);
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
       "\tEnables debugging output (if available) to be printed.\n"
         + "\t(default: off)", "output-debug-info", 0, "-output-debug-info"));
+
+    result.addElement(new Option("\tTurns off all checks - use with caution!\n"
+      + "\t(default: checks on)", "no-checks", 0, "-no-checks"));
 
     return result.elements();
   }
@@ -143,11 +169,8 @@ public abstract class Kernel implements Serializable, OptionHandler,
    */
   @Override
   public void setOptions(String[] options) throws Exception {
-    Option.setOptionsForHierarchy(options, this, Kernel.class);
-
     setDebug(Utils.getFlag("output-debug-info", options));
 
-    // This one does nothing but remains for backwards compatibility
     setChecksTurnedOff(Utils.getFlag("no-checks", options));
 
     Utils.checkForRemainingOptions(options);
@@ -161,12 +184,13 @@ public abstract class Kernel implements Serializable, OptionHandler,
   @Override
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
-    for (String s : Option.getOptionsForHierarchy(this, Kernel.class)) {
-      result.add(s);
-    }
 
     if (getDebug()) {
       result.add("-output-debug-info");
+    }
+
+    if (getChecksTurnedOff()) {
+      result.add("-no-checks");
     }
 
     return result.toArray(new String[result.size()]);
@@ -202,13 +226,32 @@ public abstract class Kernel implements Serializable, OptionHandler,
   }
 
   /**
-   * These methods remain for backwards compatibility. The first one does nothing, the second one
-   * always returns true. Checking capabilities is the responsibility of the class using the kernel.
+   * Disables or enables the checks (which could be time-consuming). Use with
+   * caution!
+   * 
+   * @param value if true turns off all checks
    */
-  @ProgrammaticProperty
-  public void setChecksTurnedOff(boolean value) { }
+  public void setChecksTurnedOff(boolean value) {
+    m_ChecksTurnedOff = value;
+  }
+
+  /**
+   * Returns whether the checks are turned off or not.
+   * 
+   * @return true if the checks are turned off
+   */
   public boolean getChecksTurnedOff() {
-    return true;
+    return m_ChecksTurnedOff;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String checksTurnedOffTipText() {
+    return "Turns time-consuming checks off - use with caution.";
   }
 
   /**
@@ -242,7 +285,7 @@ public abstract class Kernel implements Serializable, OptionHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14516 $");
+    return RevisionUtils.extract("$Revision: 11013 $");
   }
 
   /**
@@ -252,6 +295,10 @@ public abstract class Kernel implements Serializable, OptionHandler,
    * @throws Exception if something goes wrong
    */
   public void buildKernel(Instances data) throws Exception {
+    // does kernel handle the data?
+    if (!getChecksTurnedOff()) {
+      getCapabilities().testWithFail(data);
+    }
 
     initVars(data);
   }

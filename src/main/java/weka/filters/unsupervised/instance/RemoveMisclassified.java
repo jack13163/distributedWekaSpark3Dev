@@ -26,7 +26,13 @@ import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -80,10 +86,10 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5469157004717663171L;
@@ -169,7 +175,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
 
     Instance inst;
     Instances buildSet = new Instances(data);
-    Instances temp;
+    Instances temp = new Instances(data, data.numInstances());
     Instances inverseSet = new Instances(data, data.numInstances());
     int count = 0;
     double ans;
@@ -770,7 +776,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

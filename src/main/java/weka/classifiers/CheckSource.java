@@ -64,7 +64,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision: 10141 $
- * @see     Sourcable
+ * @see     weka.classifiers.Sourcable
  */
 public class CheckSource
   implements OptionHandler, RevisionHandler {

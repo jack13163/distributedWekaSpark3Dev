@@ -68,7 +68,7 @@ public interface MainMenuExtension {
    * 
    * @param frame	the frame object to embed components, etc.
    * @see		#getActionListener(JFrame)
-   * @see		JFrame
+   * @see		javax.swing.JFrame
    * @see		javax.swing.JInternalFrame
    */
   public void fillFrame(Component frame);

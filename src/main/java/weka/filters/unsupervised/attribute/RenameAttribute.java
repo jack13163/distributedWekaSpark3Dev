@@ -26,12 +26,19 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
- * <!-- globalinfo-start --> This filter is used for renaming attributes.<br/>
+ * <!-- globalinfo-start --> This filter is used for renaming attribute names.<br/>
  * Regular expressions can be used in the matching and replacing.<br/>
  * See Javadoc of java.util.regex.Pattern class for more information:<br/>
  * http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html
@@ -85,9 +92,9 @@ import weka.filters.SimpleStreamFilter;
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 10215 $
  */
-public class RenameAttribute extends SimpleStreamFilter implements WeightedInstancesHandler, WeightedAttributesHandler {
+public class RenameAttribute extends SimpleStreamFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = 4216491776378279596L;
@@ -112,8 +119,8 @@ public class RenameAttribute extends SimpleStreamFilter implements WeightedInsta
    */
   @Override
   public String globalInfo() {
-    return "This filter is used for renaming attributes.\n\n"
-      + "Regular expressions can be used in the matching and replacing.\n\n"
+    return "This filter is used for renaming attribute names.\n"
+      + "Regular expressions can be used in the matching and replacing.\n"
       + "See Javadoc of java.util.regex.Pattern class for more information:\n"
       + "http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html";
   }
@@ -523,7 +530,7 @@ public class RenameAttribute extends SimpleStreamFilter implements WeightedInsta
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**

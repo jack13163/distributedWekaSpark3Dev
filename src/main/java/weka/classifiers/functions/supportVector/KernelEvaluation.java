@@ -35,7 +35,7 @@ import weka.core.Utils;
  * Class for evaluating Kernels.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14516 $
+ * @version $Revision: 10169 $
  */
 public class KernelEvaluation implements RevisionHandler {
 
@@ -231,7 +231,6 @@ public class KernelEvaluation implements RevisionHandler {
 
     // build kernel
     startTime = System.currentTimeMillis();
-    kernel.getCapabilities().testWithFail(data);
     kernel.buildKernel(data);
     endTime = System.currentTimeMillis();
     m_Result.append("\n=== Model ===\n\n");
@@ -360,7 +359,7 @@ public class KernelEvaluation implements RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14516 $");
+    return RevisionUtils.extract("$Revision: 10169 $");
   }
 
   /**

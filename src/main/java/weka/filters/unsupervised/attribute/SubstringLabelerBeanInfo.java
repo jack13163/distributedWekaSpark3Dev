@@ -36,7 +36,7 @@ public class SubstringLabelerBeanInfo extends SimpleBeanInfo {
   @Override
   public BeanDescriptor getBeanDescriptor() {
     return new BeanDescriptor(
-      weka.filters.unsupervised.attribute.SubstringLabeler.class,
+      SubstringLabeler.class,
       SubstringLabelerFilterCustomizer.class);
   }
 }

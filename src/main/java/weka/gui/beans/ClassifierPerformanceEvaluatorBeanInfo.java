@@ -82,7 +82,7 @@ public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
   @Override
   public BeanDescriptor getBeanDescriptor() {
     return new BeanDescriptor(
-        ClassifierPerformanceEvaluator.class,
+        weka.gui.beans.ClassifierPerformanceEvaluator.class,
         ClassifierPerformanceEvaluatorCustomizer.class);
   }
 }

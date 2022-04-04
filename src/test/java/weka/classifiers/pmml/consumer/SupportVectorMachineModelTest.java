@@ -46,7 +46,7 @@ public class SupportVectorMachineModelTest extends AbstractPMMLClassifierTest {
 
   public static Test suite() {
     return new TestSuite(
-      SupportVectorMachineModelTest.class);
+      weka.classifiers.pmml.consumer.SupportVectorMachineModelTest.class);
   }
 
   public static void main(String[] args) {

@@ -52,7 +52,7 @@ import weka.experiment.PropertyNode;
  * properties that any of it's property values may have.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14494 $
+ * @version $Revision: 10216 $
  */
 public class PropertySelectorDialog extends JDialog {
 
@@ -137,7 +137,6 @@ public class PropertySelectorDialog extends JDialog {
       TreeSelectionModel.SINGLE_TREE_SELECTION);
     c.add(new JScrollPane(m_Tree), BorderLayout.CENTER);
     pack();
-    setLocationRelativeTo(parentFrame);
   }
 
   /**

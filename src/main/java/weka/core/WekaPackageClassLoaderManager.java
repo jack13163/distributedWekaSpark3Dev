@@ -101,7 +101,7 @@ public class WekaPackageClassLoaderManager {
         getClass().getClassLoader().getResourceAsStream("core.jar");
       InputStream arpackAllInputStream =
         getClass().getClassLoader().getResourceAsStream(
-          "arpack_combined.jar");
+          "arpack_combined_all.jar");
       InputStream mtjInputStream =
         getClass().getClassLoader().getResourceAsStream("mtj.jar");
       if (mtjCoreInputStream != null && arpackAllInputStream != null
@@ -647,8 +647,6 @@ public class WekaPackageClassLoaderManager {
       result = true;
     } catch (ClassNotFoundException e) {
       // ignore - means class is not visible/available here
-    } catch (NoClassDefFoundError e2) {
-      // ignore - means class is not visible/available here
     }
 
     return result;
@@ -860,7 +858,7 @@ public class WekaPackageClassLoaderManager {
   }
 
   private static ClassLoader getWekaLevelClassloader() {
-    return Version.class.getClassLoader();
+    return weka.core.Version.class.getClassLoader();
   }
 
   /**

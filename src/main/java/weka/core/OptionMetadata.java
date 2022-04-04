@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * command line option details
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 15237 $
+ * @version $Revision: 11711 $
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -50,14 +50,6 @@ public @interface OptionMetadata {
    * @return the description text of this parameter
    */
   String description();
-
-  /**
-   * Optional category for the parameter. GUI dialog can use this to group
-   * certain options for display in child dialogs
-   *
-   * @return the category for this option
-   */
-  String category() default "";
 
   /**
    * The order (low to high), relative to other parameters, that this property

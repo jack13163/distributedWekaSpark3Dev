@@ -48,7 +48,7 @@ import weka.gui.PropertyDialog;
  * This class is deprecated - use the version in weka.gui instead.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14496 $
+ * @version $Revision: 12232 $
  */
 @Deprecated
 public class FileEnvironmentField extends EnvironmentField {
@@ -207,18 +207,15 @@ public class FileEnvironmentField extends EnvironmentField {
 
   private void showFileEditor() {
     if (m_fileEditorDialog == null) {
+      int x = getLocationOnScreen().x;
+      int y = getLocationOnScreen().y;
       if (PropertyDialog.getParentDialog(this) != null) {
         m_fileEditorDialog = new PropertyDialog(
-            PropertyDialog.getParentDialog(this), m_fileEditor, -1, -1);
+            PropertyDialog.getParentDialog(this), m_fileEditor, x, y);
       } else {
         m_fileEditorDialog = new PropertyDialog(
-            PropertyDialog.getParentFrame(this), m_fileEditor, -1, -1);
+            PropertyDialog.getParentFrame(this), m_fileEditor, x, y);
       }
-    }
-    if (PropertyDialog.getParentDialog(this) != null) {
-      m_fileEditorDialog.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
-    } else {
-      m_fileEditorDialog.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
     }
     m_fileEditorDialog.setVisible(true);
   }

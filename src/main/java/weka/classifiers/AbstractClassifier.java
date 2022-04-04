@@ -47,7 +47,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14258 $
+ * @version $Revision: 12701 $
  */
 public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   Cloneable, Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler,
@@ -298,7 +298,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * Parses a given list of options. Valid options are:
    * <p>
    *
-   * -output-debug-info <br>
+   * -D <br>
    * If set, classifier is run in debug mode and may output additional info to
    * the console.
    * <p>
@@ -308,7 +308,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * (use with caution).
    * <p>
    *
-   * -num-decimal-places <br>
+   * -num-decimal-laces <br>
    * The number of decimal places for the output of numbers in the model.
    * <p>
    *
@@ -518,7 +518,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14258 $");
+    return RevisionUtils.extract("$Revision: 12701 $");
   }
 
   /**

@@ -90,7 +90,7 @@ public class ClassifierCustomizer extends JPanel implements BeanCustomizer,
   private Window m_parentWindow;
 
   /** Copy of the current classifier in case cancel is selected */
-  protected Classifier m_backup;
+  protected weka.classifiers.Classifier m_backup;
 
   private Environment m_env = Environment.getSystemWide();
 
@@ -292,7 +292,7 @@ public class ClassifierCustomizer extends JPanel implements BeanCustomizer,
     m_dsClassifier = (weka.gui.beans.Classifier) object;
     // System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
     try {
-      m_backup = (Classifier) GenericObjectEditor
+      m_backup = (weka.classifiers.Classifier) GenericObjectEditor
           .makeCopy(m_dsClassifier.getClassifierTemplate());
     } catch (Exception ex) {
       // ignore

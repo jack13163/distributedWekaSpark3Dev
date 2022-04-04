@@ -878,7 +878,7 @@ public class JSONFlowUtils {
         new weka.knowledgeflow.steps.Loader();
       weka.core.converters.ArffLoader arffL =
         new weka.core.converters.ArffLoader();
-      arffL.setFile(new File("${user.home}/datasets/UCI/iris.arff"));
+      arffL.setFile(new java.io.File("${user.home}/datasets/UCI/iris.arff"));
       step.setLoader(arffL);
 
       StepManagerImpl manager = new StepManagerImpl(step);

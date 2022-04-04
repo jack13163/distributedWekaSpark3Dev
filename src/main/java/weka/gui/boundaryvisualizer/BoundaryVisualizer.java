@@ -21,34 +21,6 @@
 
 package weka.gui.boundaryvisualizer;
 
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
-import weka.gui.WekaFileChooser;
-import weka.gui.visualize.ClassPanel;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -72,6 +44,34 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
+import weka.gui.visualize.ClassPanel;
+
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
  * boundaries in two dimensions. A supplied classifier is first trained on
@@ -93,7 +93,7 @@ import java.util.Vector;
  * Working Paper 02/03, Department of Computer Science, University of Waikato.
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 15104 $
+ * @version $Revision: 10222 $
  * @since 1.0
  * @see JPanel
  */
@@ -107,7 +107,7 @@ public class BoundaryVisualizer extends JPanel implements
    * Inner class to handle rendering the axis
    * 
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 15104 $
+   * @version $Revision: 10222 $
    * @since 1.0
    * @see JPanel
    */
@@ -308,7 +308,7 @@ public class BoundaryVisualizer extends JPanel implements
   protected PropertyPanel m_ClassifierPanel = new PropertyPanel(
     m_classifierEditor);
   /** The file chooser for selecting arff files */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
   protected ExtensionFileFilter m_arffFileFilter = new ExtensionFileFilter(
     Instances.FILE_EXTENSION, "Arff data files");
@@ -462,7 +462,7 @@ public class BoundaryVisualizer extends JPanel implements
     JPanel classifierHolder = new JPanel();
     classifierHolder.setBorder(BorderFactory.createTitledBorder("Classifier"));
     classifierHolder.setLayout(new BorderLayout());
-    m_classifierEditor.setClassType(Classifier.class);
+    m_classifierEditor.setClassType(weka.classifiers.Classifier.class);
 
     m_classifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
       @Override

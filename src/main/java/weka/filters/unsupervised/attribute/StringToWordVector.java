@@ -31,10 +31,23 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DictionaryBuilder;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.SparseInstance;
 import weka.core.stopwords.StopwordsHandler;
 import weka.core.stopwords.Null;
+import weka.core.Tag;
+import weka.core.Utils;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.Tokenizer;
@@ -44,10 +57,7 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  <!-- globalinfo-start -->
- * Converts string attributes into a set of numeric attributes representing word occurrence
- * information from the text contained in the strings. The dictionary is determined from the first batch of data
- * filtered (typically training data). Note that this filter is not strictly unsupervised when a class attribute is set
- * because it creates a separate dictionary for each class and then merges them.
+ * Converts String attributes into a set of attributes representing word occurrence (depending on the tokenizer) information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
  * <br><br>
  <!-- globalinfo-end -->
  *
@@ -130,10 +140,10 @@ import weka.filters.UnsupervisedFilter;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12074 $
  */
 public class StringToWordVector extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedInstancesHandler {
+  OptionHandler {
 
   /** Used to build and manage the dictionary + vectorization */
   protected DictionaryBuilder m_dictionaryBuilder = new DictionaryBuilder();
@@ -767,10 +777,10 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Converts string attributes into a set of numeric attributes representing word occurrence" +
-            " information from the text contained in the strings. The dictionary is determined from the first batch of data" +
-            " filtered (typically training data). Note that this filter is not strictly unsupervised when a class attribute is set" +
-            " because it creates a separate dictionary for each class and then merges them.";
+    return "Converts String attributes into a set of attributes representing "
+      + "word occurrence (depending on the tokenizer) information from the "
+      + "text contained in the strings. The set of words (attributes) is "
+      + "determined by the first batch filtered (typically training data).";
   }
 
   /**
@@ -1020,8 +1030,9 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String TFTransformTipText() {
-    return "Sets whether if the word frequencies should be transformed into"
-      + "  log(1+fij) where fij is the frequency of word i in document (instance) j.";
+    return "Sets whether if the word frequencies should be transformed into:\n "
+      + "   log(1+fij) \n"
+      + "       where fij is the frequency of word i in document (instance) j.";
   }
 
   /**
@@ -1289,7 +1300,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12074 $");
   }
 
   /**

@@ -34,7 +34,7 @@ import weka.core.Utils;
  * Class for handling a distribution of class values.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15122 $
+ * @version $Revision: 10531 $
  */
 public class Distribution implements Cloneable, Serializable, RevisionHandler {
 
@@ -42,13 +42,13 @@ public class Distribution implements Cloneable, Serializable, RevisionHandler {
   private static final long serialVersionUID = 8526859638230806576L;
 
   /** Weight of instances per class per bag. */
-  protected double m_perClassPerBag[][];
+  protected final double m_perClassPerBag[][];
 
   /** Weight of instances per bag. */
-  protected double m_perBag[];
+  protected final double m_perBag[];
 
   /** Weight of instances per class. */
-  protected double m_perClass[];
+  protected final double m_perClass[];
 
   /** Total weight of instances. */
   protected double totaL;
@@ -763,6 +763,6 @@ public class Distribution implements Cloneable, Serializable, RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15122 $");
+    return RevisionUtils.extract("$Revision: 10531 $");
   }
 }

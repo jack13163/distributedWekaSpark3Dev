@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * A flat map function to convert an {@code Object[]} array to {@code Instance}
  * s.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -74,7 +74,7 @@ public class RowToInstanceFlatMapFunction implements
   }
 
   protected static class RowToInstanceIterable implements
-    Iterable<weka.core.Instance>, Iterator<weka.core.Instance> {
+    Iterable<Instance>, Iterator<Instance> {
 
     protected Iterator<Row> m_rowIterator;
 
@@ -124,7 +124,7 @@ public class RowToInstanceFlatMapFunction implements
     }
 
     @Override
-    public weka.core.Instance next() {
+    public Instance next() {
       m_reUsableRow = new Object[m_header.numAttributes()];
 
       Row next = m_rowIterator.next();
@@ -137,7 +137,7 @@ public class RowToInstanceFlatMapFunction implements
         m_reUsableRow[i] = next.get(i);
       }
 
-      weka.core.Instance inst = null;
+      Instance inst = null;
       try {
         inst =
           m_rowHelper.makeInstanceFromObjectRow(m_header, false, m_reUsableRow,

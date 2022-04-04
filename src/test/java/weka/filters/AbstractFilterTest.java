@@ -420,7 +420,7 @@ public abstract class AbstractFilterTest
       }
       m_Filter.batchFinished();
       result = m_Filter.getOutputFormat();
-      Instance processed;
+      weka.core.Instance processed;
       while ((processed = m_Filter.output()) != null) {
         result.add(processed);
       }

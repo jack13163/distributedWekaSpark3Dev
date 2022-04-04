@@ -26,7 +26,6 @@ import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Memory;
 import weka.core.Settings;
-import weka.core.WekaPackageManager;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
 import weka.gui.explorer.Explorer;
@@ -39,8 +38,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * One app to rule them all, one app to find them, one app to bring them all and
- * with perspectives bind them.
+ * One app to rule them all, one app to find them, one app to
+ * bring them all and with perspectives bind them.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
@@ -107,8 +106,8 @@ public class WorkbenchApp extends AbstractGUIApplication {
   }
 
   /**
-   * Get the main perspective of this application. In this case the Preprocess
-   * panel is the main perspective.
+   * Get the main perspective of this application. In this case the
+   * Preprocess panel is the main perspective.
    *
    * @return the main perspective of this application
    */
@@ -163,26 +162,22 @@ public class WorkbenchApp extends AbstractGUIApplication {
    * @param args command line arguments for the Workbench
    */
   public static void main(String[] args) {
-
-    WekaPackageManager.loadPackages(false, false, true);
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
-
     try {
       LookAndFeel.setLookAndFeel(WorkbenchDefaults.APP_ID,
         WorkbenchDefaults.APP_ID + ".lookAndFeel", WorkbenchDefaults.LAF);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
+    weka.gui.GenericObjectEditor.determineClasses();
 
     try {
       if (System.getProperty("os.name").contains("Mac")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
       m_workbench = new WorkbenchApp();
-      final JFrame jf =
-        new JFrame("Weka " + m_workbench.getApplicationName());
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka " + m_workbench.getApplicationName());
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
       Image icon =
         Toolkit.getDefaultToolkit().getImage(

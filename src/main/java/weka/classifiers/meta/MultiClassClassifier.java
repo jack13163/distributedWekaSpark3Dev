@@ -28,18 +28,26 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
 /**
  <!-- globalinfo-start -->
- * A metaclassifier for handling multi-class datasets with 2-class classifiers.
- * This classifier is also capable of applying error correcting output codes for increased accuracy.
- * If the base classifier cannot handle instance weights, and the instance weights are not uniform,
- * the data will be resampled with replacement based on the weights before being passed to the base classifier.
+ * A metaclassifier for handling multi-class datasets with 2-class classifiers. This classifier is also capable of applying error correcting output codes for increased accuracy.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -90,11 +98,11 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 15475 $
+ * @version $Revision: 11889 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3879602011542849141L;
@@ -180,7 +188,7 @@ public class MultiClassClassifier
      * First dimension is number of codes.
      * Second dimension is number of classes.
      */
-    protected boolean [][] m_Codebits;
+    protected boolean [][]m_Codebits;
 
     /** 
      * Returns the number of codes. 
@@ -231,7 +239,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 15475 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -263,7 +271,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 15475 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -345,7 +353,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 15475 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -390,7 +398,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 15475 $");
+      return RevisionUtils.extract("$Revision: 11889 $");
     }
   }
 
@@ -433,12 +441,6 @@ public class MultiClassClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
-
-    if (!insts.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-      Random r = (insts.numInstances() > 0) ? insts.getRandomNumberGenerator(getSeed()) : new Random(getSeed());
-      insts = insts.resampleWithWeights(r);
-    }
-
     m_ZeroR = new ZeroR();
     m_ZeroR.buildClassifier(insts);
 
@@ -838,9 +840,7 @@ public class MultiClassClassifier
 
     return "A metaclassifier for handling multi-class datasets with 2-class "
       + "classifiers. This classifier is also capable of "
-      + "applying error correcting output codes for increased accuracy. "
-      + "If the base classifier cannot handle instance weights, and the instance weights are not uniform, "
-      + "the data will be resampled with replacement based on the weights before being passed to the base classifier.";
+      + "applying error correcting output codes for increased accuracy.";
   }
 
   /**
@@ -1038,7 +1038,7 @@ public class MultiClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15475 $");
+    return RevisionUtils.extract("$Revision: 11889 $");
   }
 
   /**

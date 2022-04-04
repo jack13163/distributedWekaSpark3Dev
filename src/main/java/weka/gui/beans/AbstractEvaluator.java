@@ -152,7 +152,7 @@ public abstract class AbstractEvaluator
    *
    * @param logger a <code>weka.gui.Logger</code> value
    */
-  public void setLog(Logger logger) {
+  public void setLog(weka.gui.Logger logger) {
     m_logger = logger;
   }
 

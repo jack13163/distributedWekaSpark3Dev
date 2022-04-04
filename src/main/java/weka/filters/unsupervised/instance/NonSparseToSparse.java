@@ -25,8 +25,16 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -38,10 +46,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12477 $
  */
 public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 4694489111366063852L;
@@ -216,7 +224,7 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12477 $");
   }
 
   /**

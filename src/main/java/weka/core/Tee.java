@@ -21,50 +21,48 @@
 
 package weka.core;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Vector;
 
 /**
- * This class pipelines print/println's to several PrintStreams. Useful for
- * redirecting System.out and System.err to files etc.<br/>
- * E.g., for redirecting stderr/stdout to files with timestamps and:<br/>
- * <pre>
- *    import java.io.*;
- *    import weka.core.Tee;
- *
- *    ...
- *    // stdout
- *    Tee teeOut = new Tee(System.out);
- *    teeOut.add(new PrintStream(new FileOutputStream("out.txt")), true);
- *    System.setOut(teeOut);
- *
- *    // stderr
- *    Tee teeErr = new Tee(System.err);
- *    teeErr.add(new PrintStream(new FileOutputStream("err.txt")), true);
- *    System.setOut(teeErr);
- *    ...
- * </pre>
- *
- * @author   FracPete (fracpete at waikato dot ac dot nz)
- * @version  $Revision: 15286 $
- */
+* This class pipelines print/println's to several PrintStreams. Useful for
+* redirecting System.out and System.err to files etc.<br/>
+* E.g., for redirecting stderr/stdout to files with timestamps and:<br/>
+* <pre>
+*    import java.io.*;
+*    import weka.core.Tee;
+*
+*    ...
+*    // stdout
+*    Tee teeOut = new Tee(System.out);
+*    teeOut.add(new PrintStream(new FileOutputStream("out.txt")), true);
+*    System.setOut(teeOut);
+*    
+*    // stderr
+*    Tee teeErr = new Tee(System.err);
+*    teeErr.add(new PrintStream(new FileOutputStream("err.txt")), true);
+*    System.setOut(teeErr);
+*    ...
+* </pre>
+*
+* @author   FracPete (fracpete at waikato dot ac dot nz)
+* @version  $Revision: 11247 $
+*/
 
 public class Tee
   extends PrintStream
   implements RevisionHandler {
-
+  
   /** the different PrintStreams. */
   protected Vector<PrintStream> m_Streams = new Vector<PrintStream>();
-
+  
   /** whether to add timestamps or not. */
   protected Vector<Boolean> m_Timestamps = new Vector<Boolean>();
-
+  
   /** whether to add a prefix or not. */
   protected Vector<String> m_Prefixes = new Vector<String>();
-
+  
   /** the default printstream. */
   protected PrintStream m_Default = null;
 
@@ -78,7 +76,7 @@ public class Tee
   /**
    * initializes the object with the given default printstream, e.g.,
    * System.out.
-   *
+   * 
    * @param def     the default printstream, remains also after calling clear()
    */
   public Tee(PrintStream def) {
@@ -91,21 +89,21 @@ public class Tee
   /**
    * removes all streams and places the default printstream, if any, again in
    * the list.
-   *
+   * 
    * @see #getDefault()
    */
   public void clear() {
     m_Streams.clear();
     m_Timestamps.clear();
     m_Prefixes.clear();
-
+    
     if (getDefault() != null)
       add(getDefault());
   }
 
   /**
    * returns the default printstrean, can be NULL.
-   *
+   * 
    * @return the default printstream
    * @see #m_Default
    */
@@ -116,7 +114,7 @@ public class Tee
   /**
    * adds the given PrintStream to the list of streams, with NO timestamp and
    * NO prefix.
-   *
+   * 
    * @param p       the printstream to add
    */
   public void add(PrintStream p) {
@@ -125,7 +123,7 @@ public class Tee
 
   /**
    * adds the given PrintStream to the list of streams, with NO prefix.
-   *
+   * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
    */
@@ -135,7 +133,7 @@ public class Tee
 
   /**
    * adds the given PrintStream to the list of streams.
-   *
+   * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
    * @param prefix      the prefix to use
@@ -155,7 +153,7 @@ public class Tee
 
   /**
    * returns the specified PrintStream from the list.
-   *
+   * 
    * @param index the index of the PrintStream to return
    * @return the specified PrintStream, or null if invalid index
    */
@@ -168,14 +166,15 @@ public class Tee
 
   /**
    * removes the given PrintStream from the list.
-   *
+   * 
    * @param p the PrintStream to remove
    * @return returns the removed PrintStream if it could be removed, null otherwise
    */
   public PrintStream remove(PrintStream p) {
+    int         index;
 
-    int index;
-    if ((index = m_Streams.indexOf(p)) != -1) {
+    if (contains(p)) {
+      index = m_Streams.indexOf(p);
       m_Timestamps.remove(index);
       m_Prefixes.remove(index);
       return (PrintStream) m_Streams.remove(index);
@@ -187,7 +186,7 @@ public class Tee
 
   /**
    * removes the given PrintStream from the list.
-   *
+   * 
    * @param index the index of the PrintStream to remove
    * @return returns the removed PrintStream if it could be removed, null otherwise
    */
@@ -204,7 +203,7 @@ public class Tee
 
   /**
    * checks whether the given PrintStream is already in the list.
-   *
+   * 
    * @param p the PrintStream to look for
    * @return true if the PrintStream is in the list
    */
@@ -214,7 +213,7 @@ public class Tee
 
   /**
    * returns the number of streams currently in the list.
-   *
+   * 
    * @return the number of streams in the list
    */
   public int size() {
@@ -229,11 +228,11 @@ public class Tee
     for (int i = 0; i < size(); i++) {
       // prefix
       if (!((String) m_Prefixes.get(i)).equals(""))
-	((PrintStream) m_Streams.get(i)).print("[" + m_Prefixes.get(i) + "]\t");
-
+        ((PrintStream) m_Streams.get(i)).print("[" + m_Prefixes.get(i) + "]\t");
+      
       // timestamp
       if (((Boolean) m_Timestamps.get(i)).booleanValue())
-	((PrintStream) m_Streams.get(i)).print("[" + new Date() + "]\t");
+        ((PrintStream) m_Streams.get(i)).print("[" + new Date() + "]\t");
     }
   }
 
@@ -247,7 +246,7 @@ public class Tee
 
   /**
    * prints the given int to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(int x) {
@@ -259,7 +258,7 @@ public class Tee
 
   /**
    * prints the given long to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(long x) {
@@ -271,7 +270,7 @@ public class Tee
 
   /**
    * prints the given float to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(float x) {
@@ -283,7 +282,7 @@ public class Tee
 
   /**
    * prints the given double to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(double x) {
@@ -295,7 +294,7 @@ public class Tee
 
   /**
    * prints the given boolean to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(boolean x) {
@@ -307,7 +306,7 @@ public class Tee
 
   /**
    * prints the given char to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(char x) {
@@ -319,7 +318,7 @@ public class Tee
 
   /**
    * prints the given char array to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(char[] x) {
@@ -331,7 +330,7 @@ public class Tee
 
   /**
    * prints the given string to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(String x) {
@@ -343,7 +342,7 @@ public class Tee
 
   /**
    * prints the given object to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void print(Object x) {
@@ -365,7 +364,7 @@ public class Tee
 
   /**
    * prints the given int to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(int x) {
@@ -377,7 +376,7 @@ public class Tee
 
   /**
    * prints the given long to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(long x) {
@@ -389,7 +388,7 @@ public class Tee
 
   /**
    * prints the given float to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(float x) {
@@ -401,7 +400,7 @@ public class Tee
 
   /**
    * prints the given double to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(double x) {
@@ -413,7 +412,7 @@ public class Tee
 
   /**
    * prints the given boolean to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(boolean x) {
@@ -425,7 +424,7 @@ public class Tee
 
   /**
    * prints the given char to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(char x) {
@@ -437,7 +436,7 @@ public class Tee
 
   /**
    * prints the given char array to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(char[] x) {
@@ -449,7 +448,7 @@ public class Tee
 
   /**
    * prints the given string to the streams.
-   *
+   * 
    * @param x the object to print
    */
   public void println(String x) {
@@ -462,7 +461,7 @@ public class Tee
   /**
    * prints the given object to the streams (for Throwables we print the stack
    * trace).
-   *
+   * 
    * @param x the object to print
    */
   public void println(Object x) {
@@ -476,7 +475,7 @@ public class Tee
       trace = t.getStackTrace();
       line  = t.toString() + "\n";
       for (i = 0; i < trace.length; i++)
-	line += "\t" + trace[i].toString() + "\n";
+        line += "\t" + trace[i].toString() + "\n";
       x = line;
     }
 
@@ -529,257 +528,20 @@ public class Tee
   }
 
   /**
-   * Writes <code>b.length</code> bytes to this output stream.
-   * <p>
-   * The <code>write</code> method of <code>FilterOutputStream</code>
-   * calls its <code>write</code> method of three arguments with the
-   * arguments <code>b</code>, <code>0</code>, and
-   * <code>b.length</code>.
-   * <p>
-   * Note that this method does not call the one-argument
-   * <code>write</code> method of its underlying output stream with
-   * the single argument <code>b</code>.
-   *
-   * @param      b   the data to be written.
-   * @exception  IOException  if an I/O error occurs.
-   * @see        java.io.FilterOutputStream#write(byte[], int, int)
-   */
-  @Override
-  public void write(byte[] b) throws IOException {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      ((PrintStream) m_Streams.get(i)).write(b);
-    flush();
-  }
-
-  /**
-   * A convenience method to write a formatted string to this output stream
-   * using the specified format string and arguments.
-   *
-   * <p> An invocation of this method of the form
-   * {@code out.printf(format, args)} behaves
-   * in exactly the same way as the invocation
-   *
-   * <pre>{@code
-   *     out.format(format, args)
-   * }</pre>
-   *
-   * @param  format
-   *         A format string as described in <a
-   *         href="../util/Formatter.html#syntax">Format string syntax</a>
-   *
-   * @param  args
-   *         Arguments referenced by the format specifiers in the format
-   *         string.  If there are more arguments than format specifiers, the
-   *         extra arguments are ignored.  The number of arguments is
-   *         variable and may be zero.  The maximum number of arguments is
-   *         limited by the maximum dimension of a Java array as defined by
-   *         <cite>The Java&trade; Virtual Machine Specification</cite>.
-   *         The behaviour on a
-   *         {@code null} argument depends on the <a
-   *         href="../util/Formatter.html#syntax">conversion</a>.
-   *
-   * @throws  java.util.IllegalFormatException
-   *          If a format string contains an illegal syntax, a format
-   *          specifier that is incompatible with the given arguments,
-   *          insufficient arguments given the format string, or other
-   *          illegal conditions.  For specification of all possible
-   *          formatting errors, see the <a
-   *          href="../util/Formatter.html#detail">Details</a> section of the
-   *          formatter class specification.
-   *
-   * @throws  NullPointerException
-   *          If the {@code format} is {@code null}
-   *
-   * @return  This output stream
-   *
-   * @since  1.5
-   */
-  @Override
-  public PrintStream printf(String format, Object... args) {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      m_Streams.get(i).printf(format, args);
-    flush();
-    return this;
-  }
-
-  /**
-   * A convenience method to write a formatted string to this output stream
-   * using the specified format string and arguments.
-   *
-   * <p> An invocation of this method of the form
-   * {@code out.printf(l, format, args)} behaves
-   * in exactly the same way as the invocation
-   *
-   * <pre>{@code
-   *     out.format(l, format, args)
-   * }</pre>
-   *
-   * @param  l
-   *         The {@linkplain Locale locale} to apply during
-   *         formatting.  If {@code l} is {@code null} then no localization
-   *         is applied.
-   *
-   * @param  format
-   *         A format string as described in <a
-   *         href="../util/Formatter.html#syntax">Format string syntax</a>
-   *
-   * @param  args
-   *         Arguments referenced by the format specifiers in the format
-   *         string.  If there are more arguments than format specifiers, the
-   *         extra arguments are ignored.  The number of arguments is
-   *         variable and may be zero.  The maximum number of arguments is
-   *         limited by the maximum dimension of a Java array as defined by
-   *         <cite>The Java&trade; Virtual Machine Specification</cite>.
-   *         The behaviour on a
-   *         {@code null} argument depends on the <a
-   *         href="../util/Formatter.html#syntax">conversion</a>.
-   *
-   * @throws  java.util.IllegalFormatException
-   *          If a format string contains an illegal syntax, a format
-   *          specifier that is incompatible with the given arguments,
-   *          insufficient arguments given the format string, or other
-   *          illegal conditions.  For specification of all possible
-   *          formatting errors, see the <a
-   *          href="../util/Formatter.html#detail">Details</a> section of the
-   *          formatter class specification.
-   *
-   * @throws  NullPointerException
-   *          If the {@code format} is {@code null}
-   *
-   * @return  This output stream
-   *
-   * @since  1.5
-   */
-  @Override
-  public PrintStream printf(Locale l, String format, Object... args) {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      m_Streams.get(i).printf(l, format, args);
-    flush();
-    return this;
-  }
-
-  /**
-   * Appends the specified character to this output stream.
-   *
-   * <p> An invocation of this method of the form {@code out.append(c)}
-   * behaves in exactly the same way as the invocation
-   *
-   * <pre>{@code
-   *     out.print(c)
-   * }</pre>
-   *
-   * @param  c
-   *         The 16-bit character to append
-   *
-   * @return  This output stream
-   *
-   * @since  1.5
-   */
-  @Override
-  public PrintStream append(char c) {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      m_Streams.get(i).append(c);
-    flush();
-    return this;
-  }
-
-  /**
-   * Appends the specified character sequence to this output stream.
-   *
-   * <p> An invocation of this method of the form {@code out.append(csq)}
-   * behaves in exactly the same way as the invocation
-   *
-   * <pre>{@code
-   *     out.print(csq.toString())
-   * }</pre>
-   *
-   * <p> Depending on the specification of {@code toString} for the
-   * character sequence {@code csq}, the entire sequence may not be
-   * appended.  For instance, invoking then {@code toString} method of a
-   * character buffer will return a subsequence whose content depends upon
-   * the buffer's position and limit.
-   *
-   * @param  csq
-   *         The character sequence to append.  If {@code csq} is
-   *         {@code null}, then the four characters {@code "null"} are
-   *         appended to this output stream.
-   *
-   * @return  This output stream
-   *
-   * @since  1.5
-   */
-  @Override
-  public PrintStream append(CharSequence csq) {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      m_Streams.get(i).append(csq);
-    flush();
-    return this;
-  }
-
-  /**
-   * Appends a subsequence of the specified character sequence to this output
-   * stream.
-   *
-   * <p> An invocation of this method of the form
-   * {@code out.append(csq, start, end)} when
-   * {@code csq} is not {@code null}, behaves in
-   * exactly the same way as the invocation
-   *
-   * <pre>{@code
-   *     out.print(csq.subSequence(start, end).toString())
-   * }</pre>
-   *
-   * @param  csq
-   *         The character sequence from which a subsequence will be
-   *         appended.  If {@code csq} is {@code null}, then characters
-   *         will be appended as if {@code csq} contained the four
-   *         characters {@code "null"}.
-   *
-   * @param  start
-   *         The index of the first character in the subsequence
-   *
-   * @param  end
-   *         The index of the character following the last character in the
-   *         subsequence
-   *
-   * @return  This output stream
-   *
-   * @throws  IndexOutOfBoundsException
-   *          If {@code start} or {@code end} are negative, {@code start}
-   *          is greater than {@code end}, or {@code end} is greater than
-   *          {@code csq.length()}
-   *
-   * @since  1.5
-   */
-  @Override
-  public PrintStream append(CharSequence csq, int start, int end) {
-    printHeader();
-    for (int i = 0; i < size(); i++)
-      m_Streams.get(i).append(csq, start, end);
-    flush();
-    return this;
-  }
-
-  /**
    * returns only the classname and the number of streams.
-   *
+   * 
    * @return only the classname and the number of streams
    */
   public String toString() {
     return this.getClass().getName() + ": " + m_Streams.size();
   }
-
+  
   /**
    * Returns the revision string.
-   *
+   * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15286 $");
+    return RevisionUtils.extract("$Revision: 11247 $");
   }
 }

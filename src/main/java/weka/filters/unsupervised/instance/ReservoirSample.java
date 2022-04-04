@@ -21,12 +21,17 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
-import weka.gui.ProgrammaticProperty;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -73,10 +78,10 @@ import java.util.Vector;
  * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 14508 $
+ * @version $Revision: 13490 $
  */
 public class ReservoirSample extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter, Randomizable, WeightedAttributesHandler {
+  OptionHandler, StreamableFilter {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
@@ -219,16 +224,6 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
    */
   public void setRandomSeed(int newSeed) {
     m_RandomSeed = newSeed;
-  }
-
-  @ProgrammaticProperty
-  public void setSeed(int seed) {
-    setRandomSeed(seed);
-  }
-
-  @ProgrammaticProperty
-  public int getSeed() {
-    return getRandomSeed();
   }
 
   /**
@@ -428,7 +423,7 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 13490 $");
   }
 
   /**

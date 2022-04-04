@@ -21,18 +21,16 @@
 
 package weka.core.stemmers;
 
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.ClassDiscovery;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.PluginManager;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.WekaPackageClassLoaderManager;
-
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
+import weka.gui.GenericObjectEditor;
 
 /**
  * <!-- globalinfo-start --> A wrapper class for the Snowball stemmers. Only
@@ -45,6 +43,10 @@ import java.util.Vector;
  * You can use the 'weka.core.ClassDiscovery' for this:<br/>
  * java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram
  * org.tartarus.snowball.ext<br/>
+ * <br/>
+ * For more information visit these web sites:<br/>
+ * http://weka.wikispaces.com/Stemmers<br/>
+ * http://snowball.tartarus.org/<br/>
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -62,7 +64,7 @@ import java.util.Vector;
  * <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15257 $
+ * @version $Revision: 13430 $
  */
 public class SnowballStemmer implements Stemmer, OptionHandler {
 
@@ -125,7 +127,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
    */
   private static void checkForSnowball() {
     try {
-      WekaPackageClassLoaderManager.forName(SNOWBALL_PROGRAM);
+      Class.forName(SNOWBALL_PROGRAM);
       m_Present = true;
     } catch (Exception e) {
       m_Present = false;
@@ -147,10 +149,10 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
       + "'weka/gui/GenericObjectEditor.props' file has to be uncommented "
       + "as well. If necessary you have to discover and fill in the snowball "
       + "stemmers manually. You can use the 'weka.core.ClassDiscovery' for this:\n"
-      + "  java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext\n";
- /*     + "\n" + "For more information visit these web sites:\n"
+      + "  java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext\n"
+      + "\n" + "For more information visit these web sites:\n"
       + "  http://weka.wikispaces.com/Stemmers\n"
-      + "  http://snowball.tartarus.org/\n";*/
+      + "  http://snowball.tartarus.org/\n";
   }
 
   /**
@@ -246,7 +248,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
    * retrieves the language names of the availabel stemmers.
    */
   private static void initStemmers() {
-    List<String> classnames;
+    Vector<String> classnames;
     int i;
 
     if (m_Stemmers != null) {
@@ -259,7 +261,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
       return;
     }
 
-    classnames = PluginManager.getPluginNamesOfTypeList(SNOWBALL_PROGRAM);
+    classnames = GenericObjectEditor.getClassnames(SNOWBALL_PROGRAM);
     // try dynamic discovery if not in props file
     if (classnames.size() == 0) {
       classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);
@@ -354,8 +356,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
 
     if (m_Stemmers.contains(name)) {
       try {
-        // snowballClass = Class.forName(getStemmerClassname(name));
-        snowballClass = WekaPackageClassLoaderManager.forName(getStemmerClassname(name));
+        snowballClass = Class.forName(getStemmerClassname(name));
         m_Stemmer = snowballClass.newInstance();
 
         // methods
@@ -453,7 +454,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15257 $");
+    return RevisionUtils.extract("$Revision: 13430 $");
   }
 
   /**

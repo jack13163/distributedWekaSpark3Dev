@@ -37,9 +37,10 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
+ * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 14512 $
+ * @version $Revision: 10169 $
  */
 public abstract class CachedKernel extends Kernel {
 
@@ -180,7 +181,7 @@ public abstract class CachedKernel extends Kernel {
     int location = -1;
 
     // we can only cache if we know the indexes and caching is not
-    // disabled (m_cacheSize == -1)
+    // disbled (m_cacheSize == -1)
     if ((id1 >= 0) && (m_cacheSize != -1)) {
 
       // Use full cache?
@@ -383,6 +384,10 @@ public abstract class CachedKernel extends Kernel {
    */
   @Override
   public void buildKernel(Instances data) throws Exception {
+    // does kernel handle the data?
+    if (!getChecksTurnedOff()) {
+      getCapabilities().testWithFail(data);
+    }
 
     initVars(data);
   }

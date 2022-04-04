@@ -46,7 +46,7 @@ public interface IntervalBasedEvaluationMetric {
    * @throws Exception if intervals could not be computed successfully
    */
   void updateStatsForIntervalEstimator(IntervalEstimator classifier,
-                                       Instance classMissing, double classValue) throws Exception;
+      Instance classMissing, double classValue) throws Exception;
 
   /**
    * Return a formatted string (suitable for displaying in console or GUI

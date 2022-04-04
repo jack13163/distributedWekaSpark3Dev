@@ -32,11 +32,7 @@ import java.util.Vector;
 
 /**
  * <!-- globalinfo-start -->
- * A filter that can be used to introduce missing values in a dataset.
- * The specified probability is used to flip a biased coin to decide whether to replace a particular
- * attribute value in an instance with a missing value (i.e., a probability of 0.9 means 90% of values
- * will be replaced with missing values). This filter only modifies the first batch of data that is processed.
- * The class attribute is skipped by default.
+ * A filter that can be used to introduce missing values in a dataset. The specified probability is used to flip a biased coin to decide whether to replace a particular attribute value in an instance with a missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). This filter only modifies the first batch of data that is processed.
  * <br><br>
  * <!-- globalinfo-end -->
  *
@@ -66,8 +62,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 10215 $
  */
-public class ReplaceWithMissingValue extends SimpleBatchFilter
-        implements UnsupervisedFilter, Randomizable, WeightedAttributesHandler, WeightedInstancesHandler {
+public class ReplaceWithMissingValue extends SimpleBatchFilter implements UnsupervisedFilter, Randomizable {
 
   /** for serialization */
   private static final long serialVersionUID = -2356630932899796239L;
@@ -446,7 +441,7 @@ public class ReplaceWithMissingValue extends SimpleBatchFilter
     return "A filter that can be used to introduce missing values in a dataset. The specified probability is used to" +
             " flip a biased coin to decide whether to replace a particular attribute value in an instance with a" +
             " missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). " +
-            "This filter only modifies the first batch of data that is processed. The class attribute is skipped by default.";
+            "This filter only modifies the first batch of data that is processed.";
   }
 
   /**

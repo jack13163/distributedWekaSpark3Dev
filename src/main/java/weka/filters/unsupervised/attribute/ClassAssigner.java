@@ -24,8 +24,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
@@ -51,9 +56,9 @@ import weka.filters.SimpleStreamFilter;
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 10215 $
  */
-public class ClassAssigner extends SimpleStreamFilter implements WeightedInstancesHandler, WeightedAttributesHandler {
+public class ClassAssigner extends SimpleStreamFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = 1775780193887394115L;
@@ -277,7 +282,7 @@ public class ClassAssigner extends SimpleStreamFilter implements WeightedInstanc
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**

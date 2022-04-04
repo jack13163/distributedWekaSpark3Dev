@@ -41,7 +41,6 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
-import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -102,8 +101,8 @@ import weka.filters.unsupervised.attribute.Remove;
  * <p/>
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15203 $
- * @see Drawable
+ * @version $Revision: 11958 $
+ * @see weka.core.Drawable
  */
 public class ClusterEvaluation implements Serializable, RevisionHandler {
 
@@ -416,10 +415,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     while (source.hasMoreElements(instances)) {
       instance = source.nextElement(instances);
       if (m_clusterAssignments[i] >= 0) {
-        if (!instance.classIsMissing()) {
-          counts[(int) m_clusterAssignments[i]][(int) instance.classValue()]++;
-          clusterTotals[(int) m_clusterAssignments[i]]++;
-        }
+        counts[(int) m_clusterAssignments[i]][(int) instance.classValue()]++;
+        clusterTotals[(int) m_clusterAssignments[i]]++;
       }
       i++;
     }
@@ -750,22 +747,19 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     Utils.checkForRemainingOptions(options);
 
     Instances trainHeader = train;
-    int[] ignoredAttributes = null;
     if (objectInputFileName.length() != 0) {
       // Load the clusterer from file
       // clusterer = (Clusterer) SerializationHelper.read(objectInputFileName);
-      java.io.ObjectInputStream ois = SerializationHelper.
-        getObjectInputStream(new java.io.FileInputStream(objectInputFileName));
-
+      java.io.ObjectInputStream ois =
+        new java.io.ObjectInputStream(new java.io.BufferedInputStream(
+          new java.io.FileInputStream(objectInputFileName)));
       clusterer = (Clusterer) ois.readObject();
-      // try and get the training header (and any ignored attributes)
+      // try and get the training header
       try {
         trainHeader = (Instances) ois.readObject();
-        ignoredAttributes = (int []) ois.readObject();
       } catch (Exception ex) {
         // don't moan if we cant
       }
-
       ois.close();
     } else {
       // Build the clusterer if no object file provided
@@ -807,15 +801,6 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
         ce.setClusterer(clusterer);
         ce.evaluateClusterer(train, trainFileName);
 
-        // If classifier is drawable output string describing graph
-        if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
-          BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
-          writer.write(((Drawable) clusterer).graph());
-          writer.newLine();
-          writer.flush();
-          writer.close();
-        }
-
         return "\n\n=== Clustering stats for training data ===\n\n"
           + ce.clusterResultsToString();
       }
@@ -832,7 +817,7 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
 
     text.append(clusterer.toString());
     text.append("\n\n=== Clustering stats for training data ===\n\n"
-      + printClusterStats(clusterer, trainFileName, ignoredAttributes));
+      + printClusterStats(clusterer, trainFileName));
 
     if (testFileName.length() != 0) {
       // check header compatibility
@@ -844,7 +829,7 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       }
 
       text.append("\n\n=== Clustering stats for testing data ===\n\n"
-        + printClusterStats(clusterer, testFileName, ignoredAttributes));
+        + printClusterStats(clusterer, testFileName));
     }
 
     if ((clusterer instanceof DensityBasedClusterer) && (doXval == true)
@@ -1001,11 +986,10 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
    * 
    * @param clusterer the clusterer to use for generating statistics.
    * @param fileName the file to load
-   * @param ignoredAtts if non null, then these attributes are to be ignored/removed
    * @return a string containing cluster statistics.
    * @throws Exception if statistics can't be generated.
    */
-  private static String printClusterStats(Clusterer clusterer, String fileName, int[] ignoredAtts)
+  private static String printClusterStats(Clusterer clusterer, String fileName)
     throws Exception {
     StringBuffer text = new StringBuffer();
     int i = 0;
@@ -1014,32 +998,18 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     int cc = clusterer.numberOfClusters();
     double[] instanceStats = new double[cc];
     int unclusteredInstances = 0;
-    Remove remove = null;
-
-    if (ignoredAtts != null && ignoredAtts.length > 0) {
-      remove = new Remove();
-      remove.setAttributeIndicesArray(ignoredAtts);
-      remove.setInvertSelection(false);
-    }
 
     if (fileName.length() != 0) {
       DataSource source = new DataSource(fileName);
       Instances structure = source.getStructure();
-      if (remove != null) {
-        remove.setInputFormat(structure);
-      }
       Instances forBatchPredictors =
         (clusterer instanceof BatchPredictor && ((BatchPredictor) clusterer)
           .implementsMoreEfficientBatchPrediction()) ? new Instances(
-          remove != null ? remove.getOutputFormat() : source.getStructure(), 0) : null;
+          source.getStructure(), 0) : null;
 
       Instance inst;
       while (source.hasMoreElements(structure)) {
         inst = source.nextElement(structure);
-        if (remove != null) {
-          remove.input(inst);
-          inst = remove.output();
-        }
         if (forBatchPredictors != null) {
           forBatchPredictors.add(inst);
         } else {
@@ -1382,7 +1352,7 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15203 $");
+    return RevisionUtils.extract("$Revision: 11958 $");
   }
 
   /**

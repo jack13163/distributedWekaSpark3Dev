@@ -181,7 +181,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     m_combo.setEditable(true);
     // m_combo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-    Component theEditor = m_combo.getEditor().getEditorComponent();
+    java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     if (theEditor instanceof JTextField) {
       ((JTextField) m_combo.getEditor().getEditorComponent())
         .addCaretListener(new CaretListener() {
@@ -233,7 +233,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
    */
   public void setText(String text) {
     m_currentContents = text;
-    Component theEditor = m_combo.getEditor().getEditorComponent();
+    java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     if (theEditor instanceof JTextField) {
       ((JTextField) theEditor).setText(text);
     } else {
@@ -248,7 +248,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
    * @return the text from the combo box
    */
   public String getText() {
-    Component theEditor = m_combo.getEditor().getEditorComponent();
+    java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     String text = m_combo.getSelectedItem().toString();
     if (theEditor instanceof JTextField) {
       text = ((JTextField) theEditor).getText();
@@ -400,7 +400,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     m_combo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
       @Override
       public void keyReleased(KeyEvent e) {
-        Component theEditor = m_combo.getEditor().getEditorComponent();
+        java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
         if (theEditor instanceof JTextField) {
           String selected = ((JTextField) theEditor).getText();
           m_currentContents = selected;

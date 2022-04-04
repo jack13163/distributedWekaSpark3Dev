@@ -61,7 +61,7 @@ public class FlowRunner implements RevisionHandler {
   /** run each Startable bean sequentially? (default in parallel) */
   protected boolean m_startSequentially = false;
 
-  public static class SimpleLogger implements Logger {
+  public static class SimpleLogger implements weka.gui.Logger {
     SimpleDateFormat m_DateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
@@ -509,7 +509,7 @@ public class FlowRunner implements RevisionHandler {
     } else {
       try {
         FlowRunner fr = new FlowRunner();
-        SimpleLogger sl = new SimpleLogger();
+        FlowRunner.SimpleLogger sl = new FlowRunner.SimpleLogger();
         String fileName = args[0];
 
         if (args.length == 2 && args[1].equals("-s")) {

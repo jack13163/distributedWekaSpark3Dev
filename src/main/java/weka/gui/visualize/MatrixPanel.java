@@ -25,9 +25,7 @@ import weka.core.Attribute;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Settings;
-import weka.core.Utils;
 import weka.gui.ExtensionFileFilter;
-import weka.gui.WekaFileChooser;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,7 +41,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
@@ -81,7 +78,7 @@ import java.util.Random;
  * value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 15301 $
+ * @version $Revision: 12391 $
  */
 public class MatrixPanel extends JPanel {
 
@@ -801,8 +798,8 @@ public class MatrixPanel extends JPanel {
     setBt.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        WekaFileChooser chooser =
-          new WekaFileChooser(new java.io.File(System.getProperty("user.dir")));
+        JFileChooser chooser =
+          new JFileChooser(new java.io.File(System.getProperty("user.dir")));
         ExtensionFileFilter myfilter =
           new ExtensionFileFilter("arff", "Arff data files");
         chooser.setFileFilter(myfilter);
@@ -1036,7 +1033,8 @@ public class MatrixPanel extends JPanel {
         return;
       }
 
-      JFrame jf = Utils.getWekaJFrame("Weka Explorer: Visualizing " + m_data.relationName(), this);
+      JFrame jf =
+        new JFrame("Weka Explorer: Visualizing " + m_data.relationName());
       VisualizePanel vp = new VisualizePanel();
       try {
         PlotData2D pd = new PlotData2D(m_data);
@@ -1053,15 +1051,7 @@ public class MatrixPanel extends JPanel {
         ex.printStackTrace();
       }
       jf.getContentPane().add(vp);
-      jf.addWindowListener(new WindowAdapter() {
-        @Override
-        public void windowClosing(WindowEvent e) {
-          jf.dispose();
-        }
-      });
-      jf.pack();
       jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
     }
 

@@ -72,7 +72,7 @@ public class StripChartBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(StripChart.class,
+    return new BeanDescriptor(weka.gui.beans.StripChart.class,
 			      StripChartCustomizer.class);
   }
 }

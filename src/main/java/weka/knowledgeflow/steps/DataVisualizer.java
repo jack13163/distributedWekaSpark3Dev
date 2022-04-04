@@ -233,7 +233,7 @@ public class DataVisualizer extends BaseStep implements DataCollector {
           Object r =
             PluginManager.getPluginInstance(
               "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
-          if (r != null && r instanceof OffscreenChartRenderer) {
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default
@@ -267,19 +267,11 @@ public class DataVisualizer extends BaseStep implements DataCollector {
     Instances toPlot = data.getPrimaryPayload();
     String name = (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
     String relationName = toPlot.relationName();
-    boolean connectIt = relationName.startsWith("__");
-    if (connectIt) {
-      toPlot = new Instances(toPlot);
-      toPlot.setRelationName(relationName.substring(2));
-    }
     PlotData2D pd = new PlotData2D(toPlot);
-    if (connectIt) {
+    if (relationName.startsWith("__")) {
       boolean[] connect = new boolean[toPlot.numInstances()];
       for (int i = 1; i < toPlot.numInstances(); i++) {
-        if (toPlot.instance(i - 1).weight() >= 0
-          && toPlot.instance(i).weight() >= 0) {
-          connect[i] = true;
-        }
+        connect[i] = true;
       }
       try {
         pd.setConnectPoints(connect);

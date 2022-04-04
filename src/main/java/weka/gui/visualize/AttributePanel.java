@@ -47,7 +47,7 @@ import java.util.ArrayList;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15168 $
+ * @version $Revision: 12391 $
  */
 public class AttributePanel extends JScrollPane {
 
@@ -184,8 +184,7 @@ public class AttributePanel extends JScrollPane {
       this.addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
-          boolean cntrldown = e.isControlDown();
-          if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK && !cntrldown) {
+          if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) {
             setX(m_attribIndex);
             if (m_Listeners.size() > 0) {
               for (int i = 0; i < m_Listeners.size(); i++) {

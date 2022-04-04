@@ -60,7 +60,7 @@ public class ModelPerformanceChartBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(ModelPerformanceChart.class,
+    return new BeanDescriptor(weka.gui.beans.ModelPerformanceChart.class,
                               ModelPerformanceChartCustomizer.class);
   }
 }

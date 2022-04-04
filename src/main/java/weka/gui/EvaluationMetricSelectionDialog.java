@@ -100,7 +100,7 @@ public class EvaluationMetricSelectionDialog extends JDialog {
   }
 
   private void init() {
-    final AttributeSelectionPanel evalConfigurer = new AttributeSelectionPanel(
+    final weka.gui.AttributeSelectionPanel evalConfigurer = new weka.gui.AttributeSelectionPanel(
         true, true, true, true);
 
     ArrayList<Attribute> atts = new ArrayList<Attribute>();

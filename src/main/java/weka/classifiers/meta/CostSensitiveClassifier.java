@@ -39,12 +39,7 @@ import weka.core.Capabilities.Capability;
 
 /**
  <!-- globalinfo-start -->
- * A metaclassifier that makes its base classifier cost sensitive. Two methods can be used to introduce
- * cost-sensitivity: reweighting training instances according to the total cost assigned to each class;
- * or predicting the class with minimum expected misclassification cost (rather than the most likely class).
- * Performance can often be improved by using a bagged classifier to improve the probability estimates of
- * the base classifier. If the base classifier cannot handle instance weights, and the instance weights are not uniform,
- * the data will be resampled with replacement based on the weights before being passed to the base classifier.
+ * A metaclassifier that makes its base classifier cost-sensitive. Two methods can be used to introduce cost-sensitivity: reweighting training instances according to the total cost assigned to each class; or predicting the class with minimum expected misclassification cost (rather than the most likely class). Performance can often be improved by using a Bagged classifier to improve the probability estimates of the base classifier.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -94,11 +89,11 @@ import weka.core.Capabilities.Capability;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 15477 $
+ * @version $Revision: 12180 $
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer
-  implements OptionHandler, Drawable, BatchPredictor, WeightedInstancesHandler {
+  implements OptionHandler, Drawable, BatchPredictor {
 
   /** for serialization */
   static final long serialVersionUID = -110658209263002404L;
@@ -315,16 +310,14 @@ public class CostSensitiveClassifier
    */
   public String globalInfo() {
 
-    return "A metaclassifier that makes its base classifier cost sensitive. "
+    return "A metaclassifier that makes its base classifier cost-sensitive. "
       + "Two methods can be used to introduce cost-sensitivity: reweighting "
       + "training instances according to the total cost assigned to each "
       + "class; or predicting the class with minimum expected "
       + "misclassification cost (rather than the most likely class). "
       + "Performance can often be "
-      + "improved by using a bagged classifier to improve the probability "
-      + "estimates of the base classifier. If the base classifier cannot handle instance weights, "
-      + "and the instance weights are not uniform, the data will be resampled with replacement "
-      + "based on the weights before being passed to the base classifier.";
+      + "improved by using a Bagged classifier to improve the probability "
+      + "estimates of the base classifier.";
   }
 
   /**
@@ -510,7 +503,7 @@ public class CostSensitiveClassifier
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-
+    
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }
@@ -521,25 +514,20 @@ public class CostSensitiveClassifier
         throw new Exception("On-demand cost file doesn't exist: " + costFile);
       }
       setCostMatrix(new CostMatrix(new BufferedReader(
-              new FileReader(costFile))));
+                                   new FileReader(costFile))));
     } else if (m_CostMatrix == null) {
       // try loading an old format cost file
       m_CostMatrix = new CostMatrix(data.numClasses());
       m_CostMatrix.readOldFormat(new BufferedReader(
-              new FileReader(m_CostFile)));
+			       new FileReader(m_CostFile)));
     }
 
     if (!m_MinimizeExpectedCost) {
       Random random = null;
       if (!(m_Classifier instanceof WeightedInstancesHandler)) {
-        random = new Random(m_Seed);
+	random = new Random(m_Seed);
       }
-      data = m_CostMatrix.applyCostMatrix(data, random);
-    } else {
-      if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-        Random r = (data.numInstances() > 0) ? data.getRandomNumberGenerator(getSeed()) : new Random(getSeed());
-        data = data.resampleWithWeights(r);
-      }
+      data = m_CostMatrix.applyCostMatrix(data, random);      
     }
     m_Classifier.buildClassifier(data);
   }
@@ -628,7 +616,7 @@ public class CostSensitiveClassifier
 
   /**
    * Set the batch size to use. Gets passed through to the base learner if it
-   * implements BatchPredictor. Otherwise it is just ignored.
+   * implements BatchPrecitor. Otherwise it is just ignored.
    *
    * @param size the batch size to use
    */
@@ -636,8 +624,6 @@ public class CostSensitiveClassifier
 
     if (getClassifier() instanceof BatchPredictor) {
       ((BatchPredictor) getClassifier()).setBatchSize(size);
-    } else {
-      super.setBatchSize(size);
     }
   }
 
@@ -652,7 +638,7 @@ public class CostSensitiveClassifier
     if (getClassifier() instanceof BatchPredictor) {
       return ((BatchPredictor) getClassifier()).getBatchSize();
     } else {
-      return super.getBatchSize();
+      return "1";
     }
   }
 
@@ -732,7 +718,7 @@ public class CostSensitiveClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15477 $");
+    return RevisionUtils.extract("$Revision: 12180 $");
   }
 
   /**

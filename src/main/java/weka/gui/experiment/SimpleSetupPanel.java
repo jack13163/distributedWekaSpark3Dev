@@ -22,7 +22,6 @@
 package weka.gui.experiment;
 
 import weka.classifiers.Classifier;
-import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.experiment.CSVResultListener;
 import weka.experiment.ClassifierSplitEvaluator;
@@ -36,19 +35,36 @@ import weka.experiment.RegressionSplitEvaluator;
 import weka.experiment.SplitEvaluator;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
-import weka.gui.WekaFileChooser;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.IntrospectionException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -64,7 +80,7 @@ import java.io.File;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 15302 $
+ * @version $Revision: 12016 $
  */
 public class SimpleSetupPanel
   extends AbstractSetupPanel {
@@ -129,12 +145,12 @@ public class SimpleSetupPanel
                             "Experiment configuration files (*.xml)");
 
   /** The file chooser for selecting experiments */
-  protected WekaFileChooser m_FileChooser =
-    new WekaFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooser =
+    new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** The file chooser for selecting result destinations */
-  protected WekaFileChooser m_DestFileChooser =
-    new WekaFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_DestFileChooser =
+    new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** Combo box for choosing experiment destination type */
   protected JComboBox m_ResultsDestinationCBox = new JComboBox();
@@ -194,7 +210,7 @@ public class SimpleSetupPanel
   protected JButton m_NotesButton =  new JButton("Notes");
 
   /** Frame for the notes */
-  protected JFrame m_NotesFrame;
+  protected JFrame m_NotesFrame = new JFrame("Notes");
 
   /** Area for user notes Default of 10 rows */
   protected JTextArea m_NotesText = new JTextArea(null, 10, 0);
@@ -375,23 +391,17 @@ public class SimpleSetupPanel
 	public void changedUpdate(DocumentEvent e) {numRepetitionsChanged();}
       });
 
-    m_NotesFrame = Utils.getWekaJFrame("Notes", this);
-    m_NotesFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-
     m_NotesFrame.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
 	  m_NotesButton.setEnabled(true);
 	}
       });
     m_NotesFrame.getContentPane().add(new JScrollPane(m_NotesText));
-    m_NotesFrame.pack();
-    m_NotesFrame.setSize(800, 600);
+    m_NotesFrame.setSize(600, 400);
 
     m_NotesButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  m_NotesButton.setEnabled(false);
-	  m_NotesFrame.setIconImage(((JFrame)SwingUtilities.getWindowAncestor(SimpleSetupPanel.this)).getIconImage());
-	  m_NotesFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SimpleSetupPanel.this));
 	  m_NotesFrame.setVisible(true);
 	}
       });
@@ -557,32 +567,6 @@ public class SimpleSetupPanel
     add(schemes, BorderLayout.CENTER);
     add(notes, BorderLayout.SOUTH);
   }
-
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it sets all references
-   * to associated JFrame objects to null.
-   */
-   public void terminate() {
-     if (m_NotesFrame != null) {
-       for (WindowListener w : m_NotesFrame.getWindowListeners()) {
-         m_NotesFrame.removeWindowListener(w);
-       }
-       m_NotesFrame.setContentPane(new JPanel());
-       m_NotesFrame.dispose();
-       m_NotesFrame = null;
-     }
-     if (m_AlgorithmListPanel != null) {
-       m_AlgorithmListPanel.terminate();
-       m_AlgorithmListPanel = null;
-     }
-     if (m_Support != null) {
-       for (PropertyChangeListener l : m_Support.getPropertyChangeListeners()) {
-         m_Support.removePropertyChangeListener(l);
-       }
-       m_Support = null;
-     }
-     m_modePanel = null;
-   }
 
   /**
    * Returns the name of the panel.
@@ -1209,9 +1193,7 @@ public class SimpleSetupPanel
   private void chooseURLUsername() {
     String dbaseURL=((DatabaseResultListener)m_Exp.getResultListener()).getDatabaseURL();
     String username=((DatabaseResultListener)m_Exp.getResultListener()).getUsername();
-    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog((Frame)SwingUtilities.
-            getWindowAncestor(SimpleSetupPanel.this),dbaseURL,username);
-    dbd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SimpleSetupPanel.this));
+    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,dbaseURL,username);
     dbd.setVisible(true);
       
     //if (dbaseURL == null) {

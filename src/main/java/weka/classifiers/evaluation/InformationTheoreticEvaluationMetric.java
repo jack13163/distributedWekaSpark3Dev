@@ -45,7 +45,7 @@ public interface InformationTheoreticEvaluationMetric {
    * @throws Exception if the class of the instance is not set
    */
   void updateStatsForClassifier(double[] predictedDistribution,
-                                Instance instance) throws Exception;
+      Instance instance) throws Exception;
 
   /**
    * Updates the statistics about a predictors performance for the current test
@@ -74,8 +74,8 @@ public interface InformationTheoreticEvaluationMetric {
    * @throws Exception if density could not be computed successfully
    */
   void updateStatsForConditionalDensityEstimator(
-          ConditionalDensityEstimator classifier, Instance classMissing,
-          double classValue) throws Exception;
+      ConditionalDensityEstimator classifier, Instance classMissing,
+      double classValue) throws Exception;
 
   /**
    * Return a formatted string (suitable for displaying in console or GUI

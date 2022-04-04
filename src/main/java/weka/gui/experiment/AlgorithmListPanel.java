@@ -21,33 +21,6 @@
 
 package weka.gui.experiment;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.xml.XMLClassifier;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.JListHelper;
-import weka.gui.PropertyDialog;
-import weka.gui.WekaFileChooser;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -66,14 +39,42 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.JListHelper;
+import weka.gui.PropertyDialog;
 
 /**
  * This panel controls setting a list of algorithms for an experiment to iterate
  * over.
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 15303 $
+ * @version $Revision: 13799 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -149,7 +150,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   protected JButton m_DownBut = new JButton("Down");
 
   /** The file chooser for selecting experiments */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /**
@@ -172,32 +173,9 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   /** The list model used */
   protected DefaultListModel m_AlgorithmListModel = new DefaultListModel();
 
-  /** An property change listener that needs to be available globally to permit garbage collection. */
-  protected PropertyChangeListener m_PropertyChangeListener;
-
-  /** An action listener that needs to be available globally to permit garbage collection. */
-  protected ActionListener m_ActionListener;
-
   /* Register the property editors we need */
   static {
     GenericObjectEditor.registerEditors();
-  }
-
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it disposes of the property dialog
-   * and removes the relevant listeners from the GenericObjectEditor and the GOEPanel.
-   */
-  public void terminate() {
-    if (m_PD != null) {
-      m_PD.dispose();
-      m_PD = null;
-    }
-    if (m_ClassifierEditor != null) {
-      m_ClassifierEditor.removePropertyChangeListener(m_PropertyChangeListener);
-      if (m_ActionListener != null) {
-        ((GenericObjectEditor.GOEPanel) m_ClassifierEditor.getCustomEditor()).removeOkListener(m_ActionListener);
-      }
-    }
   }
 
   /**
@@ -364,21 +342,21 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
-    m_PropertyChangeListener = new PropertyChangeListener() {
+    m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent e) {
         repaint();
       }
-    };
-    m_ClassifierEditor.addPropertyChangeListener(m_PropertyChangeListener);
-    m_ActionListener = new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        Classifier newCopy = (Classifier) copyObject(m_ClassifierEditor.getValue());
-        addNewAlgorithm(newCopy);
-      }
-    };
-    ((GenericObjectEditor.GOEPanel) m_ClassifierEditor.getCustomEditor()).addOkListener(m_ActionListener);
+    });
+    ((GenericObjectEditor.GOEPanel) m_ClassifierEditor.getCustomEditor())
+      .addOkListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          Classifier newCopy = (Classifier) copyObject(m_ClassifierEditor
+            .getValue());
+          addNewAlgorithm(newCopy);
+        }
+      });
 
     m_DeleteBut.setEnabled(false);
     m_DeleteBut.addActionListener(this);
@@ -554,26 +532,23 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     if (e.getSource() == m_AddBut) {
       m_Editing = false;
       if (m_PD == null) {
+        int x = getLocationOnScreen().x;
+        int y = getLocationOnScreen().y;
         if (PropertyDialog.getParentDialog(this) != null) {
           m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
-            m_ClassifierEditor, -1, -1);
+            m_ClassifierEditor, x, y);
         } else {
           m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
-            m_ClassifierEditor, -1, -1);
+            m_ClassifierEditor, x, y);
         }
         m_PD.setVisible(true);
       } else {
-        if (PropertyDialog.getParentDialog(this) != null) {
-          m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
-        } else {
-          m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
-        }
         m_PD.setVisible(true);
       }
 
     } else if (e.getSource() == m_EditBut) {
       if (m_List.getSelectedValue() != null) {
-        m_ClassifierEditor.setClassType(Classifier.class);
+        m_ClassifierEditor.setClassType(weka.classifiers.Classifier.class);
         // m_PD.getEditor().setValue(m_List.getSelectedValue());
         m_ClassifierEditor.setValue(m_List.getSelectedValue());
         m_Editing = true;
@@ -582,18 +557,13 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
           int y = getLocationOnScreen().y;
           if (PropertyDialog.getParentDialog(this) != null) {
             m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
-              m_ClassifierEditor, -1, -1);
+              m_ClassifierEditor, x, y);
           } else {
             m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
-              m_ClassifierEditor, -1, -1);
+              m_ClassifierEditor, x, y);
           }
           m_PD.setVisible(true);
         } else {
-          if (PropertyDialog.getParentDialog(this) != null) {
-            m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
-          } else {
-            m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
-          }
           m_PD.setVisible(true);
         }
       }

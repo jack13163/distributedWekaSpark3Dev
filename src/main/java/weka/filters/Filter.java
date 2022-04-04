@@ -78,7 +78,7 @@ import java.util.Vector;
  * </pre> </code>
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14804 $
+ * @version $Revision: 13476 $
  */
 public abstract class Filter implements Serializable, CapabilitiesHandler,
   RevisionHandler, OptionHandler, CapabilitiesIgnorer, CommandlineRunnable {
@@ -182,7 +182,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14804 $");
+    return RevisionUtils.extract("$Revision: 13476 $");
   }
 
   /**
@@ -698,12 +698,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
      * System.err.println(filter.getClass().getName() + " in:" +
      * data.numInstances());
      */
-    if (filter instanceof SimpleBatchFilter) {
-      ((SimpleBatchFilter)filter).input(data);
-    } else {
-      for (int i = 0; i < data.numInstances(); i++) {
-        filter.input(data.instance(i));
-      }
+    for (int i = 0; i < data.numInstances(); i++) {
+      filter.input(data.instance(i));
     }
     filter.batchFinished();
     Instances newData = filter.getOutputFormat();
@@ -1559,8 +1555,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *         explorer/experimenter gui
    */
   public String doNotCheckCapabilitiesTipText() {
-    return "If set, the filter's capabilities are not checked before it is built."
-      + " (Use with caution to reduce runtime.)";
+    return "If set, filters capabilities are not checked before filter is built"
+      + " (Use with caution to reduce runtime).";
   }
 
   /**

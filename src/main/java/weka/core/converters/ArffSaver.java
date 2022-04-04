@@ -30,8 +30,14 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
 
-import weka.core.*;
+import weka.core.AbstractInstance;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 /**
  * Writes to a destination in arff text format.
@@ -65,11 +71,11 @@ import weka.core.Capabilities.Capability;
  * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 14861 $
+ * @version $Revision: 11506 $
  * @see Saver
  */
 public class ArffSaver extends AbstractFileSaver implements BatchConverter,
-  IncrementalConverter, WeightedInstancesHandler {
+  IncrementalConverter {
 
   /** for serialization */
   static final long serialVersionUID = 2223634248900042228L;
@@ -476,7 +482,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14861 $");
+    return RevisionUtils.extract("$Revision: 11506 $");
   }
 
   /**

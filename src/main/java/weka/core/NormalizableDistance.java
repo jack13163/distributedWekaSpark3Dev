@@ -36,7 +36,7 @@ import weka.core.neighboursearch.PerformanceStats;
  *         weka.core.EuclideanDistance
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) -- original code from
  *         weka.core.EuclideanDistance
- * @version $Revision: 14813 $
+ * @version $Revision: 10535 $
  */
 public abstract class NormalizableDistance implements DistanceFunction,
   OptionHandler, Serializable, RevisionHandler {
@@ -496,7 +496,8 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * @return the normalized value
    */
   protected double norm(double x, int i) {
-    if (m_Ranges[i][R_WIDTH] == 0.0) {
+    if (Double.isNaN(m_Ranges[i][R_MIN])
+      || (m_Ranges[i][R_MAX] == m_Ranges[i][R_MIN])) {
       return 0;
     } else {
       return (x - m_Ranges[i][R_MIN]) / (m_Ranges[i][R_WIDTH]);
@@ -527,7 +528,7 @@ public abstract class NormalizableDistance implements DistanceFunction,
           if (!m_DontNormalize) {
             return 1;
           } else {
-            return m_Ranges[index][R_WIDTH];
+            return (m_Ranges[index][R_MAX] - m_Ranges[index][R_MIN]);
           }
         } else {
           double diff;
@@ -548,7 +549,8 @@ public abstract class NormalizableDistance implements DistanceFunction,
           return diff;
         }
       } else {
-        return (!m_DontNormalize) ? (norm(val1, index) - norm(val2, index)) : (val1 - val2);
+        return (!m_DontNormalize) ? (norm(val1, index) - norm(val2, index))
+          : (val1 - val2);
       }
 
     default:
@@ -562,11 +564,11 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * @return the ranges
    */
   public double[][] initializeRanges() {
-
     if (m_Data == null) {
       m_Ranges = null;
       return m_Ranges;
     }
+
     int numAtt = m_Data.numAttributes();
     double[][] ranges = new double[numAtt][3];
 
@@ -595,27 +597,19 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * and width to zero.
    * 
    * @param instance the new instance
-   * @param numAtt number of attributes in the model (ignored)
+   * @param numAtt number of attributes in the model
    * @param ranges low, high and width values for all attributes
    */
   public void updateRangesFirst(Instance instance, int numAtt, double[][] ranges) {
-
-    for (int i = 0; i < ranges.length; i++) {
-      for (int j = 0; j < ranges[i].length; j++) {
-        ranges[i][j] = 0.0;
-      }
-    }
-
-    int numVals = instance.numValues();
-    for (int j = 0; j < numVals; j++) {
-      int currIndex = instance.index(j);
-      if (!instance.isMissingSparse(j)) {
-        ranges[currIndex][R_MIN] = instance.valueSparse(j);
-        ranges[currIndex][R_MAX] = instance.valueSparse(j);
+    for (int j = 0; j < numAtt; j++) {
+      if (!instance.isMissing(j)) {
+        ranges[j][R_MIN] = instance.value(j);
+        ranges[j][R_MAX] = instance.value(j);
+        ranges[j][R_WIDTH] = 0.0;
       } else { // if value was missing
-        ranges[currIndex][R_MIN] = Double.POSITIVE_INFINITY;
-        ranges[currIndex][R_MAX] = -Double.POSITIVE_INFINITY;
-        ranges[currIndex][R_WIDTH] = Double.POSITIVE_INFINITY;
+        ranges[j][R_MIN] = Double.POSITIVE_INFINITY;
+        ranges[j][R_MAX] = -Double.POSITIVE_INFINITY;
+        ranges[j][R_WIDTH] = Double.POSITIVE_INFINITY;
       }
     }
   }
@@ -625,37 +619,26 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * based on a new instance.
    * 
    * @param instance the new instance
-   * @param numAtt number of attributes in the model (ignored)
+   * @param numAtt number of attributes in the model
    * @param ranges low, high and width values for all attributes
    */
   public void updateRanges(Instance instance, int numAtt, double[][] ranges) {
-
-    int numVals = instance.numValues();
-    int prevIndex = 0;
-
-    for (int j = 0; j < numVals; j++) {
-      int currIndex = instance.index(j);
-      while (prevIndex < currIndex) {
-        if (0 < ranges[prevIndex][R_MIN]) {
-          ranges[prevIndex][R_MIN] = 0;
-          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
-        }
-        if (0 > ranges[prevIndex][R_MAX]) {
-          ranges[prevIndex][R_MAX] = 0;
-          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
-        }
-        prevIndex++;
-      }
-      prevIndex++;
-      if (!instance.isMissingSparse(j)) {
-        double val = instance.valueSparse(j);
-        if (val < ranges[currIndex][R_MIN]) {
-          ranges[currIndex][R_MIN] = val;
-          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
-        }
-        if (val > ranges[currIndex][R_MAX]) {
-          ranges[currIndex][R_MAX] = val;
-          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < numAtt; j++) {
+      double value = instance.value(j);
+      if (!instance.isMissing(j)) {
+        if (value < ranges[j][R_MIN]) {
+          ranges[j][R_MIN] = value;
+          ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+          if (value > ranges[j][R_MAX]) { // if this is the first value that is
+            ranges[j][R_MAX] = value; // not missing. The,0
+            ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+          }
+        } else {
+          if (value > ranges[j][R_MAX]) {
+            ranges[j][R_MAX] = value;
+            ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+          }
         }
       }
     }
@@ -683,8 +666,21 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * @return the updated ranges
    */
   public double[][] updateRanges(Instance instance, double[][] ranges) {
-
-    updateRanges(instance, instance.numAttributes(), ranges);
+    // updateRangesFirst must have been called on ranges
+    for (int j = 0; j < ranges.length; j++) {
+      double value = instance.value(j);
+      if (!instance.isMissing(j)) {
+        if (value < ranges[j][R_MIN]) {
+          ranges[j][R_MIN] = value;
+          ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+        } else {
+          if (instance.value(j) > ranges[j][R_MAX]) {
+            ranges[j][R_MAX] = value;
+            ranges[j][R_WIDTH] = ranges[j][R_MAX] - ranges[j][R_MIN];
+          }
+        }
+      }
+    }
 
     return ranges;
   }
@@ -698,8 +694,25 @@ public abstract class NormalizableDistance implements DistanceFunction,
    * @throws Exception if something goes wrong
    */
   public double[][] initializeRanges(int[] instList) throws Exception {
+    if (m_Data == null) {
+      throw new Exception("No instances supplied.");
+    }
 
-    return initializeRanges(instList, 0, instList.length - 1);
+    int numAtt = m_Data.numAttributes();
+    double[][] ranges = new double[numAtt][3];
+
+    if (m_Data.numInstances() <= 0) {
+      initializeRangesEmpty(numAtt, ranges);
+      return ranges;
+    } else {
+      // initialize ranges using the first instance
+      updateRangesFirst(m_Data.instance(instList[0]), numAtt, ranges);
+      // update ranges, starting from the second
+      for (int i = 1; i < instList.length; i++) {
+        updateRanges(m_Data.instance(instList[i]), numAtt, ranges);
+      }
+    }
+    return ranges;
   }
 
   /**
@@ -739,7 +752,7 @@ public abstract class NormalizableDistance implements DistanceFunction,
   }
 
   /**
-   * Update the ranges with a new instance.
+   * Update the ranges if a new instance comes.
    * 
    * @param instance the new instance
    */
@@ -750,8 +763,7 @@ public abstract class NormalizableDistance implements DistanceFunction,
   }
 
   /**
-   * Test if an instance is within the given ranges. Missing values are skipped.
-   * Inefficient when using sparse data.
+   * Test if an instance is within the given ranges.
    * 
    * @param instance the instance
    * @param ranges the ranges the instance is tested to be in

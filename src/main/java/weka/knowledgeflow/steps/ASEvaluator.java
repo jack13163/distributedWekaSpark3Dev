@@ -135,7 +135,7 @@ public class ASEvaluator extends WekaAlgorithmWrapper {
    */
   @Override
   public Class getWrappedAlgorithmClass() {
-    return ASEvaluation.class;
+    return weka.attributeSelection.ASEvaluation.class;
   }
 
   /**
@@ -156,7 +156,7 @@ public class ASEvaluator extends WekaAlgorithmWrapper {
    * @return the attribute or subset evaluator wrapped by this step
    */
   public ASEvaluation getEvaluator() {
-    return (ASEvaluation) getWrappedAlgorithm();
+    return (weka.attributeSelection.ASEvaluation) getWrappedAlgorithm();
   }
 
   /**

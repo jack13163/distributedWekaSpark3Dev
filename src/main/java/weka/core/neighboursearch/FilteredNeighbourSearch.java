@@ -378,7 +378,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch implements C
    * @param target the instance for which to find the nearest neighbour
    * @return the nearest neighbour
    * 
-   * @see NearestNeighbourSearch#nearestNeighbour(Instance)
+   * @see weka.core.neighboursearch.NearestNeighbourSearch#nearestNeighbour(weka.core.Instance)
    */
   @Override
   public Instance nearestNeighbour(Instance target) throws Exception {
@@ -398,7 +398,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch implements C
    * @param k the number of nearest neighbours to return
    * @return the nearest Neighbours
    * 
-   * @see NearestNeighbourSearch#kNearestNeighbours(Instance,
+   * @see weka.core.neighboursearch.NearestNeighbourSearch#kNearestNeighbours(weka.core.Instance,
    *      int)
    */
   @Override
@@ -424,7 +424,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch implements C
    * 
    * @return the array of distances for the nearest neighbours
    * 
-   * @see NearestNeighbourSearch#getDistances()
+   * @see weka.core.neighboursearch.NearestNeighbourSearch#getDistances()
    */
   @Override
   public double[] getDistances() throws Exception {
@@ -434,7 +434,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch implements C
   /**
    * Updates ranges based on the given instance, once it has been filtered.
    * 
-   * @see NearestNeighbourSearch#update(Instance)
+   * @see weka.core.neighboursearch.NearestNeighbourSearch#update(weka.core.Instance)
    */
   @Override
   public void update(Instance ins) throws Exception {

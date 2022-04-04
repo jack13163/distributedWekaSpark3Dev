@@ -155,7 +155,7 @@ import weka.core.WeightedInstancesHandler;
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 15232 $
+ * @version $Revision: 11006 $
  */
 public class HoeffdingTree extends AbstractClassifier implements
     UpdateableClassifier, WeightedInstancesHandler, OptionHandler,
@@ -447,8 +447,6 @@ public class HoeffdingTree extends AbstractClassifier implements
     }
 
     m_printLeafModels = Utils.getFlag('P', options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -757,7 +755,7 @@ public class HoeffdingTree extends AbstractClassifier implements
   /**
    * Updates the classifier with the given instance.
    * 
-   * @param inst the new training instance to include in the model
+   * @param instance the new training instance to include in the model
    * @exception Exception if the instance could not be incorporated in the
    *              model.
    */
@@ -799,7 +797,7 @@ public class HoeffdingTree extends AbstractClassifier implements
   /**
    * Returns class probabilities for an instance.
    * 
-   * @param inst the instance to compute the distribution for
+   * @param instance the instance to compute the distribution for
    * @return the class probabilities
    * @throws Exception if distribution can't be computed successfully
    */
@@ -992,7 +990,7 @@ public class HoeffdingTree extends AbstractClassifier implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15232 $");
+    return RevisionUtils.extract("$Revision: 11006 $");
   }
 
   public static void main(String[] args) {

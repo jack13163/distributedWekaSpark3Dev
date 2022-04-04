@@ -21,25 +21,6 @@
 
 package weka.gui.beans;
 
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Tag;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-import weka.gui.WekaFileChooser;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
@@ -52,11 +33,29 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Tag;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+
 /**
  * GUI Customizer for the SerializedModelSaver bean
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 15104 $
+ * @version $Revision: 11076 $
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
@@ -73,12 +72,12 @@ public class SerializedModelSaverCustomizer
   private final PropertyChangeSupport m_pcSupport =
     new PropertyChangeSupport(this);
 
-  private SerializedModelSaver m_smSaver;
+  private weka.gui.beans.SerializedModelSaver m_smSaver;
 
   private final PropertySheetPanel m_SaverEditor =
     new PropertySheetPanel();
 
-  private final WekaFileChooser m_fileChooser = new WekaFileChooser(new File(
+  private final JFileChooser m_fileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   private Window m_parentWindow;
@@ -286,7 +285,6 @@ public class SerializedModelSaverCustomizer
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
           m_fileChooserFrame = jf;
           jf.pack();
-          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SerializedModelSaverCustomizer.this));
           jf.setVisible(true);
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -457,7 +455,7 @@ public class SerializedModelSaverCustomizer
    */
   @Override
   public void setObject(Object object) {
-    m_smSaver = (SerializedModelSaver) object;
+    m_smSaver = (weka.gui.beans.SerializedModelSaver) object;
     m_SaverEditor.setTarget(m_smSaver);
     m_prefixBackup = m_smSaver.getPrefix();
     m_directoryBackup = m_smSaver.getDirectory();

@@ -127,7 +127,7 @@ import weka.core.converters.ArffLoader.ArffReader;
  <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14115 $
+ * @version $Revision: 11831 $
  */
 public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   IncrementalConverter, OptionHandler {
@@ -263,7 +263,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
   @Override
   public String getRevision() {
-    return "$Revision: 14115 $";
+    return "$Revision: 11831 $";
   }
 
   /**
@@ -686,9 +686,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (getDateAttributes().length() > 0) {
       result.add("-D");
       result.add(getDateAttributes());
+      result.add("-format");
+      result.add(getDateFormat());
     }
-    result.add("-format");
-    result.add(getDateFormat());
 
     if (getNumericAttributes().length() > 0) {
       result.add("-R");
@@ -1032,7 +1032,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     for (int i = 0; i < m_types.length; i++) {
       if (m_types[i] == TYPE.STRING || m_types[i] == TYPE.UNDETERMINED) {
         attribs.add(new Attribute(m_structure.attribute(i).name(),
-          (List<String>) null));
+          (java.util.List<String>) null));
       } else if (m_types[i] == TYPE.NUMERIC) {
         attribs.add(new Attribute(m_structure.attribute(i).name()));
       } else if (m_types[i] == TYPE.NOMINAL) {
@@ -1116,7 +1116,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
           attName = m_st.sval;
         }
 
-        attribNames.add(new Attribute(attName, (List<String>) null));
+        attribNames.add(new Attribute(attName, (java.util.List<String>) null));
       }
       if (!wasSep) {
         StreamTokenizerUtils.getToken(m_st);

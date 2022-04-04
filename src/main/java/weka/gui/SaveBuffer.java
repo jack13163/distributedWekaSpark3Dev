@@ -21,14 +21,15 @@
 
 package weka.gui;
 
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /**
  * This class handles the saving of StringBuffers to files. It will pop
@@ -67,12 +68,12 @@ public class SaveBuffer {
    */
   public boolean save(StringBuffer buf) {
     if (buf != null) {
-      WekaFileChooser fileChooser;
+      JFileChooser fileChooser;
       if (m_lastvisitedDirectory == null) {
-	fileChooser = new WekaFileChooser(
+	fileChooser = new JFileChooser(
 		      new File(System.getProperty("user.dir")));
       } else {
-	fileChooser = new WekaFileChooser(m_lastvisitedDirectory);
+	fileChooser = new JFileChooser(m_lastvisitedDirectory);
       }
 
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -173,7 +174,7 @@ public class SaveBuffer {
        final javax.swing.JFrame jf =
 	 new javax.swing.JFrame("SaveBuffer test");
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
-      LogPanel lp = new LogPanel();
+      weka.gui.LogPanel lp = new weka.gui.LogPanel();
       javax.swing.JButton jb = new javax.swing.JButton("Save");
       jf.getContentPane().add(jb,java.awt.BorderLayout.SOUTH);
       jf.getContentPane().add(lp, java.awt.BorderLayout.CENTER);

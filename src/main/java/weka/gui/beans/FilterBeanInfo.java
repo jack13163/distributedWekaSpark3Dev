@@ -75,7 +75,7 @@ public class FilterBeanInfo extends SimpleBeanInfo {
    * @return a <code>BeanDescriptor</code> value
    */
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Filter.class,
+    return new BeanDescriptor(weka.gui.beans.Filter.class,
 			      FilterCustomizer.class);
   }
 }

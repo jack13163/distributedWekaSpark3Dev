@@ -40,7 +40,7 @@ public class AddUserFieldsBeanInfo extends SimpleBeanInfo {
   @Override
   public BeanDescriptor getBeanDescriptor() {
     return new BeanDescriptor(
-        AddUserFields.class,
+        weka.filters.unsupervised.attribute.AddUserFields.class,
         weka.gui.filters.AddUserFieldsCustomizer.class);
   }
 }

@@ -21,7 +21,6 @@
 package weka.gui;
 
 import java.awt.Color;
-import java.io.InterruptedIOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 
@@ -36,7 +35,7 @@ import javax.swing.text.StyledDocument;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15288 $
+ * @version $Revision: 8034 $
  */
 public class ReaderToTextPane
   extends Thread {
@@ -49,9 +48,6 @@ public class ReaderToTextPane
   
   /** the color to use. */
   protected Color m_Color;
-
-  /** string buffer to use for content */
-  protected StringBuffer m_Buffer;
 
   /**
    * Sets up the thread. Using black as color for displaying the text.
@@ -79,7 +75,6 @@ public class ReaderToTextPane
     m_Color  = color;
     m_Input  = new LineNumberReader(input);
     m_Output = output;
-    m_Buffer = new StringBuffer();
     
     doc   = m_Output.getStyledDocument();
     style = StyleContext.getDefaultStyleContext()
@@ -112,50 +107,22 @@ public class ReaderToTextPane
    * to the text component.
    */
   public void run() {
-
-    Thread t = new Thread() {
-      public void run() {
-        long oldSize = 0;
-        while (true) {
-          try {
-            long currentSize = m_Buffer.length();
-            if ((currentSize > 0) && (currentSize == oldSize)) {
-              StyledDocument doc = m_Output.getStyledDocument();
-              doc.insertString(doc.getLength(), m_Buffer.toString(), doc.getStyle(getStyleName()));
-              m_Output.setCaretPosition(doc.getLength());
-              m_Buffer.delete(0, m_Buffer.length());
-              oldSize = 0;
-            } else {
-              oldSize = currentSize;
-            }
-            sleep(100);
-          } catch (Exception e) {
-            if (e instanceof InterruptedException || e instanceof InterruptedIOException) {
-              break;
-            }
-          }
-        }
-      }
-    };
-    t.start();
-
     while (true) {
       try {
-        String s = m_Input.readLine();
-        m_Buffer.append(s).append('\n');
-      } catch (Exception ex) {
-        if (ex instanceof InterruptedException || ex instanceof InterruptedIOException) {
-          t.interrupt();
-          break;
-        }
-        try {
-          sleep(100);
-        } catch (Exception e) {
-          if (e instanceof InterruptedException) {
-            t.interrupt();
-            break;
-          }
-        }
+	StyledDocument doc = m_Output.getStyledDocument();
+	doc.insertString(
+	    doc.getLength(), 
+	    m_Input.readLine() + '\n', 
+	    doc.getStyle(getStyleName()));
+	m_Output.setCaretPosition(doc.getLength());
+      }
+      catch (Exception ex) {
+	try {
+	  sleep(100);
+	}
+	catch (Exception e) {
+	  // ignored
+	}
       }
     }
   }

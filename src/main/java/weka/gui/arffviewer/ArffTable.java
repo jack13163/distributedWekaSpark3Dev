@@ -53,7 +53,7 @@ import weka.gui.ViewerDialog;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14583 $
+ * @version $Revision: 10216 $
  */
 public class ArffTable extends JTable {
 
@@ -104,7 +104,7 @@ public class ArffTable extends JTable {
           dialog = new ViewerDialog(null);
           dialog.setTitle("Relational attribute Viewer - "
             + ((ArffSortedTableModel) getModel()).getInstances()
-              .attribute(((ArffSortedTableModel)getModel()).getAttributeIndex(columnIndex)).name());
+              .attribute(m_ColumnIndex - 1).name());
           result = dialog.showDialog(m_CurrentInst);
           if (result == ViewerDialog.APPROVE_OPTION) {
             m_CurrentInst = dialog.getInstances();
@@ -130,7 +130,7 @@ public class ArffTable extends JTable {
 
       model = (ArffSortedTableModel) getModel();
       value = model.getInstancesValueAt(rowIndex, columnIndex);
-      result = model.getInstances().attribute(model.getAttributeIndex(columnIndex))
+      result = model.getInstances().attribute(columnIndex - 1)
         .relation((int) value);
 
       return result;
@@ -293,7 +293,7 @@ public class ArffTable extends JTable {
         if (arffModel.getType(i) == Attribute.NOMINAL) {
           combo = new JComboBox();
           combo.addItem(null);
-          enm = arffModel.getInstances().attribute(arffModel.getAttributeIndex(i)).enumerateValues();
+          enm = arffModel.getInstances().attribute(i - 1).enumerateValues();
           while (enm.hasMoreElements()) {
             Object o = enm.nextElement();
             if (o instanceof SerializedObject) {
@@ -336,11 +336,7 @@ public class ArffTable extends JTable {
       if (columnIndex == 0) {
         result = "No.";
       } else {
-        if (arffModel.getAttributeIndex(columnIndex) < 0) {
-          result = "Weight";
-        } else {
-          result = arffModel.getAttributeAt(columnIndex).name();
-        }
+        result = arffModel.getAttributeAt(columnIndex).name();
       }
     }
 

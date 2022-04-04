@@ -805,11 +805,11 @@ public class Loader extends AbstractDataSource implements Startable,
   public static void main(String[] args) {
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
       final Loader tv = new Loader();
 
-      jf.getContentPane().add(tv, BorderLayout.CENTER);
+      jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {

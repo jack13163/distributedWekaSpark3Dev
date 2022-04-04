@@ -21,26 +21,39 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> A filter that generates output with a new order of
- * the attributes. Useful if one wants to move an attribute to the end of the list of attributes to use it
- * as class attribute (e.g., using "-R 2-last,1").<br/><br/>
- * It is not only possible to change the order of the attributes. Attributes can also be left out.
- * E.g. if you have 10 attributes, you can
- * generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/><br/>
- * You can also duplicate attributes, e.g., for further processing later on: e.g., using
- * 1,1,1,4,4,4,2,2,2 if one needs to process two copies of the attributes with other filters but also
- * needs to keep the original attributes.<br/><br/>
- * One can simply reverse the order of the attributes via 'last-first'.<br/><br/>
- * After applying the filter, the index of the class attribute is set to the index of the last
+ * the attributes. Useful if one wants to move an attribute to the end to use it
+ * as class attribute (e.g. with using "-R 2-last,1").<br/>
+ * But it's not only possible to change the order of all the attributes, but
+ * also to leave out attributes. E.g. if you have 10 attributes, you can
+ * generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/>
+ * You can also duplicate attributes, e.g. for further processing later on: e.g.
+ * 1,1,1,4,4,4,2,2,2 where the second and the third column of each attribute are
+ * processed differently and the first one, i.e. the original one is kept.<br/>
+ * One can simply inverse the order of the attributes via 'last-first'.<br/>
+ * After appyling the filter, the index of the class attribute is the last
  * attribute.
  * <p/>
  * <!-- globalinfo-end -->
@@ -50,16 +63,17 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -R &lt;index1,index2-index4,...&gt;
- *  Specifies the order of the attributes (default first-last).
+ *  Specify list of columns to copy. First and last are valid
+ *  indexes. (default first-last)
  * </pre>
  * 
  * <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14605 $
+ * @version $Revision: 12037 $
  */
 public class Reorder extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -1135571321097202292L;
@@ -80,11 +94,6 @@ public class Reorder extends Filter implements UnsupervisedFilter,
   protected int[] m_InputStringIndex;
 
   /**
-   * Whether to set all attribute weights to 1.0 in the reordered data.
-   */
-  protected boolean m_setAllAttributeWeightsToOne;
-
-  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -95,7 +104,8 @@ public class Reorder extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
-      "\tSpecifies the order of the attributes (default first-last).", "R", 1,
+      "\tSpecify list of columns to copy. First and last are valid\n"
+        + "\tindexes. (default first-last)", "R", 1,
       "-R <index1,index2-index4,...>"));
 
     return newVector.elements();
@@ -110,7 +120,8 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -R &lt;index1,index2-index4,...&gt;
-   *  Specifies the order of the attributes (default first-last).
+   *  Specify list of columns to copy. First and last are valid
+   *  indexes. (default first-last)
    * </pre>
    * 
    * <!-- options-end -->
@@ -271,36 +282,14 @@ public class Reorder extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
 
-    // An array to keep track of how of how often each attribute is chosen
-    int[] frequency = new int[instanceInfo.numAttributes()];
-    m_SelectedAttributes = determineIndices(instanceInfo.numAttributes());
-    boolean atLeastOneAttributeOccursMoreThanOnce = false;
-    for (int current : m_SelectedAttributes) {
-      frequency[current]++;
-      if (frequency[current] > 1) {
-        if (current == instanceInfo.classIndex()) {
-          throw new IllegalArgumentException("Reorder filter: Cannot duplicate class attribute");
-        }
-        atLeastOneAttributeOccursMoreThanOnce = true;
-        break;
-      }
-    }
-    Arrays.fill(frequency, 0);
-
     ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     int outputClass = -1;
+    m_SelectedAttributes = determineIndices(instanceInfo.numAttributes());
     for (int current : m_SelectedAttributes) {
       if (instanceInfo.classIndex() == current) {
         outputClass = attributes.size();
       }
-      String newName = instanceInfo.attribute(current).name();
-      if (atLeastOneAttributeOccursMoreThanOnce) {
-        newName += "_" + (++frequency[current]); // Make sure attribute names in filtered data are unique
-      }
-      Attribute keep = (Attribute) instanceInfo.attribute(current).copy(newName);
-      if (m_setAllAttributeWeightsToOne) {
-        keep.setWeight(1.0);
-      }
+      Attribute keep = (Attribute) instanceInfo.attribute(current).copy();
       attributes.add(keep);
     }
 
@@ -312,14 +301,6 @@ public class Reorder extends Filter implements UnsupervisedFilter,
     setOutputFormat(outputFormat);
 
     return true;
-  }
-
-  /**
-   * Whether to set all attribute weights to one in output data.
-   */
-  public void setAllAttributeWeightsToOne(boolean b) {
-
-    m_setAllAttributeWeightsToOne = b;
   }
 
   /**
@@ -368,16 +349,17 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
     return "A filter that generates output with a new order of the "
-      + "attributes. Useful if one wants to move an attribute to the end of the list of attributes to "
-      + "use it as class attribute (e.g., using \"-R 2-last,1\").\n\n"
-      + "It is not only possible to change the order of the attributes. "
-      + "Attributes can also be left out. E.g. if you have 10 attributes, you "
-      + "can generate the following output order: 1,3,5,7,9,10 or 10,1-5.\n\n"
-      + "You can also duplicate attributes, e.g., for further processing later "
-      + "on: e.g., using 1,1,1,4,4,4,2,2,2 if one needs to process two copies of the attributes "
-            + "with other filters but also needs to keep the original attributes.\n\n"
-      + "One can simply reverse the order of the attributes via 'last-first'.\n\n"
-      + "After applying the filter, the index of the class attribute is set to the index of the "
+      + "attributes. Useful if one wants to move an attribute to the end to "
+      + "use it as class attribute (e.g. with using \"-R 2-last,1\").\n"
+      + "But it's not only possible to change the order of all the attributes, "
+      + "but also to leave out attributes. E.g. if you have 10 attributes, you "
+      + "can generate the following output order: 1,3,5,7,9,10 or 10,1-5.\n"
+      + "You can also duplicate attributes, e.g. for further processing later "
+      + "on: e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of "
+      + "each attribute are processed differently and the first one, i.e. the "
+      + "original one is kept.\n"
+      + "One can simply inverse the order of the attributes via 'last-first'.\n"
+      + "After appyling the filter, the index of the class attribute is the "
       + "last attribute.";
   }
 
@@ -446,7 +428,7 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14605 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -72,7 +72,7 @@ public class ClassValuePickerBeanInfo
   }
 
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(ClassValuePicker.class,
+    return new BeanDescriptor(weka.gui.beans.ClassValuePicker.class,
 			      ClassValuePickerCustomizer.class);
   }
 }

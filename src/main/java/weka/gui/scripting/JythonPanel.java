@@ -42,7 +42,7 @@ import weka.gui.visualize.VisualizeUtils;
  * A scripting panel for <a href="http://www.jython.org/" target="_blank">Jython</a>.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15257 $
+ * @version $Revision: 8034 $
  */
 public class JythonPanel
   extends FileScriptingPanel {
@@ -116,10 +116,10 @@ public class JythonPanel
     result.add(panel, BorderLayout.SOUTH);
     
     panel.add(new JLabel("Jython homepage"));
-    panel.add(BrowserHelper.createLink("https://www.jython.org/", null));
+    panel.add(BrowserHelper.createLink("http://www.jython.org/", null));
     panel.add(new JLabel(" "));
     panel.add(new JLabel("Weka and Jython"));
-    panel.add(BrowserHelper.createLink("https://waikato.github.io/weka-wiki/using_weka_from_jython", null));
+    panel.add(BrowserHelper.createLink("http://weka.wikispaces.com/Using+Weka+from+Jython", null));
     
     return result;
   }

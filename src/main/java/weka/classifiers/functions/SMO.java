@@ -225,7 +225,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 14824 $
+ * @version $Revision: 12558 $
  */
 public class SMO 
   extends AbstractClassifier 
@@ -1198,7 +1198,7 @@ public class SMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 14824 $");
+      return RevisionUtils.extract("$Revision: 12558 $");
     }
   }
 
@@ -1708,7 +1708,7 @@ public class SMO
     result.addElement(new Option(
             "\tFull name of calibration model, followed by options.\n" +
                     "\t(default: \"weka.classifiers.functions.Logistic\")",
-            "calibrator", 1, "-calibrator <scheme specification>"));
+            "calibrator", 0, "-calibrator <scheme specification>"));
 
     result.addAll(Collections.list(super.listOptions()));
 
@@ -2291,7 +2291,7 @@ public class SMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14824 $");
+    return RevisionUtils.extract("$Revision: 12558 $");
   }
   
   /**

@@ -30,7 +30,7 @@ import weka.filters.SimpleStreamFilter;
 
 /**
  * <!-- globalinfo-start --> A filter that 'cleanses' the numeric data from
- * values that are too small, too big or very close to a certain value,
+ * values that are too small, too big or very close to a certain value (e.g., 0)
  * and sets these values to a pre-defined default.
  * <p/>
  * <!-- globalinfo-end -->
@@ -39,7 +39,7 @@ import weka.filters.SimpleStreamFilter;
  * <p/>
  * 
  * <pre>
- * -output-debug-info
+ * -D
  *  Turns on output of debugging information.
  * </pre>
  * 
@@ -50,14 +50,13 @@ import weka.filters.SimpleStreamFilter;
  * 
  * <pre>
  * -min-default &lt;double&gt;
- *  The minimum threshold below which values are replaced by the corresponding default.
+ *  The replacement for values smaller than the minimum threshold.
  *  (default -Double.MAX_VALUE)
  * </pre>
  * 
  * <pre>
  * -max &lt;double&gt;
- *  The maximum threshold above which values are replaced by the corresponding default.
- *  (default Double.MAX_VALUE)
+ *  The maximum threshold. (default Double.MAX_VALUE)
  * </pre>
  * 
  * <pre>
@@ -68,18 +67,19 @@ import weka.filters.SimpleStreamFilter;
  * 
  * <pre>
  * -closeto &lt;double&gt;
- *  The value with respect to which closeness is determined. (default 0)
+ *  The number values are checked for closeness. (default 0)
  * </pre>
  * 
  * <pre>
  * -closeto-default &lt;double&gt;
- *  The replacement for values that are too close to '-closeto'.
+ *  The replacement for values that are close to '-closeto'.
  *  (default 0)
  * </pre>
  * 
  * <pre>
  * -closeto-tolerance &lt;double&gt;
- *  The tolerance for testing whether a value is too close. (default 1E-6)
+ *  The tolerance below which numbers are considered being close to 
+ *  to each other. (default 1E-6)
  * </pre>
  * 
  * <pre>
@@ -102,16 +102,16 @@ import weka.filters.SimpleStreamFilter;
  * <pre>
  * -include-class
  *  Whether to include the class in the cleansing.
- *  The class column will always be skipped if this flag is not
+ *  The class column will always be skipped, if this flag is not
  *  present. (default no)
  * </pre>
  * 
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12473 $
  */
-public class NumericCleaner extends SimpleStreamFilter implements WeightedAttributesHandler, WeightedInstancesHandler {
+public class NumericCleaner extends SimpleStreamFilter {
 
   /** for serialization */
   private static final long serialVersionUID = -352890679895066592L;
@@ -157,7 +157,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
   @Override
   public String globalInfo() {
     return "A filter that 'cleanses' the numeric data from values that are too "
-      + "small, too big or very close to a certain value, and sets "
+      + "small, too big or very close to a certain value (e.g., 0) and sets "
       + "these values to a pre-defined default.";
   }
 
@@ -172,8 +172,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
     Vector<Option> result = new Vector<Option>(11);
 
     result.addElement(new Option(
-      "\tThe minimum threshold below which values are replaced by the corresponding default.\n" +
-              "\t(default -Double.MAX_VALUE)", "min", 1,
+      "\tThe minimum threshold. (default -Double.MAX_VALUE)", "min", 1,
       "-min <double>"));
 
     result.addElement(new Option(
@@ -182,8 +181,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
       "-min-default <double>"));
 
     result.addElement(new Option(
-      "\tThe maximum threshold above which values are replaced by the corresponding default.\n" +
-              "\t(default Double.MAX_VALUE)", "max", 1,
+      "\tThe maximum threshold. (default Double.MAX_VALUE)", "max", 1,
       "-max <double>"));
 
     result.addElement(new Option(
@@ -192,16 +190,16 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
       "-max-default <double>"));
 
     result.addElement(new Option(
-      "\tThe value with respect to which closeness is determined. (default 0)", "closeto",
+      "\tThe number values are checked for closeness. (default 0)", "closeto",
       1, "-closeto <double>"));
 
     result.addElement(new Option(
-      "\tThe replacement for values that are too close to '-closeto'.\n"
+      "\tThe replacement for values that are close to '-closeto'.\n"
         + "\t(default 0)", "closeto-default", 1, "-closeto-default <double>"));
 
     result.addElement(new Option(
-      "\tThe tolerance for testing whether a value is too close.\n" +
-        "\t(default 1E-6)", "closeto-tolerance", 1,
+      "\tThe tolerance below which numbers are considered being close to \n"
+        + "\tto each other. (default 1E-6)", "closeto-tolerance", 1,
       "-closeto-tolerance <double>"));
 
     result.addElement(new Option(
@@ -217,7 +215,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
 
     result.addElement(new Option(
       "\tWhether to include the class in the cleansing.\n"
-        + "\tThe class column will always be skipped if this flag is not\n"
+        + "\tThe class column will always be skipped, if this flag is not\n"
         + "\tpresent. (default no)", "include-class", 0, "-include-class"));
 
     result.addAll(Collections.list(super.listOptions()));
@@ -281,75 +279,75 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    * 
    * <!-- options-start --> Valid options are:
    * <p/>
-   *
+   * 
    * <pre>
-   * -output-debug-info
+   * -D
    *  Turns on output of debugging information.
    * </pre>
-   *
+   * 
    * <pre>
    * -min &lt;double&gt;
    *  The minimum threshold. (default -Double.MAX_VALUE)
    * </pre>
-   *
+   * 
    * <pre>
    * -min-default &lt;double&gt;
-   *  The minimum threshold below which values are replaced by the corresponding default.
+   *  The replacement for values smaller than the minimum threshold.
    *  (default -Double.MAX_VALUE)
    * </pre>
-   *
+   * 
    * <pre>
    * -max &lt;double&gt;
-   *  The maximum threshold above which values are replaced by the corresponding default.
-   *  (default Double.MAX_VALUE)
+   *  The maximum threshold. (default Double.MAX_VALUE)
    * </pre>
-   *
+   * 
    * <pre>
    * -max-default &lt;double&gt;
    *  The replacement for values larger than the maximum threshold.
    *  (default Double.MAX_VALUE)
    * </pre>
-   *
+   * 
    * <pre>
    * -closeto &lt;double&gt;
-   *  The value with respect to which closeness is determined. (default 0)
+   *  The number values are checked for closeness. (default 0)
    * </pre>
-   *
+   * 
    * <pre>
    * -closeto-default &lt;double&gt;
-   *  The replacement for values that are too close to '-closeto'.
+   *  The replacement for values that are close to '-closeto'.
    *  (default 0)
    * </pre>
-   *
+   * 
    * <pre>
    * -closeto-tolerance &lt;double&gt;
-   *  The tolerance for testing whether a value is too close. (default 1E-6)
+   *  The tolerance below which numbers are considered being close to 
+   *  to each other. (default 1E-6)
    * </pre>
-   *
+   * 
    * <pre>
    * -decimals &lt;int&gt;
    *  The number of decimals to round to, -1 means no rounding at all.
    *  (default -1)
    * </pre>
-   *
+   * 
    * <pre>
    * -R &lt;col1,col2,...&gt;
    *  The list of columns to cleanse, e.g., first-last or first-3,5-last.
    *  (default first-last)
    * </pre>
-   *
+   * 
    * <pre>
    * -V
    *  Inverts the matching sense.
    * </pre>
-   *
+   * 
    * <pre>
    * -include-class
    *  Whether to include the class in the cleansing.
-   *  The class column will always be skipped if this flag is not
+   *  The class column will always be skipped, if this flag is not
    *  present. (default no)
    * </pre>
-   *
+   * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -562,7 +560,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String minThresholdTipText() {
-    return "The minimum threshold below which values are replaced by the corresponding default.";
+    return "The minimum threshold below values are replaced by a default.";
   }
 
   /**
@@ -590,7 +588,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String minDefaultTipText() {
-    return "The replacement for values smaller than the minimum threshold.";
+    return "The default value to replace values that are below the minimum threshold.";
   }
 
   /**
@@ -618,7 +616,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String maxThresholdTipText() {
-    return "The maximum threshold above which values are replaced by the corresponding default.";
+    return "The maximum threshold above values are replaced by a default.";
   }
 
   /**
@@ -646,7 +644,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String maxDefaultTipText() {
-    return "The replacement for values larger than the maximum threshold.";
+    return "The default value to replace values that are above the maximum threshold.";
   }
 
   /**
@@ -674,7 +672,8 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String closeToTipText() {
-    return "The value with respect to which closeness is determined.";
+    return "The number values are checked for whether they are too close to "
+      + "and get replaced by a default.";
   }
 
   /**
@@ -702,7 +701,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String closeToDefaultTipText() {
-    return "The replacement for values that are too close.";
+    return "The default value to replace values with that are too close.";
   }
 
   /**
@@ -730,7 +729,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String closeToToleranceTipText() {
-    return "The tolerance for testing whether a value is too close.";
+    return "The value below which values are considered close to.";
   }
 
   /**
@@ -758,7 +757,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String attributeIndicesTipText() {
-    return "The selection of columns to use in the cleansing process, first and last are valid indices.";
+    return "The selection of columns to use in the cleansing processs, first and last are valid indices.";
   }
 
   /**
@@ -786,7 +785,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
-    return "If enabled, the selection of the columns is inverted.";
+    return "If enabled the selection of the columns is inverted.";
   }
 
   /**
@@ -814,7 +813,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    *         explorer/experimenter gui
    */
   public String includeClassTipText() {
-    return "If disabled, the class attribute will be left out of the cleaning process.";
+    return "If disabled, the class attribute will be always left out of the cleaning process.";
   }
 
   /**
@@ -871,7 +870,7 @@ public class NumericCleaner extends SimpleStreamFilter implements WeightedAttrib
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12473 $");
   }
 
   /**

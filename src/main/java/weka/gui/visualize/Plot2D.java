@@ -48,7 +48,7 @@ import java.util.Vector;
  * errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 14582 $
+ * @version $Revision: 12391 $
  */
 public class Plot2D extends JPanel {
 
@@ -546,9 +546,6 @@ public class Plot2D extends JPanel {
                   (Instance) temp_plot.m_plotInstances.instance(i).copy());
                 insts.append("\nPlot : " + temp_plot.m_plotName
                   + "\nInstance: " + (i + 1) + "\n");
-                if (temp_plot.m_plotInstances.instance(i).weight() != 1.0) {
-                  insts.append("Weight : " + temp_plot.m_plotInstances.instance(i).weight() + "\n");
-                }
                 for (int j = 0; j < temp_plot.m_plotInstances.numAttributes(); j++) {
                   for (int k = 0; k < (longest - temp_plot.m_plotInstances
                     .attribute(j).name().length()); k++) {
@@ -1509,15 +1506,15 @@ public class Plot2D extends JPanel {
         System.exit(1);
       }
 
-      final JFrame jf =
-        new JFrame("Weka Explorer: Visualize");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       final Plot2D p2 = new Plot2D();
       jf.getContentPane().add(p2, BorderLayout.CENTER);
-      jf.addWindowListener(new WindowAdapter() {
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }

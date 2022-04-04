@@ -84,17 +84,22 @@ import weka.core.Utils;
  * 
  * <!-- options-end -->
  * 
- * Based on code from the TextDirectoryToArff tool.
- *
- * See the
- * <li><a href="https://waikato.github.io/weka-wiki/arff_from_text_collections/"
+ * Based on code from the TextDirectoryToArff tool:
+ * <ul>
+ * <li><a href=
+ * "https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2002-October/000685.html"
+ * target="_blank">Original tool</a></li>
+ * <li><a href=
+ * "https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2004-January/002160.html"
+ * target="_blank">Current version</a></li>
+ * <li><a href="http://weka.wikispaces.com/ARFF+files+from+Text+Collections"
  * target="_blank">Wiki article</a></li>
  * </ul>
  * 
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15257 $
+ * @version $Revision: 12184 $
  * @see Loader
  */
 public class TextDirectoryLoader extends AbstractLoader implements
@@ -636,7 +641,7 @@ public class TextDirectoryLoader extends AbstractLoader implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15257 $");
+    return RevisionUtils.extract("$Revision: 12184 $");
   }
 
   /**

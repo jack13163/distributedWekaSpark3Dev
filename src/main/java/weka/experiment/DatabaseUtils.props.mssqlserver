@@ -1,12 +1,12 @@
 # Database settings for Microsoft SQL Server 2000
 #
 # General information on database access can be found here:
-# https://waikato.github.io/weka-wiki/databases/
+# http://weka.wikispaces.com/Databases
 #
 # url:     http://www.microsoft.com/
 # jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 15257 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver

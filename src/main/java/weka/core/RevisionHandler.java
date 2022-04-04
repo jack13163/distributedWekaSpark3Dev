@@ -25,7 +25,7 @@ package weka.core;
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision: 8034 $
- * @see     RevisionUtils
+ * @see     weka.core.RevisionUtils
  */
 public interface RevisionHandler {
 

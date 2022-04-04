@@ -37,7 +37,7 @@ public class SubstringReplacerBeanInfo extends SimpleBeanInfo {
   @Override
   public BeanDescriptor getBeanDescriptor() {
     return new BeanDescriptor(
-      weka.filters.unsupervised.attribute.SubstringReplacer.class,
+      SubstringReplacer.class,
       SubstringReplacerFilterCustomizer.class);
   }
 }

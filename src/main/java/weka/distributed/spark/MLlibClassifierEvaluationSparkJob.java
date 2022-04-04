@@ -78,7 +78,7 @@ import weka.gui.beans.TextProducer;
  * this job are guaranteed to be the same as used by the
  * WekaClassifierEvaluationSparkJob as long as the same number of initial input
  * partitions, number of folds and random seed are used.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -598,7 +598,7 @@ public class MLlibClassifierEvaluationSparkJob extends SparkJob implements
 
   /**
    * Create cross-validation folds
-   * 
+   *
    * @param dataset the dataset (RDD of instances) to operate on
    * @param headerNoSummary the header of the dataset (without summary
    *          attributes)
@@ -763,7 +763,7 @@ public class MLlibClassifierEvaluationSparkJob extends SparkJob implements
 
   /**
    * Build the MLlib classifier/regressor models for the training folds
-   * 
+   *
    * @param dataset the dataset to operate on
    * @param folds the number of cross-validation folds
    * @param seed the random seed to use
@@ -809,7 +809,7 @@ public class MLlibClassifierEvaluationSparkJob extends SparkJob implements
 
   /**
    * Evaluate MLlib classifiers/regressors on test folds
-   * 
+   *
    * @param dataset the dataset to operate on
    * @param headerWithSummary the header of the dataset (with summary
    *          attributes)
@@ -1068,7 +1068,7 @@ public class MLlibClassifierEvaluationSparkJob extends SparkJob implements
       WDDataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
       // dataSet =
       // m_randomizeSparkJob.getRandomizedStratifiedRDD();
-      dataSet = (JavaRDD<weka.core.Instance>) d.getRDD();
+      dataSet = (JavaRDD<Instance>) d.getRDD();
       headerWithSummary = d.getHeaderWithSummary();
       setDataset(TRAINING_DATA, new WDDataset(dataSet, headerWithSummary));
     }

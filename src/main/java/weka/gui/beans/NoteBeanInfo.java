@@ -41,7 +41,7 @@ public class NoteBeanInfo extends SimpleBeanInfo {
   }
   
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Note.class,
-        NoteCustomizer.class);
+    return new BeanDescriptor(weka.gui.beans.Note.class, 
+        weka.gui.beans.NoteCustomizer.class);
   }
 }

@@ -107,7 +107,7 @@ import weka.core.Utils;
  * </ol>
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14072 $
+ * @version $Revision: 11424 $
  */
 public class Stats
 implements Serializable, RevisionHandler {
@@ -127,7 +127,7 @@ implements Serializable, RevisionHandler {
   /** The std deviation of values at the last calculateDerived() call */    
   public double stdDev = Double.NaN;
 
-  /** The mean of values, or Double.NaN if no values seen */
+  /** The mean of values at the last calculateDerived() call */    
   public double mean = Double.NaN;
 
   /** The minimum value seen, or Double.NaN if no values seen */
@@ -305,7 +305,8 @@ implements Serializable, RevisionHandler {
 
   /**
    * Tells the object to calculate any statistics that don't have their
-   * values automatically updated during add. Currently updates the standard deviation.
+   * values automatically updated during add. Currently updates the mean
+   * and standard deviation.
    */
   public void calculateDerived() {
 
@@ -345,7 +346,7 @@ implements Serializable, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14072 $");
+    return RevisionUtils.extract("$Revision: 11424 $");
   }
 
   /**

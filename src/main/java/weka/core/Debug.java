@@ -553,7 +553,7 @@ public class Debug
    * and not the java.util.logging stuff (see Log for that). Uses the 
    * writeToFile methods of the Debug class.
    * 
-   * @see Log
+   * @see Debug.Log
    * @see Debug#writeToFile(String, String)
    * @see Debug#writeToFile(String, String, boolean)
    */
@@ -664,7 +664,7 @@ public class Debug
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
    * @version $Revision: 8034 $ 
-   * @see SimpleLog
+   * @see Debug.SimpleLog
    */
   public static class Log
     implements Serializable, RevisionHandler {

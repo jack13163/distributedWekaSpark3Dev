@@ -33,7 +33,7 @@ import java.util.Set;
  * metrics.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 15006 $
+ * @version $Revision: 12409 $
  */
 public abstract class AbstractEvaluationMetric implements Serializable {
 
@@ -46,7 +46,7 @@ public abstract class AbstractEvaluationMetric implements Serializable {
    * 
    * @return a list of plugin metrics or null if there are no plugin metrics
    */
-  public synchronized static ArrayList<AbstractEvaluationMetric> getPluginMetrics() {
+  public static ArrayList<AbstractEvaluationMetric> getPluginMetrics() {
     ArrayList<AbstractEvaluationMetric> pluginMetricsList = null;
     Set<String> pluginMetrics =
       PluginManager.getPluginNamesOfType(AbstractEvaluationMetric.class
@@ -75,7 +75,7 @@ public abstract class AbstractEvaluationMetric implements Serializable {
    * of their implementation
    * 
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   * @version $Revision: 15006 $
+   * @version $Revision: 12409 $
    */
   public class UnknownStatisticException extends IllegalArgumentException {
 

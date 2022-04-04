@@ -27,18 +27,19 @@ import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.AbstractLoader;
 import weka.core.converters.AbstractSaver;
-import weka.core.converters.ConverterResources;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.FileSourcedConverter;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -52,10 +53,10 @@ import java.util.Vector;
  * can set a Capabilities filter.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15104 $
+ * @version $Revision: 13476 $
  * @see #setCapabilitiesFilter(Capabilities)
  */
-public class ConverterFileChooser extends WekaFileChooser {
+public class ConverterFileChooser extends JFileChooser {
 
   /** for serialization. */
   private static final long serialVersionUID = -5373058011025481738L;
@@ -69,6 +70,9 @@ public class ConverterFileChooser extends WekaFileChooser {
   /** the saver dialog. */
   public final static int SAVER_DIALOG = 2;
 
+  /** the file chooser itself. */
+  protected ConverterFileChooser m_Self;
+
   /** the file filters for the loaders. */
   protected static Vector<ExtensionFileFilter> m_LoaderFileFilters;
 
@@ -80,6 +84,9 @@ public class ConverterFileChooser extends WekaFileChooser {
 
   /** the converter that was chosen by the user. */
   protected Object m_CurrentConverter;
+
+  /** the configure button. */
+  protected JButton m_ConfigureButton;
 
   /** the propertychangelistener. */
   protected PropertyChangeListener m_Listener;
@@ -102,8 +109,11 @@ public class ConverterFileChooser extends WekaFileChooser {
   /** the checkbox for bringing up the GenericObjectEditor. */
   protected JCheckBox m_CheckBoxOptions;
 
+  /** the note about the options dialog. */
+  protected JLabel m_LabelOptions;
+
   /** the GOE for displaying the options of a loader/saver. */
-  protected GenericObjectEditor m_Editor;
+  protected GenericObjectEditor m_Editor = null;
 
   /** whether the GOE was OKed or Canceled. */
   protected int m_EditorResult;
@@ -112,8 +122,8 @@ public class ConverterFileChooser extends WekaFileChooser {
    * whether to display only core converters (hardcoded in ConverterUtils).
    * Necessary for RMI/Remote Experiments for instance.
    * 
-   * @see ConverterResources#CORE_FILE_LOADERS
-   * @see ConverterResources#CORE_FILE_SAVERS
+   * @see ConverterUtils#CORE_FILE_LOADERS
+   * @see ConverterUtils#CORE_FILE_SAVERS
    */
   protected boolean m_CoreConvertersOnly = false;
 
@@ -125,7 +135,6 @@ public class ConverterFileChooser extends WekaFileChooser {
    * Initialize the default set of filters for loaders and savers
    */
   public static void initDefaultFilters() {
-    ConverterUtils.initialize();
     initFilters(true, ConverterUtils.getFileLoaders());
     initFilters(false, ConverterUtils.getFileSavers());
   }
@@ -135,6 +144,7 @@ public class ConverterFileChooser extends WekaFileChooser {
    */
   public ConverterFileChooser() {
     super();
+    initialize();
   }
 
   /**
@@ -144,6 +154,7 @@ public class ConverterFileChooser extends WekaFileChooser {
    */
   public ConverterFileChooser(File currentDirectory) {
     super(currentDirectory);
+    initialize();
   }
 
   /**
@@ -153,6 +164,7 @@ public class ConverterFileChooser extends WekaFileChooser {
    */
   public ConverterFileChooser(String currentDirectory) {
     super(currentDirectory);
+    initialize();
   }
 
   /**
@@ -160,14 +172,21 @@ public class ConverterFileChooser extends WekaFileChooser {
    */
   protected void initialize() {
     JPanel panel;
+    JPanel panel2;
 
-    super.initialize();
+    m_Self = this;
 
-    panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    m_AccessoryPanel.add(panel, BorderLayout.NORTH);
     m_CheckBoxOptions = new JCheckBox("Invoke options dialog");
     m_CheckBoxOptions.setMnemonic('I');
-    panel.add(m_CheckBoxOptions);
+    m_LabelOptions = new JLabel(
+      "<html><br>Note:<br><br>Some file formats offer additional<br>options which can be customized<br>when invoking the options dialog.</html>");
+    panel = new JPanel(new BorderLayout());
+    panel.add(m_CheckBoxOptions, BorderLayout.NORTH);
+    panel2 = new JPanel(new BorderLayout());
+    panel2.add(m_LabelOptions, BorderLayout.NORTH);
+    panel2.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    panel.add(panel2, BorderLayout.CENTER);
+    setAccessory(panel);
 
     m_Editor = new GenericObjectEditor(false);
     ((GenericObjectEditor.GOEPanel) m_Editor.getCustomEditor())
@@ -218,7 +237,7 @@ public class ConverterFileChooser extends WekaFileChooser {
         filter = list.get(i);
         loader = ConverterUtils
           .getLoaderForExtension(filter.getExtensions()[0]);
-        if (ConverterResources.isCoreFileLoader(loader.getClass().getName())) {
+        if (ConverterUtils.isCoreFileLoader(loader.getClass().getName())) {
           result.add(filter);
         }
       }
@@ -248,7 +267,7 @@ public class ConverterFileChooser extends WekaFileChooser {
       for (i = 0; i < list.size(); i++) {
         filter = list.get(i);
         saver = ConverterUtils.getSaverForExtension(filter.getExtensions()[0]);
-        if (ConverterResources.isCoreFileSaver(saver.getClass().getName())) {
+        if (ConverterUtils.isCoreFileSaver(saver.getClass().getName())) {
           result.add(filter);
         }
       }

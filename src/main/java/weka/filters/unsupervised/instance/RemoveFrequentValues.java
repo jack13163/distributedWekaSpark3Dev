@@ -28,8 +28,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -54,7 +64,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -N &lt;num&gt;
- *  Number of values to retain for the specified attribute,
+ *  Number of values to retain for the sepcified attribute, 
  *  i.e. the ones with the most instances (default 2).
  * </pre>
  * 
@@ -78,10 +88,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class RemoveFrequentValues extends Filter implements OptionHandler,
-  UnsupervisedFilter, WeightedAttributesHandler {
+  UnsupervisedFilter {
 
   /** for serialization */
   static final long serialVersionUID = -2447432930070059511L;
@@ -136,7 +146,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     newVector.addElement(new Option(
       "\tChoose attribute to be used for selection.", "C", 1, "-C <num>"));
     newVector.addElement(new Option(
-      "\tNumber of values to retain for the specified attribute, \n"
+      "\tNumber of values to retain for the sepcified attribute, \n"
         + "\ti.e. the ones with the most instances (default 2).", "N", 1,
       "-N <num>"));
     newVector.addElement(new Option(
@@ -654,7 +664,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -61,6 +61,6 @@ public class JoinBeanInfo extends SimpleBeanInfo {
    */
   @Override
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(Join.class, JoinCustomizer.class);
+    return new BeanDescriptor(weka.gui.beans.Join.class, JoinCustomizer.class);
   }
 }

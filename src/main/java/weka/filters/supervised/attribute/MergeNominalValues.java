@@ -26,17 +26,31 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.ContingencyTables;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SpecialFunctions;
+import weka.core.Statistics;
+import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> Merges values of all nominal attributes among the
  * specified attributes, excluding the class attribute, using the CHAID method,
- * but without considering re-splitting of merged subsets. It implements Steps 1 and
+ * but without considering to re-split merged subsets. It implements Steps 1 and
  * 2 described by Kass (1980), see<br/>
  * <br/>
  * Gordon V. Kass (1980). An Exploratory Technique for Investigating Large
@@ -90,10 +104,10 @@ import weka.filters.SupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Eibe Frank
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class MergeNominalValues extends SimpleBatchFilter implements
-  SupervisedFilter, WeightedInstancesHandler, WeightedAttributesHandler, TechnicalInformationHandler {
+  SupervisedFilter, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 7447337831221353842L;
@@ -125,7 +139,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   @Override
   public String globalInfo() {
     return "Merges values of all nominal attributes among the specified attributes, excluding "
-      + "the class attribute, using the CHAID method, but without considering re-splitting of "
+      + "the class attribute, using the CHAID method, but without considering to re-split "
       + "merged subsets. It implements Steps 1 and 2 described by Kass (1980), see\n\n"
       + getTechnicalInformation().toString()
       + "\n\n"
@@ -319,7 +333,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   /**
    * Sets the significance level.
    * 
-   * @param sF the significance level as a double.
+   * @param the significance level as an integer.
    */
   public void setSignificanceLevel(double sF) {
 
@@ -558,9 +572,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
         for (StringBuilder val : vals) {
           valsAsStrings.add(val.toString());
         }
-        Attribute a = new Attribute(att.name() + "_merged_values", valsAsStrings);
-        a.setWeight(att.weight());
-        atts.add(a);
+        atts.add(new Attribute(att.name() + "_merged_values", valsAsStrings));
       } else {
         atts.add((Attribute) att.copy());
       }
@@ -759,7 +771,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

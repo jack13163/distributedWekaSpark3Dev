@@ -20,17 +20,26 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.filters.SimpleBatchFilter;
-
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.filters.SimpleStreamFilter;
 
 /**
  <!-- globalinfo-start -->
- * Chooses a random subset of non-class attributes, either an absolute number or a percentage. Attributes are included
- * in the order in which they occur in the input data. The class attribute (if present) is always included in the output.
+ * Chooses a random subset of attributes, either an absolute number or a percentage. The class is always included in the output (as the last attribute).
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -60,11 +69,9 @@ import weka.filters.SimpleBatchFilter;
  <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @author eibe@cs.waikato.ac.nz
- * @version $Revision: 15073 $
+ * @version $Revision: 12037 $
  */
-public class RandomSubset extends SimpleBatchFilter
-        implements Randomizable, WeightedInstancesHandler, WeightedAttributesHandler {
+public class RandomSubset extends SimpleStreamFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = 2911221724251628050L;
@@ -92,9 +99,9 @@ public class RandomSubset extends SimpleBatchFilter
    */
   @Override
   public String globalInfo() {
-    return "Chooses a random subset of non-class attributes, either an absolute number "
-      + "or a percentage. Attributes are included in the order in which they occur in the input data. The class "
-      + "attribute (if present) is always included in the output.";
+    return "Chooses a random subset of attributes, either an absolute number "
+      + "or a percentage. The class is always included in the output ("
+      + "as the last attribute).";
   }
 
   /**
@@ -314,17 +321,6 @@ public class RandomSubset extends SimpleBatchFilter
   }
 
   /**
-   * Returns whether to allow the determineOutputFormat(Instances) method access
-   * to the full dataset rather than just the header.
-   * <p/>
-   *
-   * @return true for this filter so that input data can affect subset of attributes that is selected
-   */
-  public boolean allowAccessToFullInputFormat() {
-    return true;
-  }
-
-  /**
    * Determines the output format based on the input format and returns this. In
    * case the output format cannot be returned immediately, i.e.,
    * hasImmediateOutputFormat() returns false, then this method will called from
@@ -336,85 +332,74 @@ public class RandomSubset extends SimpleBatchFilter
    * @throws Exception in case the determination goes wrong
    */
   @Override
-  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
+  protected Instances determineOutputFormat(Instances inputFormat)
+    throws Exception {
+    Instances result;
+    ArrayList<Attribute> atts;
+    int i;
+    int numAtts;
+    Vector<Integer> indices;
+    Vector<Integer> subset;
+    Random rand;
+    int index;
 
     // determine the number of attributes
-    int numAttsWithoutClass = inputFormat.numAttributes();
+    numAtts = inputFormat.numAttributes();
     if (inputFormat.classIndex() > -1) {
-      numAttsWithoutClass--;
+      numAtts--;
     }
 
-    int sizeOfSample = 0;
     if (m_NumAttributes < 1) {
-      sizeOfSample = (int) Math.round(numAttsWithoutClass * m_NumAttributes);
+      numAtts = (int) Math.round(numAtts * m_NumAttributes);
     } else {
-      if (m_NumAttributes < numAttsWithoutClass) {
-        sizeOfSample = (int) m_NumAttributes;
+      if (m_NumAttributes < numAtts) {
+        numAtts = (int) m_NumAttributes;
       }
     }
     if (getDebug()) {
-      System.out.println("# of atts: " + sizeOfSample);
+      System.out.println("# of atts: " + numAtts);
     }
 
-    // Get a random number generator that depends on the particular dataset passed in
-    Random rand = inputFormat.getRandomNumberGenerator(getSeed());
+    // determine random indices
+    indices = new Vector<Integer>();
+    for (i = 0; i < inputFormat.numAttributes(); i++) {
+      if (i == inputFormat.classIndex()) {
+        continue;
+      }
+      indices.add(i);
+    }
 
-    // The random indices (we will need to take care of the class attribute)
-    int[] indices = RandomSample.drawSortedSample(sizeOfSample, numAttsWithoutClass, rand);
+    subset = new Vector<Integer>();
+    rand = new Random(m_Seed);
+    for (i = 0; i < numAtts; i++) {
+      index = rand.nextInt(indices.size());
+      subset.add(indices.get(index));
+      indices.remove(index);
+    }
 
-    // Do we need to take the inverse?
     if (m_invertSelection) {
-      int[] newIndices = new int[numAttsWithoutClass - indices.length];
-      int index = 0;
-      int indexNew = 0;
-      int i = 0;
-      while ((i < numAttsWithoutClass)) {
-        while ((indexNew < newIndices.length) && ((indices.length <= index) || (i < indices[index]))) {
-          newIndices[indexNew++] = i++;
-        }
-        index++;
-        i++;
-      }
-      indices = newIndices;
+      subset = indices;
     }
 
-    // Make a new list of indices, taking care of the class
-    List<Integer> selected  = new ArrayList<>();
-    int newClassIndex = -1;
+    Collections.sort(subset);
     if (inputFormat.classIndex() > -1) {
-      for (int i = 0; i < indices.length; i++) {
-        int index = indices[i];
-        if (index < inputFormat.classIndex()) {
-          selected.add(index);
-        } else {
-          selected.add(index + 1);
-        }
-      }
-      newClassIndex = -Collections.binarySearch(selected, inputFormat.classIndex()) - 1;
-      selected.add(newClassIndex, inputFormat.classIndex());
-    } else {
-      for (int i = 0; i < indices.length; i++) {
-        selected.add(indices[i]);
-      }
+      subset.add(inputFormat.classIndex());
     }
-
     if (getDebug()) {
-      System.out.println("Selected indices: " + selected);
+      System.out.println("indices: " + subset);
     }
 
     // generate output format
-    ArrayList<Attribute> atts = new ArrayList<>();
-    m_Indices = new int[selected.size()];
-    for (int i = 0; i < selected.size(); i++) {
-      atts.add((Attribute)inputFormat.attribute(selected.get(i)).copy());
-      m_Indices[i] = selected.get(i);
+    atts = new ArrayList<Attribute>();
+    m_Indices = new int[subset.size()];
+    for (i = 0; i < subset.size(); i++) {
+      atts.add(inputFormat.attribute(subset.get(i)));
+      m_Indices[i] = subset.get(i);
     }
-    Instances result = new Instances(inputFormat.relationName(), atts, 0).stringFreeStructure();
+    result = new Instances(inputFormat.relationName(), atts, 0);
     if (inputFormat.classIndex() > -1) {
-      result.setClassIndex(newClassIndex);
+      result.setClassIndex(result.numAttributes() - 1);
     }
-
-    initInputLocators(inputFormatPeek(), m_Indices);
 
     return result;
   }
@@ -423,48 +408,25 @@ public class RandomSubset extends SimpleBatchFilter
    * processes the given instance (may change the provided instance) and returns
    * the modified version.
    * 
-   * @param instances the instance to process
+   * @param instance the instance to process
    * @return the modified data
    * @throws Exception in case the processing goes wrong
    */
   @Override
-  protected Instances process(Instances instances) throws Exception {
+  protected Instance process(Instance instance) throws Exception {
+    Instance result;
+    double[] values;
+    int i;
 
-    Instances result = new Instances(outputFormatPeek(), 0);
-    for (Instance instance : instances) {
-      Instance newInstance;
-      if (instance instanceof SparseInstance) {
-        int n1 = instance.numValues();
-        int n2 = m_Indices.length;
-        int[] indices = new int[instance.numValues()];
-        double[] values = new double[instance.numValues()];
-        int vals = 0;
-        for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2; ) {
-          int ind1 = instance.index(p1);
-          int ind2 = m_Indices[p2];
-          if (ind1 == ind2) {
-            indices[vals] = p2;
-            values[vals] = instance.valueSparse(p1);
-            vals++;
-            p1++;
-            p2++;
-          } else if (ind1 > ind2) {
-            p2++;
-          } else {
-            p1++;
-          }
-        }
-        newInstance = new SparseInstance(instance.weight(), values, indices, m_Indices.length);
-      } else {
-        double[] values = new double[m_Indices.length];
-        for (int i = 0; i < m_Indices.length; i++) {
-          values[i] = instance.value(m_Indices[i]);
-        }
-        newInstance = new DenseInstance(instance.weight(), values);
-      }
-      copyValues(newInstance, false, instance.dataset(), result);
-      result.add(newInstance);
+    values = new double[m_Indices.length];
+    for (i = 0; i < m_Indices.length; i++) {
+      values[i] = instance.value(m_Indices[i]);
     }
+
+    result = new DenseInstance(instance.weight(), values);
+
+    copyValues(result, false, instance.dataset(), outputFormatPeek());
+
     return result;
   }
 
@@ -475,7 +437,7 @@ public class RandomSubset extends SimpleBatchFilter
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15073 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

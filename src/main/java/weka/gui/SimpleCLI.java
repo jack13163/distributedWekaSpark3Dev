@@ -21,9 +21,7 @@
 
 package weka.gui;
 
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
@@ -37,7 +35,7 @@ import weka.gui.scripting.ScriptingPanel;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15292 $
+ * @version $Revision: 8034 $
  */
 public class SimpleCLI
   extends JFrame {
@@ -54,17 +52,10 @@ public class SimpleCLI
     SimpleCLIPanel	panel;
 
     panel = new SimpleCLIPanel();
-
-    addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent w) {
-        panel.terminate();
-        dispose();
-      }
-    });
-
+    
     setLayout(new BorderLayout());
     setTitle(panel.getTitle());
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     setIconImage(panel.getIcon().getImage());
     add(panel);
     pack();
@@ -79,15 +70,6 @@ public class SimpleCLI
    * @param args 	Not used.
    */
   public static void main(String[] args) {
-
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-            "Logging started");
-
-    LookAndFeel.setLookAndFeel();
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    GenericObjectEditor.determineClasses();
-
     ScriptingPanel.showPanel(new SimpleCLIPanel(), args, 600, 500);
   }
 }

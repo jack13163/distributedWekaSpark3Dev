@@ -20,8 +20,11 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.filters.SimpleBatchFilter;
 import weka.classifiers.rules.DecisionTableHashKey;
 
@@ -29,7 +32,7 @@ import java.util.HashSet;
 
 /**
  <!-- globalinfo-start -->
- * Removes all duplicate instances from the first batch of data it receives. Simply returns copies of other batches.
+ * Removes all duplicate instances from the first batch of data it receives.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -44,7 +47,7 @@ import java.util.HashSet;
  * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 9804 $
  */
-public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttributesHandler, WeightedInstancesHandler{
+public class RemoveDuplicates extends SimpleBatchFilter {
 
   /** for serialization. */
   private static final long serialVersionUID = 4518686110979589602L;
@@ -57,8 +60,7 @@ public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttri
    */
   @Override
   public String globalInfo() {
-    return "Removes all duplicate instances from the first batch of data it receives. " +
-            "Simply returns a copy of other batches.";
+    return "Removes all duplicate instances from the first batch of data it receives.";
   }
 
   /**
@@ -176,7 +178,7 @@ public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttri
       newInstances.compactify();
       return newInstances;
     }
-    return new Instances(instances);
+    throw new Exception("The process method should never be called for subsequent batches.");
   }
 
   /**

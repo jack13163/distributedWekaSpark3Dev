@@ -22,8 +22,13 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -35,11 +40,11 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 14508 $ 
+ * @version $Revision: 12037 $ 
  */
 public class SparseToNonSparse 
   extends Filter 
-  implements UnsupervisedFilter, StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
+  implements UnsupervisedFilter, StreamableFilter {
 
   /** for serialization */
   static final long serialVersionUID = 2481634184210236074L;
@@ -130,7 +135,7 @@ public class SparseToNonSparse
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

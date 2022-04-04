@@ -44,7 +44,7 @@ import weka.gui.SysErrLog;
  * A panel for generating artificial data via DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15437 $
+ * @version $Revision: 8034 $
  */
 public class DataGeneratorPanel
   extends JPanel {
@@ -138,75 +138,48 @@ public class DataGeneratorPanel
     return (DataGenerator) m_GeneratorEditor.getValue();
   }
 
-
   /**
    * generates the instances, returns TRUE if successful
-   *
-   * stores output as a string
-   *
+   * 
    * @return		TRUE if successful
    * @see #getInstances()
    */
   public boolean execute() {
-    return execute(true);
-  }
-
-  /**
-   * generates the instances, returns TRUE if successful
-   *
-   * @param storeOutput whether to store output as string
-   *
-   * @return		TRUE if successful
-   * @see #getInstances()
-   */
-  public boolean execute(boolean storeOutput) {
+    DataGenerator     generator;
+    boolean           result;
+    String            relName;
+    String            cname;
+    String            cmd;
     
-    boolean result = true;
-    DataGenerator generator = (DataGenerator) m_GeneratorEditor.getValue();
+    result    = true;
+    generator = (DataGenerator) m_GeneratorEditor.getValue();
+    relName   = generator.getRelationName();
 
-    String cname = generator.getClass().getName().replaceAll(".*\\.", "");
-    String cmd = generator.getClass().getName();
-    if (generator instanceof OptionHandler) {
+    cname = generator.getClass().getName().replaceAll(".*\\.", "");
+    cmd = generator.getClass().getName();
+    if (generator instanceof OptionHandler)
       cmd += " " + Utils.joinOptions(((OptionHandler) generator).getOptions());
-    }
-
+    
     try {
       m_Log.logMessage("Started " + cname);
       m_Log.logMessage("Command: " + cmd);
       m_Output = new StringWriter();
       generator.setOutput(new PrintWriter(m_Output));
-
-      // define dataset format
-      // computes actual number of examples to be produced
-      generator.defineDataFormat();
-
-      if (storeOutput) {
-        m_Output.append(generator.getPrologue());
-      } else {
-        m_Output.append("String output of data generator has not been stored");
-      }
-      if (generator.getSingleModeFlag()) {
-        m_Instances = generator.getDatasetFormat();
-        for (int i = 0; i < generator.getNumExamplesAct(); i++) {
-          m_Instances.add(generator.generateExample());
-        }
-      } else {
-        m_Instances = generator.generateExamples();
-      }
-      if (storeOutput) {
-        m_Output.append(m_Instances.toString());
-        m_Output.append(generator.getEpilogue());
-      }
-      generator.getOutput().close();
+      DataGenerator.makeData(generator, generator.getOptions());
+      m_Instances = new Instances(new StringReader(getOutput()));
       m_Log.logMessage("Finished " + cname);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
-      JOptionPane.showMessageDialog(this, "Error generating data:\n" + e.getMessage(),
+      JOptionPane.showMessageDialog(
+          this, "Error generating data:\n" + e.getMessage(), 
           "Error", JOptionPane.ERROR_MESSAGE);
       m_Instances = null;
       m_Output    = new StringWriter();
       result      = false;
     }
+
+    generator.setRelationName(relName);
 
     return result;
   }

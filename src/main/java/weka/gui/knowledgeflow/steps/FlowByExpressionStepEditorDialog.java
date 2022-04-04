@@ -334,7 +334,7 @@ public class FlowByExpressionStepEditorDialog extends StepEditorDialog {
                   if (m_lhsField.getSelectedItem() != null) {
                     text = m_lhsField.getSelectedItem().toString();
                   }
-                  Component theEditor =
+                  java.awt.Component theEditor =
                     m_lhsField.getEditor().getEditorComponent();
                   if (theEditor instanceof JTextField) {
                     text = ((JTextField) theEditor).getText();
@@ -403,7 +403,7 @@ public class FlowByExpressionStepEditorDialog extends StepEditorDialog {
                   if (m_rhsField.getSelectedItem() != null) {
                     text = m_rhsField.getSelectedItem().toString();
                   }
-                  Component theEditor =
+                  java.awt.Component theEditor =
                     m_rhsField.getEditor().getEditorComponent();
                   if (theEditor instanceof JTextField) {
                     text = ((JTextField) theEditor).getText();

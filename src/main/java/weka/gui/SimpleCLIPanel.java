@@ -15,38 +15,43 @@
 
 /*
  * SimpleCLIPanel.java
- * Copyright (C) 2009-2018 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.Defaults;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.Trie;
 import weka.core.Utils;
-import weka.core.WekaPackageManager;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.gui.scripting.ScriptingPanel;
-import weka.gui.simplecli.AbstractCommand;
-import weka.gui.simplecli.Help;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,10 +59,8 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -131,9 +134,6 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
 
   /** The commandline completion. */
   protected CommandlineCompletion m_Completion;
-
-  /** for storing variables. */
-  protected Map<String,Object> m_Variables;
 
   @Override
   public void instantiationComplete() {
@@ -236,12 +236,9 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
    * thread.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 14982 $
+   * @version $Revision: 12776 $
    */
-  public static class ClassRunner extends Thread {
-
-    /** the owner. */
-    protected SimpleCLIPanel m_Owner;
+  class ClassRunner extends Thread {
 
     /** Stores the main method to call. */
     protected Method m_MainMethod;
@@ -259,11 +256,10 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
      * @param commandArgs an array of Strings to use as command line args
      * @throws Exception if an error occurs
      */
-    public ClassRunner(SimpleCLIPanel owner, Class<?> theClass, String[] commandArgs)
+    public ClassRunner(Class<?> theClass, String[] commandArgs)
       throws Exception {
 
-      m_Owner = owner;
-      m_classIsRun = (theClass.getClass().getName().equals("weka.Run"));
+      m_classIsRun = theClass == weka.Run.class;
 
       setDaemon(true);
       Class<?>[] argTemplate = { String[].class };
@@ -272,7 +268,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
         if (!commandArgs[0].equalsIgnoreCase("-h")
           && !commandArgs[0].equalsIgnoreCase("-help")) {
           m_CommandArgs = new String[commandArgs.length + 1];
-          System.arraycopy(commandArgs, 0, m_CommandArgs, 1, commandArgs.length);
+          System
+            .arraycopy(commandArgs, 0, m_CommandArgs, 1, commandArgs.length);
           m_CommandArgs[0] = "-do-not-prompt-if-multiple-matches";
         }
       }
@@ -336,7 +333,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
           System.err.println("[Run exception] " + ex.getMessage());
         }
       } finally {
-        m_Owner.stopThread();
+        m_RunThread = null;
       }
 
       // restore old System.out stream
@@ -354,7 +351,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
    * A class for commandline completion of classnames.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 14982 $
+   * @version $Revision: 12776 $
    */
   public static class CommandlineCompletion {
 
@@ -721,7 +718,6 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
     m_CommandHistory = new Vector<String>();
     m_HistoryPos = 0;
     m_Completion = new CommandlineCompletion();
-    m_Variables  = new HashMap<>();
   }
 
   /**
@@ -769,14 +765,14 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
       + "be either absolute or start with '." + File.separator + "' or '~/'\n"
       + "(the latter is a shortcut for the home directory).\n"
       + "<Alt+BackSpace> is used for deleting the text\n"
-      + "in the commandline in chunks.\n"
-      + "\n"
-      + "Type 'help' followed by <Enter> to see an overview \n"
-      + "of all commands.");
+      + "in the commandline in chunks.\n");
+    try {
+      runCommand("help");
+    } catch (Exception e) {
+      // ignored
+    }
 
     loadHistory();
-
-    SwingUtilities.invokeLater(() -> m_Input.requestFocus());
   }
 
   /**
@@ -821,113 +817,161 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
   }
 
   /**
-   * Checks whether a thread is currently running.
-   *
-   * @return		true if thread active
-   */
-  public boolean isBusy() {
-    return (m_RunThread != null);
-  }
-
-  /**
-   * Starts the thread.
-   *
-   * @param runner 	the thread to start
-   */
-  public void startThread(ClassRunner runner) {
-    m_RunThread = runner;
-    m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-    m_RunThread.start();
-  }
-
-  /**
-   * Stops the currently running thread, if any.
-   */
-  @SuppressWarnings("deprecation")
-  public void stopThread() {
-    if (m_RunThread != null) {
-      if (m_RunThread.isAlive()) {
-        try {
-	  m_RunThread.stop();
-	}
-	catch (Throwable t) {
-          // ignored
-	}
-      }
-      m_RunThread = null;
-    }
-  }
-
-  /**
-   * Returns the variables.
-   *
-   * @return		the variables
-   */
-  public Map<String,Object> getVariables() {
-    return m_Variables;
-  }
-
-  /**
-   * The output area.
-   *
-   * @return		the output area
-   */
-  public JTextPane getOutputArea() {
-    return m_OutputArea;
-  }
-
-  /**
-   * Returns the command history.
-   *
-   * @return		the history
-   */
-  public List<String> getCommandHistory() {
-    return m_CommandHistory;
-  }
-
-  /**
    * Executes a simple cli command.
    * 
-   * @param command the command string
+   * @param commands the command string
    * @throws Exception if an error occurs
    */
-  public void runCommand(String command) throws Exception {
-    System.out.println("> " + command + '\n');
-    System.out.flush();
-    String[] commandArgs;
-    if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-      commandArgs = Utils.splitOptions(command);
-    } else { // If we are on Windows, we must not replace \t, \n, etc., at this stage because \ is path separator
-      commandArgs = Utils.splitOptions(command, new String[] { "\\\\", "\\\""}, new char[] { '\\', '"' });
-    }
+  @SuppressWarnings("deprecation")
+  public void runCommand(String commands) throws Exception {
 
-    // no command
+    System.out.println("> " + commands + '\n');
+    System.out.flush();
+    String[] commandArgs = Utils.splitOptions(commands);
     if (commandArgs.length == 0) {
       return;
     }
+    if (commandArgs[0].equals("java")) {
+      // Execute the main method of a class
+      commandArgs[0] = "";
+      try {
+        if (commandArgs.length == 1) {
+          throw new Exception("No class name given");
+        }
+        String className = commandArgs[1];
+        commandArgs[1] = "";
+        if (m_RunThread != null) {
+          throw new Exception("An object is already running, use \"break\""
+            + " to interrupt it.");
+        }
+        Class<?> theClass = Class.forName(className);
 
-    // find command
-    AbstractCommand cmd = AbstractCommand.getCommand(commandArgs[0]);
+        // some classes expect a fixed order of the args, i.e., they don't
+        // use Utils.getOption(...) => create new array without first two
+        // empty strings (former "java" and "<classname>")
+        Vector<String> argv = new Vector<String>();
+        for (int i = 2; i < commandArgs.length; i++) {
+          argv.add(commandArgs[i]);
+        }
 
-    // unknown command
-    if (cmd == null) {
-      System.err.println("Unknown command: " + commandArgs[0]);
-      Help help = new Help();
-      help.setOwner(this);
-      help.execute(new String[0]);
-      return;
-    }
+        m_RunThread =
+          new ClassRunner(theClass, argv.toArray(new String[argv.size()]));
+        m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+        m_RunThread.start();
+      } catch (Exception ex) {
+        System.err.println(ex.getMessage());
+      }
 
-    // execute command
-    String[] params = new String[commandArgs.length -1];
-    System.arraycopy(commandArgs, 1, params, 0, params.length);
-    cmd.setOwner(this);
-    try {
-      cmd.execute(params);
-    }
-    catch (Exception e) {
-      System.err.println("Error executing: " + command);
-      e.printStackTrace();
+    } else if (commandArgs[0].equals("capabilities")) {
+      try {
+        Object obj = Class.forName(commandArgs[1]).newInstance();
+        if (obj instanceof CapabilitiesHandler) {
+          if (obj instanceof OptionHandler) {
+            Vector<String> args = new Vector<String>();
+            for (int i = 2; i < commandArgs.length; i++) {
+              args.add(commandArgs[i]);
+            }
+            ((OptionHandler) obj).setOptions(args.toArray(new String[args
+              .size()]));
+          }
+          Capabilities caps = ((CapabilitiesHandler) obj).getCapabilities();
+          System.out.println(caps.toString().replace("[", "\n")
+            .replace("]", "\n"));
+        } else {
+          System.out.println("'" + commandArgs[1] + "' is not a "
+            + CapabilitiesHandler.class.getName() + "!");
+        }
+      } catch (Exception e) {
+        System.err.println(e.getMessage());
+      }
+    } else if (commandArgs[0].equals("cls")) {
+      // Clear the text area
+      m_OutputArea.setText("");
+    } else if (commandArgs[0].equals("history")) {
+      System.out.println("Command history:");
+      for (int i = 0; i < m_CommandHistory.size(); i++) {
+        System.out.println(m_CommandHistory.get(i));
+      }
+      System.out.println();
+    } else if (commandArgs[0].equals("kill")) {
+      if (m_RunThread == null) {
+        System.err.println("Nothing is currently running.");
+      } else {
+        System.out.println("[Kill...]");
+        m_RunThread.stop();
+        m_RunThread = null;
+      }
+    } else if (commandArgs[0].equals("exit")) {
+      // Shut down
+      // determine parent
+      Container parent = getParent();
+      Container frame = null;
+      boolean finished = false;
+      while (!finished) {
+        if ((parent instanceof JFrame) || (parent instanceof Frame)
+          || (parent instanceof JInternalFrame)) {
+          frame = parent;
+          finished = true;
+        }
+
+        if (!finished) {
+          parent = parent.getParent();
+          finished = (parent == null);
+        }
+      }
+      // fire the frame close event
+      if (frame != null) {
+        if (frame instanceof JInternalFrame) {
+          ((JInternalFrame) frame).doDefaultCloseAction();
+        } else {
+          ((Window) frame).dispatchEvent(new WindowEvent((Window) frame,
+            WindowEvent.WINDOW_CLOSING));
+        }
+      }
+
+    } else {
+      boolean help =
+        ((commandArgs.length > 1) && commandArgs[0].equals("help"));
+      if (help && commandArgs[1].equals("java")) {
+        System.out.println("java <classname> <args>\n\n"
+          + "Starts the main method of <classname> with "
+          + "the supplied command line arguments (if any).\n"
+          + "The command is started in a separate thread, "
+          + "and may be interrupted with the \"break\"\n"
+          + "command (friendly), or killed with the \"kill\" "
+          + "command (unfriendly).\n"
+          + "Redirecting can be done with '>' followed by the "
+          + "file to write to, e.g.:\n" + "  java some.Class > ."
+          + File.separator + "some.txt");
+      } else if (help && commandArgs[1].equals("break")) {
+        System.out.println("break\n\n"
+          + "Attempts to nicely interrupt the running job, "
+          + "if any. If this doesn't respond in an\n"
+          + "acceptable time, use \"kill\".\n");
+      } else if (help && commandArgs[1].equals("kill")) {
+        System.out.println("kill\n\n"
+          + "Kills the running job, if any. You should only "
+          + "use this if the job doesn't respond to\n" + "\"break\".\n");
+      } else if (help && commandArgs[1].equals("capabilities")) {
+        System.out
+          .println("capabilities <classname> <args>\n\n"
+            + "Lists the capabilities of the specified class.\n"
+            + "If the class is a " + OptionHandler.class.getName() + " then\n"
+            + "trailing options after the classname will be\n"
+            + "set as well.\n");
+      } else if (help && commandArgs[1].equals("cls")) {
+        System.out.println("cls\n\n" + "Clears the output area.\n");
+      } else if (help && commandArgs[1].equals("history")) {
+        System.out.println("history\n\n" + "Prints all issued commands.\n");
+      } else if (help && commandArgs[1].equals("exit")) {
+        System.out.println("exit\n\n" + "Exits the SimpleCLI program.\n");
+      } else {
+        // Print a help message
+        System.out.println("Command must be one of:\n"
+          + "\tjava <classname> <args> [ > file]\n" + "\tkill\n"
+          + "\tcapabilities <classname> <args>\n" + "\tcls\n" + "\thistory\n"
+          + "\texit\n" + "\thelp <command>\n");
+      }
     }
   }
 
@@ -1158,7 +1202,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
 
     try {
       filename =
-        WekaPackageManager.PROPERTIES_DIR.getAbsolutePath() + File.separatorChar
+        System.getProperties().getProperty("user.home") + File.separatorChar
           + FILENAME;
       stream = new BufferedOutputStream(new FileOutputStream(filename));
       PROPERTIES.store(stream, "SimpleCLI");
@@ -1174,16 +1218,6 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
    * @param args ignored
    */
   public static void main(String[] args) {
-
-
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-            "Logging started");
-
-    LookAndFeel.setLookAndFeel();
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    GenericObjectEditor.determineClasses();
-
     showPanel(new SimpleCLIPanel(), args);
   }
 }

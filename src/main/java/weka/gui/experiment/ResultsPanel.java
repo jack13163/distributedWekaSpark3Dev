@@ -24,9 +24,7 @@ package weka.gui.experiment;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.PluginManager;
 import weka.core.Range;
-import weka.core.Utils;
 import weka.core.converters.CSVLoader;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -38,12 +36,12 @@ import weka.experiment.ResultMatrixPlainText;
 import weka.experiment.Tester;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
 import weka.gui.ListSelectorDialog;
 import weka.gui.Perspective;
 import weka.gui.PropertyDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.WekaFileChooser;
 import weka.gui.explorer.Explorer;
 
 import javax.swing.BorderFactory;
@@ -68,11 +66,12 @@ import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -83,7 +82,6 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -91,7 +89,7 @@ import java.util.Vector;
  * This panel controls simple analysis of experimental results.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15294 $
+ * @version $Revision: 12396 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -249,7 +247,7 @@ public class ResultsPanel extends JPanel {
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
   /** The file chooser for selecting result files. */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   // File filters for various file types.
@@ -288,8 +286,8 @@ public class ResultsPanel extends JPanel {
    */
   public ResultsPanel() {
 
-    List<String> classes =
-      PluginManager.getPluginNamesOfTypeList(Tester.class.getName());
+    Vector<String> classes =
+      GenericObjectEditor.getClassnames(Tester.class.getName());
 
     // set names and classes
     m_Testers = new Vector<Class<?>>();
@@ -832,8 +830,7 @@ public class ResultsPanel extends JPanel {
        */
 
       DatabaseConnectionDialog dbd =
-        new DatabaseConnectionDialog((Frame)SwingUtilities.getWindowAncestor(ResultsPanel.this), dbaseURL, username);
-      dbd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(ResultsPanel.this));
+        new DatabaseConnectionDialog(null, dbaseURL, username);
       dbd.setVisible(true);
 
       // if (dbaseURL == null) {
@@ -877,7 +874,7 @@ public class ResultsPanel extends JPanel {
       int result;
       // display dialog only if there's not just one result!
       if (jl.getModel().getSize() != 1) {
-        ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), jl);
+        ListSelectorDialog jd = new ListSelectorDialog(null, jl);
         result = jd.showDialog();
       } else {
         result = ListSelectorDialog.APPROVE_OPTION;
@@ -1262,7 +1259,7 @@ public class ResultsPanel extends JPanel {
 
   public void setResultKeyFromDialog() {
 
-    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_ResultKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_ResultKeyList);
 
     // Open the dialog
     int result = jd.showDialog();
@@ -1290,7 +1287,7 @@ public class ResultsPanel extends JPanel {
 
   public void setDatasetKeyFromDialog() {
 
-    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_DatasetKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_DatasetKeyList);
 
     // Open the dialog
     int result = jd.showDialog();
@@ -1336,14 +1333,14 @@ public class ResultsPanel extends JPanel {
   }
 
   public void setTestBaseFromDialog() {
-    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_TestsList);
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
 
     // Open the dialog
     jd.showDialog();
   }
 
   public void setDisplayedFromDialog() {
-    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_DisplayedList);
+    ListSelectorDialog jd = new ListSelectorDialog(null, m_DisplayedList);
 
     // Open the dialog
     jd.showDialog();
@@ -1420,37 +1417,29 @@ public class ResultsPanel extends JPanel {
     System.out.println("Tester set to: " + m_TTester.getClass().getName());
   }
 
-  /**
-   * A trivial wrapper for a JFrame so that we can facilitate garbage collection.
-   */
-  protected class JFrameWrapper {
-
-    // The reference to the actual JFrame
-    protected JFrame m_Frame;
-  }
-
   protected synchronized void openExplorer() {
     if (m_Instances != null) {
       if (m_mainPerspective == null || !m_mainPerspective.acceptsInstances()) {
         Explorer exp = new Explorer();
         exp.getPreprocessPanel().setInstances(m_Instances);
 
-        final JFrameWrapper jf = new JFrameWrapper();
-        jf.m_Frame = Utils.getWekaJFrame("Weka Explorer", this);
-        jf.m_Frame.getContentPane().setLayout(new BorderLayout());
-        jf.m_Frame.getContentPane().add(exp, BorderLayout.CENTER);
-        jf.m_Frame.addWindowListener(new WindowAdapter() {
+        final JFrame jf = new JFrame("Weka Explorer");
+        jf.getContentPane().setLayout(new BorderLayout());
+        jf.getContentPane().add(exp, BorderLayout.CENTER);
+        jf.addWindowListener(new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
-            exp.terminate();
-            jf.m_Frame.dispose();
-            jf.m_Frame = null;
+            jf.dispose();
           }
         });
-        jf.m_Frame.pack();
-        jf.m_Frame.setSize(1024, 768);
-        jf.m_Frame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
-        jf.m_Frame.setVisible(true);
+        jf.pack();
+        jf.setSize(800, 600);
+        jf.setVisible(true);
+        Image icon =
+          Toolkit.getDefaultToolkit().getImage(
+            exp.getClass().getClassLoader()
+              .getResource("weka/gui/weka_icon_new_48.png"));
+        jf.setIconImage(icon);
       } else {
         m_mainPerspective.setInstances(m_Instances);
         m_mainPerspective.getMainApplication().getPerspectiveManager()

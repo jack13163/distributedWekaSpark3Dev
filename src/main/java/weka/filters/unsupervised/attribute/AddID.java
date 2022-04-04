@@ -23,16 +23,24 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> An instance filter that adds an ID attribute to the
  * dataset. The new attribute contains a unique ID for each instance.<br/>
- * Note: The ID is not reset for the second batch of instances when batch mode
- * is used from the command-line, or the FilteredClassifier.
+ * Note: The ID is not reset for the second batch of files (using -b and -r and
+ * -s).
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -54,10 +62,9 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
-public class AddID extends Filter
-        implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler{
+public class AddID extends Filter implements UnsupervisedFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 4734383199819293390L;
@@ -79,9 +86,9 @@ public class AddID extends Filter
    */
   public String globalInfo() {
     return "An instance filter that adds an ID attribute to the dataset. "
-      + "The new attribute contains a unique ID for each instance.\n\n"
-      + "Note: The ID is not reset for the second batch of instances "
-      + "when batch mode is used from the command-line, or the FilteredClassifier.";
+      + "The new attribute contains a unique ID for each instance.\n"
+      + "Note: The ID is not reset for the second batch of files (using -b "
+      + "and -r and -s).";
   }
 
   /**
@@ -380,7 +387,7 @@ public class AddID extends Filter
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -105,7 +105,7 @@ import weka.core.UnassignedClassException;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15021 $
+ * @version $Revision: 12091 $
  */
 public class AdditiveRegression extends IteratedSingleClassifierEnhancer implements OptionHandler, 
         AdditionalMeasureProducer, WeightedInstancesHandler, TechnicalInformationHandler, IterativeClassifier {
@@ -136,16 +136,7 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
   protected double m_Diff;
   
   /** Whether to minimise absolute error instead of squared error. */
-  protected boolean m_MinimizeAbsoluteError;
-
-  /**
-   * Whether to allow training to continue at a later point after the initial
-   * model is built.
-   */
-  protected boolean m_resume;
-
-  /** Number of iterations performed in this session of iterating */
-  protected int m_numItsPerformed;
+  protected boolean m_MinimizeAbsoluteError = false;
   
   /**
    * Returns a string describing this attribute evaluator
@@ -229,10 +220,6 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
             "\tMinimize absolute error instead of squared error (assumes that base learner minimizes absolute error).",
             "A", 0, "-A"));
 
-    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
-      "resume", 0, "-resume"));
-
-
     newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
@@ -285,8 +272,6 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
     }
     setMinimizeAbsoluteError(Utils.getFlag('A', options));
 
-    setResume(Utils.getFlag("resume", options));
-
     super.setOptions(options);
     
     Utils.checkForRemainingOptions(options);
@@ -306,11 +291,7 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
     if (getMinimizeAbsoluteError()) {
       options.add("-A");
     }
-
-    if (getResume()) {
-      options.add("-resume");
-    }
-
+    
     Collections.addAll(options, super.getOptions());
     
     return options.toArray(new String[0]);
@@ -373,38 +354,6 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
   }
 
   /**
-   * Tool tip text for the resume property
-   *
-   * @return the tool tip text for the finalize property
-   */
-  public String resumeTipText() {
-    return "Set whether classifier can continue training after performing the"
-      + "requested number of iterations. \n\tNote that setting this to true will "
-      + "retain certain data structures which can increase the \n\t"
-      + "size of the model.";
-  }
-
-  /**
-   * If called with argument true, then the next time done() is called the model is effectively
-   * "frozen" and no further iterations can be performed
-   *
-   * @param resume true if the model is to be finalized after performing iterations
-   */
-  public void setResume(boolean resume) {
-    m_resume = resume;
-  }
-
-  /**
-   * Returns true if the model is to be finalized (or has been finalized) after
-   * training.
-   *
-   * @return the current value of finalize
-   */
-  public boolean getResume() {
-    return m_resume;
-  }
-
-  /**
    * Returns default capabilities of the classifier.
    *
    * @return      the capabilities of this classifier
@@ -442,59 +391,50 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
    * @param data the training data
    * @throws Exception if the classifier could not be initialized successfully
    */
-  @Override public void initializeClassifier(Instances data) throws Exception {
+  public void initializeClassifier(Instances data) throws Exception {
 
-    m_numItsPerformed = 0;
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-    if (m_Data == null) {
-      // can classifier handle the data?
-      getCapabilities().testWithFail(data);
+    // remove instances with missing class
+    m_Data = new Instances(data);
+    m_Data.deleteWithMissingClass();
 
-      // remove instances with missing class
-      m_Data = new Instances(data);
-      m_Data.deleteWithMissingClass();
+    // Add the model for the mean first
+    if (getMinimizeAbsoluteError()) {
+      m_InitialPrediction = m_Data.kthSmallestValue(m_Data.classIndex(), m_Data.numInstances() / 2);
+    } else {
+      m_InitialPrediction = m_Data.meanOrMode(m_Data.classIndex());
+    }
+    
+    // only class? -> use only ZeroR model
+    if (m_Data.numAttributes() == 1) {
+      System.err.println("Cannot build non-trivial model (only class attribute present in data!).");
+      m_SuitableData = false;
+      return;
+    } else {
+      m_SuitableData = true;
+    }
+   
+    // Initialize list of classifiers and data
+    m_Classifiers = new ArrayList<Classifier>(m_NumIterations);
+    m_Data = residualReplace(m_Data, m_InitialPrediction);
 
-      // Add the model for the mean first
+    // Calculate error
+    m_Error = 0;
+    m_Diff = Double.MAX_VALUE;
+    for (int i = 0; i < m_Data.numInstances(); i++) {
       if (getMinimizeAbsoluteError()) {
-        m_InitialPrediction = m_Data
-          .kthSmallestValue(m_Data.classIndex(), m_Data.numInstances() / 2);
+        m_Error += m_Data.instance(i).weight() * Math.abs(m_Data.instance(i).classValue());
       } else {
-        m_InitialPrediction = m_Data.meanOrMode(m_Data.classIndex());
+        m_Error += m_Data.instance(i).weight() * m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
       }
-
-      // only class? -> use only ZeroR model
-      if (m_Data.numAttributes() == 1) {
-        System.err.println(
-          "Cannot build non-trivial model (only class attribute present in data!).");
-        m_SuitableData = false;
-        return;
+    }
+    if (m_Debug) {
+      if (getMinimizeAbsoluteError()) {
+        System.err.println("Sum of absolute residuals (predicting the median) : " + m_Error);
       } else {
-        m_SuitableData = true;
-      }
-
-      // Initialize list of classifiers and data
-      m_Classifiers = new ArrayList<Classifier>(m_NumIterations);
-      m_Data = residualReplace(m_Data, m_InitialPrediction);
-
-      // Calculate error
-      m_Error = 0;
-      m_Diff = Double.MAX_VALUE;
-      for (int i = 0; i < m_Data.numInstances(); i++) {
-        if (getMinimizeAbsoluteError()) {
-          m_Error += m_Data.instance(i).weight() * Math.abs(m_Data.instance(i).classValue());
-        } else {
-          m_Error +=
-            m_Data.instance(i).weight() * m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
-        }
-      }
-      if (m_Debug) {
-        if (getMinimizeAbsoluteError()) {
-          System.err.println(
-            "Sum of absolute residuals (predicting the median) : " + m_Error);
-        } else {
-          System.err.println(
-            "Sum of squared residuals (predicting the mean) : " + m_Error);
-        }
+        System.err.println("Sum of squared residuals (predicting the mean) : " + m_Error);
       }
     }
   }
@@ -502,9 +442,9 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
   /**
    * Perform another iteration.
    */
-  @Override public boolean next() throws Exception {
+  public boolean next() throws Exception {
 
-    if ((!m_SuitableData) || (m_numItsPerformed >= m_NumIterations) ||
+    if ((!m_SuitableData) || (m_Classifiers.size() >= m_NumIterations) ||
             (m_Diff <= Utils.SMALL)) {
       return false;
     }
@@ -532,7 +472,6 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
   
     m_Diff = m_Error - sum;
     m_Error = sum;
-    m_numItsPerformed++;
 
     return true;
   }
@@ -540,10 +479,9 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
   /**
    * Clean up.
    */
-  @Override public void done() {
-    if (!getResume()) {
-      m_Data = null;
-    }
+  public void done() {
+    
+    m_Data = null;
   }
 
   /**
@@ -692,7 +630,7 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer impleme
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15021 $");
+    return RevisionUtils.extract("$Revision: 12091 $");
   }
 
   /**

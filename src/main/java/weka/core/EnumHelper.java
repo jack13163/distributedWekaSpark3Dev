@@ -102,31 +102,16 @@ public class EnumHelper {
    * Helper method to recover an enum value given the fully qualified name of
    * the enum and the value in question as strings
    *
-   * @param enumClass a string containing the fully qualified name of the enum
+   * @param enmumClass a string containing the fully qualified name of the enum
    *          class
    * @param enumValue a string containing the value of the enum to find
    * @return the enum value as an Object
    * @throws Exception if a problem occurs
    */
-  public static Object valueFromString(String enumClass, String enumValue)
+  public static Object valueFromString(String enmumClass, String enumValue)
     throws Exception {
-    Class<?> eClazz = WekaPackageClassLoaderManager.forName(enumClass);
-
-    return valueFromString(eClazz, enumValue);
-  }
-
-  /**
-   * Helper method to recover an enum value given the fully qualified name of
-   * the enum and the value in question as strings
-   *
-   * @param enumClass the class of the enum
-   * @param enumValue a string containing the value of the enum to find
-   * @return the enum value as an Object
-   * @throws Exception if a problem occurs
-   */
-  public static Object valueFromString(Class<?> enumClass, String enumValue)
-    throws Exception {
-    Method valuesM = enumClass.getMethod("values");
+    Class<?> eClazz = WekaPackageClassLoaderManager.forName(enmumClass);
+    Method valuesM = eClazz.getMethod("values");
 
     Enum[] values = (Enum[]) valuesM.invoke(null);
     for (Enum e : values) {

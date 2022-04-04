@@ -52,7 +52,7 @@ public interface StandardEvaluationMetric {
    * @throws Exception if the class of the instance is not set
    */
   void updateStatsForClassifier(double[] predictedDistribution,
-                                Instance instance) throws Exception;
+      Instance instance) throws Exception;
 
   /**
    * Updates the statistics about a predictors performance for the current test

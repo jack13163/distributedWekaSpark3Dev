@@ -48,11 +48,11 @@ import weka.experiment.RemoteExperimentEvent;
 import weka.experiment.RemoteExperimentListener;
 import weka.gui.LogPanel;
 
-/**
+/** 
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15301 $
+ * @version $Revision: 9486 $
  */
 public class RunPanel
   extends JPanel
@@ -93,7 +93,7 @@ public class RunPanel
     private static final long serialVersionUID = -5591889874714150118L;
 
     Experiment m_ExpCopy;
-
+    
     public ExperimentRunner(final Experiment exp) throws Exception {
 
       // Create a full copy using serialization
@@ -322,7 +322,7 @@ public class RunPanel
 		   +"complete...");
       }
       ((ExperimentRunner)m_RunThread).abortExperiment();
-      m_RunThread.stop();
+      // m_RunThread.stop() ??
       m_RunThread = null;
     }
   }

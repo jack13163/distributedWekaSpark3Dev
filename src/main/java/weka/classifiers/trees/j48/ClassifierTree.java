@@ -38,9 +38,10 @@ import weka.core.Utils;
  * Class for handling a tree structure used for classification.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15122 $
+ * @version $Revision: 13476 $
  */
-public class ClassifierTree implements Drawable, Serializable, RevisionHandler, CapabilitiesHandler {
+public class ClassifierTree implements Drawable, Serializable,
+  CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8722249377542734193L;
@@ -109,10 +110,18 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler, 
 
     PRINTED_NODES = 0;
   }
-  
+
+  /**
+   * Constructor.
+   */
+  public ClassifierTree(ModelSelection toSelectLocModel) {
+
+    m_toSelectModel = toSelectLocModel;
+  }
+
   /**
    * Returns default capabilities of the classifier tree.
-   *
+   * 
    * @return the capabilities of this classifier tree
    */
   @Override
@@ -124,20 +133,15 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler, 
   }
 
   /**
-   * Constructor.
-   */
-  public ClassifierTree(ModelSelection toSelectLocModel) {
-
-    m_toSelectModel = toSelectLocModel;
-  }
-
-  /**
    * Method for building a classifier tree.
    * 
    * @param data the data to build the tree from
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
+
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
@@ -274,7 +278,7 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler, 
    * @return the distribution
    * @throws Exception if something goes wrong
    */
-  public double[] distributionForInstance(Instance instance,
+  public final double[] distributionForInstance(Instance instance,
     boolean useLaplace) throws Exception {
 
     double[] doubles = new double[instance.numClasses()];
@@ -770,6 +774,6 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler, 
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15122 $");
+    return RevisionUtils.extract("$Revision: 13476 $");
   }
 }

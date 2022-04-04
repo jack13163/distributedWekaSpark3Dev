@@ -25,8 +25,18 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -88,10 +98,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class RemoveWithValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 4752870193679263361L;
@@ -659,6 +669,7 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
    * 
    * @param rangeList a string representing the list of nominal indices. eg:
    *          first-3,5,6-last
+   * @throws InvalidArgumentException if an invalid range list is supplied
    */
   public void setNominalIndices(String rangeList) {
 
@@ -711,6 +722,7 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
    * 
    * @param values an array containing indexes of values to be used for
    *          selection
+   * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setNominalIndicesArr(int[] values) {
 
@@ -732,7 +744,7 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

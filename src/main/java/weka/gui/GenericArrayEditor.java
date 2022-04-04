@@ -63,7 +63,7 @@ import java.lang.reflect.Array;
  * A PropertyEditor for arrays of objects that themselves have property editors.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14496 $
+ * @version $Revision: 13799 $
  */
 public class GenericArrayEditor implements PropertyEditor {
 
@@ -147,12 +147,16 @@ public class GenericArrayEditor implements PropertyEditor {
             m_Editor.setValue(m_ElementList.getSelectedValue());
           }
           if (m_Editor.getValue() != null) {
+            int x = getLocationOnScreen().x;
+            int y = getLocationOnScreen().y;
             if (PropertyDialog.getParentDialog(CustomEditor.this) != null) {
               m_PD = new PropertyDialog(
-                PropertyDialog.getParentDialog(CustomEditor.this), m_Editor, -1, -1);
+                PropertyDialog.getParentDialog(CustomEditor.this), m_Editor, x,
+                y);
             } else {
               m_PD = new PropertyDialog(
-                PropertyDialog.getParentFrame(CustomEditor.this), m_Editor, -1, -1);
+                PropertyDialog.getParentFrame(CustomEditor.this), m_Editor, x,
+                y);
             }
             m_PD.setVisible(true);
             if (!(m_Editor instanceof GenericObjectEditor)
@@ -541,7 +545,7 @@ public class GenericArrayEditor implements PropertyEditor {
    * @param box the area we are allowed to paint into
    */
   @Override
-  public void paintValue(Graphics gfx, Rectangle box) {
+  public void paintValue(java.awt.Graphics gfx, java.awt.Rectangle box) {
 
     FontMetrics fm = gfx.getFontMetrics();
     int vpad = (box.height - fm.getHeight()) / 2;
@@ -598,7 +602,7 @@ public class GenericArrayEditor implements PropertyEditor {
    * @return a value of type 'java.awt.Component'
    */
   @Override
-  public Component getCustomEditor() {
+  public java.awt.Component getCustomEditor() {
     return m_customEditor;
   }
 

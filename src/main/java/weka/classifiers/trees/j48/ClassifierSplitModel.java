@@ -33,7 +33,7 @@ import weka.core.Utils;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15122 $
+ * @version $Revision: 13476 $
  */
 public abstract class ClassifierSplitModel
   implements Cloneable, Serializable, RevisionHandler {
@@ -248,7 +248,7 @@ public abstract class ClassifierSplitModel
    *
    * @exception Exception if something goes wrong
    */
-  public Instances [] split(Instances data)
+  public final Instances [] split(Instances data) 
        throws Exception { 
 
     // Find size and constitution of subsets

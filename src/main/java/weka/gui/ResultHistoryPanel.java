@@ -21,7 +21,10 @@
 
 package weka.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -34,14 +37,21 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
-import weka.core.Utils;
 import weka.gui.visualize.PrintableComponent;
 
 /**
@@ -51,7 +61,7 @@ import weka.gui.visualize.PrintableComponent;
  * that will have it's text set to the named result text on a left-click.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 14493 $
+ * @version $Revision: 13739 $
  */
 public class ResultHistoryPanel extends JPanel {
 
@@ -159,7 +169,7 @@ public class ResultHistoryPanel extends JPanel {
 //          }
         } else {
           // if there are stored objects then assume that the storer
-          // will handle popping up the text in a separate frame
+          // will handle popping up the text in a seperate frame
           if (m_HandleRightClicks) {
             int index = m_List.locationToIndex(e.getPoint());
             if (index != -1) {
@@ -242,7 +252,7 @@ public class ResultHistoryPanel extends JPanel {
 
   /**
    * Adds a new result to the result list.
-   *
+   * 
    * @param name the name to associate with the result
    * @param result the StringBuffer that contains the result text
    */
@@ -286,7 +296,7 @@ public class ResultHistoryPanel extends JPanel {
   /**
    * Removes one of the result buffers from the history. Any windows currently
    * displaying the contents of the buffer are not affected.
-   *
+   * 
    * @param name the name of the buffer to remove.
    */
   public void removeResult(String name) {
@@ -312,10 +322,8 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
-   * Adds an object to the results list. If an object with the same
-   * name already exists, then a number is appended to the end of the name
-   * to make it unique.
-   *
+   * Adds an object to the results list
+   * 
    * @param name the name to associate with the object
    * @param o the object
    */
@@ -327,17 +335,6 @@ public class ResultHistoryPanel extends JPanel {
     }
 
     m_Objs.put(nameCopy, o);
-  }
-
-  /**
-   * Adds an object to the result list. Overwrites any exsiting
-   * object with the same name
-   * 
-   * @param name the name to associate with the object
-   * @param o the object
-   */
-  public void addOrOverwriteObject(String name, Object o) {
-    m_Objs.put(name, o);
   }
 
   /**
@@ -463,7 +460,7 @@ public class ResultHistoryPanel extends JPanel {
       ta.setEditable(false);
       ta.setText(buff.toString());
       m_FramedOutput.put(name, ta);
-      final JFrame jf = Utils.getWekaJFrame(name, this);
+      final JFrame jf = new JFrame(name);
       jf.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
@@ -474,8 +471,7 @@ public class ResultHistoryPanel extends JPanel {
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
       jf.pack();
-      jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+      jf.setSize(450, 350);
       jf.setVisible(true);
     }
   }
@@ -564,8 +560,8 @@ public class ResultHistoryPanel extends JPanel {
   public static void main(String[] args) {
 
     try {
-      final JFrame jf =
-        new JFrame("Weka Explorer: Classifier");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Classifier");
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultHistoryPanel jd = new ResultHistoryPanel(null);
       jd.addResult("blah", new StringBuffer("Nothing to see here"));
@@ -573,9 +569,9 @@ public class ResultHistoryPanel extends JPanel {
       jd.addResult("blah2", new StringBuffer("Nothing to see here2"));
       jd.addResult("blah3", new StringBuffer("Nothing to see here3"));
       jf.getContentPane().add(jd, BorderLayout.CENTER);
-      jf.addWindowListener(new WindowAdapter() {
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }

@@ -37,7 +37,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Constructs a node for use in an m5 tree or rule
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15357 $
+ * @version $Revision: 12886 $
  */
 public class RuleNode extends AbstractClassifier {
 
@@ -314,14 +314,12 @@ public class RuleNode extends AbstractClassifier {
         m_left.setMinNumInstances(m_splitNum);
         m_left.setRegressionTree(m_regressionTree);
         m_left.setSaveInstances(m_saveInstances);
-        m_left.setNumDecimalPlaces(getNumDecimalPlaces());
         m_left.buildClassifier(leftSubset);
 
         m_right = new RuleNode(m_globalDeviation, m_globalAbsDeviation, this);
         m_right.setMinNumInstances(m_splitNum);
         m_right.setRegressionTree(m_regressionTree);
         m_right.setSaveInstances(m_saveInstances);
-        m_right.setNumDecimalPlaces(getNumDecimalPlaces());
         m_right.buildClassifier(rightSubset);
 
         // now find out what attributes are tested in the left and right
@@ -404,7 +402,6 @@ public class RuleNode extends AbstractClassifier {
     }
     m_nodeModel = new PreConstructedLinearModel(coeffs,
       lmCoeffs[lmCoeffs.length - 1]);
-    m_nodeModel.setNumDecimalPlaces(getNumDecimalPlaces());
     m_nodeModel.buildClassifier(m_instances);
   }
 
@@ -526,7 +523,7 @@ public class RuleNode extends AbstractClassifier {
     }
 
     text.append("\n\tSplit att: " + m_instances.attribute(m_splitAtt).name());
-    text.append("\n\tSplit val: " + Utils.doubleToString(m_splitValue, 1, getNumDecimalPlaces() - 1));
+    text.append("\n\tSplit val: " + Utils.doubleToString(m_splitValue, 1, 3));
     text.append("\n\tLM num: " + m_leafModelNum);
     text.append("\n\tLinear model\n" + m_nodeModel.toString());
     text.append("\n\n");
@@ -561,7 +558,7 @@ public class RuleNode extends AbstractClassifier {
 
       if (m_instances.attribute(m_splitAtt).name().charAt(0) != '[') {
         text.append(m_instances.attribute(m_splitAtt).name() + " <= "
-          + Utils.doubleToString(m_splitValue, 1, getNumDecimalPlaces() - 1) + " : ");
+          + Utils.doubleToString(m_splitValue, 1, 3) + " : ");
       } else {
         text.append(m_instances.attribute(m_splitAtt).name() + " false : ");
       }
@@ -578,7 +575,7 @@ public class RuleNode extends AbstractClassifier {
 
       if (m_instances.attribute(m_splitAtt).name().charAt(0) != '[') {
         text.append(m_instances.attribute(m_splitAtt).name() + " >  "
-          + Utils.doubleToString(m_splitValue, 1, getNumDecimalPlaces() - 1) + " : ");
+          + Utils.doubleToString(m_splitValue, 1, 3) + " : ");
       } else {
         text.append(m_instances.attribute(m_splitAtt).name() + " true : ");
       }
@@ -596,7 +593,7 @@ public class RuleNode extends AbstractClassifier {
           + m_numInstances
           + "/"
           + Utils.doubleToString(
-            (100.0 * m_rootMeanSquaredError / m_globalDeviation), 1, getNumDecimalPlaces() - 1)
+            (100.0 * m_rootMeanSquaredError / m_globalDeviation), 1, 3)
           + "%)\n");
       } else {
         text.append(" (" + m_numInstances + ")\n");
@@ -679,7 +676,6 @@ public class RuleNode extends AbstractClassifier {
         }
       } while (current.m_parent != null);
       m_nodeModel = new PreConstructedLinearModel(coefficients, intercept);
-      m_nodeModel.setNumDecimalPlaces(getNumDecimalPlaces());
       m_nodeModel.buildClassifier(m_instances);
     }
     if (m_left != null) {
@@ -1027,19 +1023,19 @@ public class RuleNode extends AbstractClassifier {
         + ((m_globalDeviation > 0.0) ? m_numInstances
           + "/"
           + Utils.doubleToString(
-            (100.0 * m_rootMeanSquaredError / m_globalDeviation), 1, getNumDecimalPlaces() - 1) + "%)"
+            (100.0 * m_rootMeanSquaredError / m_globalDeviation), 1, 3) + "%)"
           : m_numInstances + ")") + "\" shape=box style=filled " : "\"")
       + (m_saveInstances ? "data=\n" + m_instances + "\n,\n" : "") + "]\n");
 
     if (m_left != null) {
       text.append("N" + m_id + "->" + "N" + m_left.m_id + " [label=\"<="
-        + Utils.doubleToString(m_splitValue, 1, getNumDecimalPlaces() - 1) + "\"]\n");
+        + Utils.doubleToString(m_splitValue, 1, 3) + "\"]\n");
       m_left.graphTree(text);
     }
 
     if (m_right != null) {
       text.append("N" + m_id + "->" + "N" + m_right.m_id + " [label=\">"
-        + Utils.doubleToString(m_splitValue, 1, getNumDecimalPlaces() - 1) + "\"]\n");
+        + Utils.doubleToString(m_splitValue, 1, 3) + "\"]\n");
       m_right.graphTree(text);
     }
   }
@@ -1061,6 +1057,6 @@ public class RuleNode extends AbstractClassifier {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15357 $");
+    return RevisionUtils.extract("$Revision: 12886 $");
   }
 }

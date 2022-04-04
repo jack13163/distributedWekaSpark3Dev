@@ -26,8 +26,19 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SerializedObject;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -64,11 +75,11 @@ import weka.filters.UnsupervisedFilter;
  * Based on code from AddValues.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  * @see AddValues
  */
 public class AddValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8100622241742393656L;
@@ -285,7 +296,6 @@ public class AddValues extends Filter implements UnsupervisedFilter,
       values.add(allLabels.get(i));
     }
     attNew = new Attribute(att.name(), values);
-    attNew.setWeight(att.weight());
 
     atts = new ArrayList<Attribute>();
     for (i = 0; i < instanceInfo.numAttributes(); i++) {
@@ -485,7 +495,7 @@ public class AddValues extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

@@ -20,26 +20,6 @@
  */
 package weka.gui.graphvisualizer;
 
-import weka.gui.ExtensionFileFilter;
-import weka.gui.WekaFileChooser;
-import weka.gui.visualize.PrintablePanel;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
-import javax.swing.table.AbstractTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -68,6 +48,25 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.table.AbstractTableModel;
+
+import weka.gui.ExtensionFileFilter;
+import weka.gui.visualize.PrintablePanel;
+
 /**
  * This class displays the graph we want to visualize. It should be sufficient
  * to use only this class in weka.gui.graphvisulizer package to visualize a
@@ -94,7 +93,7 @@ import java.util.ArrayList;
  * over nodes.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 15104 $
+ * @version $Revision: 10222 $
  */
 public class GraphVisualizer extends JPanel implements GraphConstants,
   LayoutCompleteEventListener {
@@ -172,7 +171,7 @@ public class GraphVisualizer extends JPanel implements GraphConstants,
     m_jBtSave.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent ae) {
-        WekaFileChooser fc = new WekaFileChooser(System.getProperty("user.dir"));
+        JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
         ExtensionFileFilter ef1 = new ExtensionFileFilter(".dot", "DOT files");
         ExtensionFileFilter ef2 = new ExtensionFileFilter(".xml",
           "XML BIF files");
@@ -1346,17 +1345,15 @@ public class GraphVisualizer extends JPanel implements GraphConstants,
             (Frame) GraphVisualizer.this.getTopLevelAncestor(),
             "Probability Distribution Table For " + n.lbl,
             ModalityType.DOCUMENT_MODAL);
-          /*jd.setLocation(
+          jd.setSize(500, 400);
+          jd.setLocation(
             GraphVisualizer.this.getLocation().x
               + GraphVisualizer.this.getWidth() / 2 - 250,
             GraphVisualizer.this.getLocation().y
-              + GraphVisualizer.this.getHeight() / 2 - 200);*/
+              + GraphVisualizer.this.getHeight() / 2 - 200);
 
           jd.getContentPane().setLayout(new BorderLayout());
           jd.getContentPane().add(js, BorderLayout.CENTER);
-          jd.pack();
-          jd.setSize(450, 350);
-          jd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GraphVisualizer.this));
           jd.setVisible(true);
 
           return;

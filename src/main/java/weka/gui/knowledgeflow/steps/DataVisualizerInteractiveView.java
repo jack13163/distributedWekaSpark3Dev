@@ -103,8 +103,8 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
       }
 
       @Override
-      public void entriesDeleted(List<String> names,
-                                 List<Integer> indexes) {
+      public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
         List<PlotData2D> ds = ((DataVisualizer) getStep()).getPlots();
         List<PlotData2D> toRemove = new ArrayList<PlotData2D>();
         for (int i : indexes) {
@@ -204,7 +204,6 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_history, m_visPanel);
 
     add(m_splitPane, BorderLayout.CENTER);
-    m_splitPane.setDividerLocation(200 + m_splitPane.getInsets().left);
     boolean first = true;
     for (PlotData2D pd : ((DataVisualizer) getStep()).getPlots()) {
       m_history.addResult(pd.getPlotName(), new StringBuffer());

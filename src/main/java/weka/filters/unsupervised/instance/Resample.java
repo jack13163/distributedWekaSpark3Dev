@@ -26,11 +26,16 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> Produces a random subsample of a dataset using
@@ -71,10 +76,10 @@ import weka.gui.ProgrammaticProperty;
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @author Eibe Frank
- * @version $Revision: 15265 $
+ * @version $Revision: 12037 $
  */
 public class Resample extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable, WeightedAttributesHandler {
+OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
@@ -256,16 +261,6 @@ public class Resample extends Filter implements UnsupervisedFilter,
     m_RandomSeed = newSeed;
   }
 
-  @ProgrammaticProperty
-  public void setSeed(int seed) {
-    setRandomSeed(seed);
-  }
-
-  @ProgrammaticProperty
-  public int getSeed() {
-    return getRandomSeed();
-  }
-
   /**
    * Returns the tip text for this property
    * 
@@ -388,9 +383,6 @@ public class Resample extends Filter implements UnsupervisedFilter,
   @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    if (getNoReplacement() && getSampleSizePercent() > 100) {
-      throw new WekaException("Sample size cannot exceed 100% for sampling *without* replacement!");
-    }
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     return true;
@@ -508,7 +500,7 @@ public class Resample extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15265 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

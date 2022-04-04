@@ -1,12 +1,12 @@
 # Database settings for PostgreSQL 7.4
 #
 # General information on database access can be found here:
-# https://waikato.github.io/weka-wiki/databases/
+# http://weka.wikispaces.com/Databases
 #
 # url:     http://www.postgresql.org/
 # jdbc:    http://jdbc.postgresql.org/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 15257 $
+# version: $Revision: 11885 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.postgresql.Driver

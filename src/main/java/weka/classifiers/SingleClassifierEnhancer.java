@@ -34,7 +34,7 @@ import weka.core.Capabilities.Capability;
  * classifiers that use a single base learner.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14258 $
+ * @version $Revision: 12204 $
  */
 public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
@@ -74,7 +74,7 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
           + "\t(default: " + defaultClassifierString() + 
           ((defaultClassifierOptions().length > 0) ? 
            " with options " + Utils.joinOptions(defaultClassifierOptions()) + ")" : ")"),
-          "W", 1, "-W <classifier name>"));
+          "W", 1, "-W"));
     
     newVector.addAll(Collections.list(super.listOptions()));
 

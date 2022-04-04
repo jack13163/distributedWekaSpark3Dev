@@ -38,12 +38,18 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import weka.core.Environment;
-import weka.core.Utils;
 import weka.gui.Logger;
 import weka.gui.ResultHistoryPanel;
 
@@ -52,7 +58,7 @@ import weka.gui.ResultHistoryPanel;
  * static images in a popup window
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14494 $
+ * @version $Revision: 10883 $
  */
 @KFStep(category = "Visualization", toolTipText = "Display static images")
 public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
@@ -82,7 +88,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
   /**
    * The log for this bean
    */
-  protected transient Logger m_logger = null;
+  protected transient weka.gui.Logger m_logger = null;
 
   /**
    * The environment variables.
@@ -198,7 +204,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
       if (m_history == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = Utils.getWekaJFrame("Image Viewer", m_visual);
+      m_resultsFrame = new JFrame("Image Viewer");
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(new MainPanel(m_history, m_plotter),
         BorderLayout.CENTER);
@@ -210,7 +216,6 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
         }
       });
       m_resultsFrame.pack();
-      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();
@@ -357,7 +362,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
    * Inner class for displaying a BufferedImage.
    * 
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   * @version $Revision: 14494 $
+   * @version $Revision: 10883 $
    */
   private static class ImageDisplayer extends JPanel {
 

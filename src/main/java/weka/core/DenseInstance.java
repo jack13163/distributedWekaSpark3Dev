@@ -64,7 +64,7 @@ import java.util.Enumeration;
  * values, it may be faster to create a new instance from scratch.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 15069 $
+ * @version $Revision: 12472 $
  */
 public class DenseInstance extends AbstractInstance {
 
@@ -277,7 +277,7 @@ public class DenseInstance extends AbstractInstance {
   }
 
   /**
-   * Returns the values of each attribute as an array of doubles. Creates a fresh array object for this.
+   * Returns the values of each attribute as an array of doubles.
    * 
    * @return an array containing all the instance attribute values
    */
@@ -544,6 +544,6 @@ public class DenseInstance extends AbstractInstance {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 15069 $");
+    return RevisionUtils.extract("$Revision: 12472 $");
   }
 }

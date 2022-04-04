@@ -49,7 +49,7 @@ public class NeuralNetworkTest extends AbstractPMMLClassifierTest {
   }
 
   public static Test suite() {
-    return new TestSuite(NeuralNetworkTest.class);
+    return new TestSuite(weka.classifiers.pmml.consumer.NeuralNetworkTest.class);
   }
 
   public static void main(String[] args) {

@@ -46,7 +46,7 @@ public interface InformationRetrievalEvaluationMetric {
    * @throws Exception if the class of the instance is not set
    */
   void updateStatsForClassifier(double[] predictedDistribution,
-                                Instance instance) throws Exception;
+      Instance instance) throws Exception;
 
   /**
    * Get the value of the named statistic for the given class index.

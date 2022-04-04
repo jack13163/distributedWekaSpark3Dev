@@ -42,7 +42,7 @@ import java.beans.PropertyChangeListener;
  * save, configure, run experiments, and analyse experimental results.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15294 $
+ * @version $Revision: 12928 $
  */
 @PerspectiveInfo(ID = "weka.gui.experimenter", title = "Experiment",
   toolTipText = "Run large scale experiments",
@@ -120,15 +120,6 @@ public class Experimenter extends AbstractPerspective {
   public void instantiationComplete() {
     m_ResultsPanel
       .setMainPerspective(getMainApplication().getMainPerspective());
-  }
-
-  /**
-   * Terminates this panel, which means, in the case of this panel, that it sets all references
-   * to associated JFrame objects to null.
-   */
-  public void terminate() {
-
-    m_SetupPanel.terminate();
   }
 
   /**

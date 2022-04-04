@@ -280,10 +280,6 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
 
     Graphics osg = m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
-    if (g == null) {
-      // window closed?
-      return;
-    }
 
     osg.copyArea(m_refreshWidth, 0, m_iwidth - m_refreshWidth, m_iheight,
       -m_refreshWidth, 0);
@@ -457,7 +453,7 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     }
 
     String numString =
-      Utils
+      weka.core.Utils
         .doubleToString(num, nondecimal + 1 + precision, precision);
 
     return numString;

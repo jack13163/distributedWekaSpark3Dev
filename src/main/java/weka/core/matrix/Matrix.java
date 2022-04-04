@@ -1275,7 +1275,7 @@ public class Matrix implements Cloneable, Serializable, RevisionHandler {
    * 
    * @param format A Formatting object for individual elements.
    * @param width Field width for each column.
-   * @see DecimalFormat#setDecimalFormatSymbols
+   * @see java.text.DecimalFormat#setDecimalFormatSymbols
    */
   public void print(NumberFormat format, int width) {
     print(new PrintWriter(System.out, true), format, width);
@@ -1295,7 +1295,7 @@ public class Matrix implements Cloneable, Serializable, RevisionHandler {
    * @param output the output stream.
    * @param format A formatting object to format the matrix elements
    * @param width Column width.
-   * @see DecimalFormat#setDecimalFormatSymbols
+   * @see java.text.DecimalFormat#setDecimalFormatSymbols
    */
   public void print(PrintWriter output, NumberFormat format, int width) {
     output.println(); // start on new line.

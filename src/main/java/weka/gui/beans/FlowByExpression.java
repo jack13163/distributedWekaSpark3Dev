@@ -48,7 +48,7 @@ import weka.gui.Logger;
  * operators.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14911 $
+ * @version $Revision: 10220 $
  */
 @KFStep(category = "Flow", toolTipText = "Route instances according to a boolean expression")
 public class FlowByExpression extends JPanel implements BeanCommon, Visible,
@@ -413,13 +413,13 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
             if (inst.isMissing(lhsAttIndex) || inst.isMissing(rhsAttIndex)) {
               return false;
             }
-            return (inst.value(lhsAttIndex) == inst.value(rhsAttIndex));
+            return Utils.eq(inst.value(lhsAttIndex), inst.value(rhsAttIndex));
           }
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
           }
-          return (inst.value(lhsAttIndex) == numericOperand);
+          return (Utils.eq(inst.value(lhsAttIndex), numericOperand));
         }
       },
       NOTEQUAL(" != ") {

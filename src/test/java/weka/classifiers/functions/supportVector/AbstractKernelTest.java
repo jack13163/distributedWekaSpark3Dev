@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14516 $
+ * @version $Revision: 8034 $
  *
  * @see CheckKernel
  * @see CheckKernel#testsPerClassType(int, boolean, boolean)
@@ -709,7 +709,6 @@ public abstract class AbstractKernelTest
       fail("Problem setting up to use Kernel: " + e);
     }
 
-    kernel.getCapabilities().testWithFail(data);
     kernel.buildKernel(data);
     for (int n = 0; n < data.numInstances(); n++) {
       for (int i = n; i < data.numInstances(); i++) {

@@ -21,6 +21,38 @@
 
 package weka.gui.explorer;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import weka.associations.AssociationRules;
 import weka.associations.Associator;
 import weka.associations.FPGrowth;
@@ -32,7 +64,6 @@ import weka.core.Drawable;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.PluginManager;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.WekaPackageClassLoaderManager;
@@ -54,34 +85,12 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Vector;
-
 /**
  * This panel allows the user to select, configure, and run a scheme that learns
  * associations.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14493 $
+ * @version $Revision: 13739 $
  */
 @PerspectiveInfo(ID = "weka.gui.explorer.associationspanel",
   title = "Associate", toolTipText = "Discover association rules",
@@ -236,8 +245,9 @@ public class AssociationsPanel extends AbstractPerspective implements
     // check for any visualization plugins so that we
     // can add a checkbox for storing graphs or rules
     boolean showStoreOutput =
-      (PluginManager.getPluginNamesOfTypeList(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
-        PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName()).size() > 0);
+      (GenericObjectEditor.getClassnames(
+        AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
+        .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -535,8 +545,9 @@ public class AssociationsPanel extends AbstractPerspective implements
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String dottyString, String treeName) {
-    final JFrame jf =
-      Utils.getWekaJFrame("Weka Associator Tree Visualizer: " + treeName, this);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
+    jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
     jf.getContentPane().add(tv, BorderLayout.CENTER);
@@ -546,9 +557,7 @@ public class AssociationsPanel extends AbstractPerspective implements
         jf.dispose();
       }
     });
-    jf.pack();
-    jf.setSize(800, 600);
-    jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+
     jf.setVisible(true);
     tv.fitToScreen();
   }
@@ -655,10 +664,11 @@ public class AssociationsPanel extends AbstractPerspective implements
     if (visVect != null) {
       for (Object o : visVect) {
         if (o instanceof AssociationRules) {
-          List<String> pluginsVector =
-            PluginManager.getPluginNamesOfTypeList(AssociationRuleVisualizePlugin.class.getName());
+          Vector<String> pluginsVector =
+            GenericObjectEditor
+              .getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (pluginsVector.get(i));
+            String className = (pluginsVector.elementAt(i));
             try {
               AssociationRuleVisualizePlugin plugin =
                 (AssociationRuleVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
@@ -677,10 +687,11 @@ public class AssociationsPanel extends AbstractPerspective implements
             }
           }
         } else if (o instanceof String) {
-          List<String> pluginsVector =
-            PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName());
+          Vector<String> pluginsVector =
+            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class
+              .getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (pluginsVector.get(i));
+            String className = (pluginsVector.elementAt(i));
             try {
               TreeVisualizePlugin plugin =
                 (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
@@ -927,8 +938,8 @@ public class AssociationsPanel extends AbstractPerspective implements
   public static void main(String[] args) {
 
     try {
-      final JFrame jf =
-        new JFrame("Weka Explorer: Associator");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Associator");
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);

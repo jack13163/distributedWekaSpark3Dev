@@ -32,7 +32,6 @@ import weka.gui.CloseableTabTitle;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GUIApplication;
 import weka.gui.PerspectiveInfo;
-import weka.gui.WekaFileChooser;
 import weka.gui.WorkbenchDefaults;
 import weka.gui.explorer.PreprocessPanel;
 import weka.knowledgeflow.Flow;
@@ -105,15 +104,8 @@ public class MainKFPerspective extends AbstractPerspective {
   /** The paste buffer */
   protected String m_pasteBuffer;
 
-  /** The file chooser for loading layout files */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
-    System.getProperty("user.dir")));
-
-  /**
-   * The file chooser for saving layout files (only supports saving as json .kf
-   * files
-   */
-  protected WekaFileChooser m_saveFileChooser = new WekaFileChooser(new File(
+  /** The file chooser for loading/saving layout files */
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** Manages template flows */
@@ -159,13 +151,11 @@ public class MainKFPerspective extends AbstractPerspective {
       if (((ExtensionFileFilter) f).getExtensions()[0].equals("."
         + JSONFlowLoader.EXTENSION)) {
         nativeF = f;
-        m_saveFileChooser.addChoosableFileFilter(nativeF);
       }
     }
 
     if (nativeF != null) {
       m_FileChooser.setFileFilter(nativeF);
-      m_saveFileChooser.setFileFilter(nativeF);
     }
   }
 

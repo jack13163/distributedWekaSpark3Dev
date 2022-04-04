@@ -250,8 +250,8 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     private static final long serialVersionUID = 1817942234610531627L;
 
     @Override
-    public Eval evaluate(double[] input) {
-      return Eval.TRUE;
+    public Predicate.Eval evaluate(double[] input) {
+      return Predicate.Eval.TRUE;
     }
 
     @Override
@@ -271,8 +271,8 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     private static final long serialVersionUID = -3647261386442860365L;
 
     @Override
-    public Eval evaluate(double[] input) {
-      return Eval.FALSE;
+    public Predicate.Eval evaluate(double[] input) {
+      return Predicate.Eval.FALSE;
     }
 
     @Override
@@ -294,10 +294,10 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     enum Operator {
       EQUAL("equal") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
-            Utils.eq(input[fieldIndex], value));
+            weka.core.Utils.eq(input[fieldIndex], value));
         }
 
         @Override
@@ -307,7 +307,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       NOTEQUAL("notEqual") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
             (input[fieldIndex] != value));
@@ -320,7 +320,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       LESSTHAN("lessThan") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
             (input[fieldIndex] < value));
@@ -333,7 +333,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       LESSOREQUAL("lessOrEqual") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
             (input[fieldIndex] <= value));
@@ -346,7 +346,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       GREATERTHAN("greaterThan") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
             (input[fieldIndex] > value));
@@ -359,7 +359,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       GREATEROREQUAL("greaterOrEqual") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(
             Utils.isMissingValue(input[fieldIndex]),
             (input[fieldIndex] >= value));
@@ -372,7 +372,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       ISMISSING("isMissing") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(false,
             Utils.isMissingValue(input[fieldIndex]));
         }
@@ -384,7 +384,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       ISNOTMISSING("isNotMissing") {
         @Override
-        Eval evaluate(double[] input, double value, int fieldIndex) {
+        Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(false,
             !Utils.isMissingValue(input[fieldIndex]));
         }
@@ -395,7 +395,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
         }
       };
 
-      abstract Eval evaluate(double[] input, double value,
+      abstract Predicate.Eval evaluate(double[] input, double value,
         int fieldIndex);
 
       abstract String shortName();
@@ -483,7 +483,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     }
 
     @Override
-    public Eval evaluate(double[] input) {
+    public Predicate.Eval evaluate(double[] input) {
       return m_operator.evaluate(input, m_value, m_fieldIndex);
     }
 
@@ -514,15 +514,15 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     enum BooleanOperator {
       OR("or") {
         @Override
-        Eval evaluate(ArrayList<Predicate> constituents,
+        Predicate.Eval evaluate(ArrayList<Predicate> constituents,
           double[] input) {
-          Eval currentStatus = Eval.FALSE;
+          Predicate.Eval currentStatus = Predicate.Eval.FALSE;
           for (Predicate p : constituents) {
-            Eval temp = p.evaluate(input);
-            if (temp == Eval.TRUE) {
+            Predicate.Eval temp = p.evaluate(input);
+            if (temp == Predicate.Eval.TRUE) {
               currentStatus = temp;
               break;
-            } else if (temp == Eval.UNKNOWN) {
+            } else if (temp == Predicate.Eval.UNKNOWN) {
               currentStatus = temp;
             }
           }
@@ -531,15 +531,15 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       AND("and") {
         @Override
-        Eval evaluate(ArrayList<Predicate> constituents,
+        Predicate.Eval evaluate(ArrayList<Predicate> constituents,
           double[] input) {
-          Eval currentStatus = Eval.TRUE;
+          Predicate.Eval currentStatus = Predicate.Eval.TRUE;
           for (Predicate p : constituents) {
-            Eval temp = p.evaluate(input);
-            if (temp == Eval.FALSE) {
+            Predicate.Eval temp = p.evaluate(input);
+            if (temp == Predicate.Eval.FALSE) {
               currentStatus = temp;
               break;
-            } else if (temp == Eval.UNKNOWN) {
+            } else if (temp == Predicate.Eval.UNKNOWN) {
               currentStatus = temp;
             }
           }
@@ -548,20 +548,20 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       XOR("xor") {
         @Override
-        Eval evaluate(ArrayList<Predicate> constituents,
+        Predicate.Eval evaluate(ArrayList<Predicate> constituents,
           double[] input) {
-          Eval currentStatus = constituents.get(0).evaluate(input);
-          if (currentStatus != Eval.UNKNOWN) {
+          Predicate.Eval currentStatus = constituents.get(0).evaluate(input);
+          if (currentStatus != Predicate.Eval.UNKNOWN) {
             for (int i = 1; i < constituents.size(); i++) {
-              Eval temp = constituents.get(i).evaluate(input);
-              if (temp == Eval.UNKNOWN) {
+              Predicate.Eval temp = constituents.get(i).evaluate(input);
+              if (temp == Predicate.Eval.UNKNOWN) {
                 currentStatus = temp;
                 break;
               } else {
                 if (currentStatus != temp) {
-                  currentStatus = Eval.TRUE;
+                  currentStatus = Predicate.Eval.TRUE;
                 } else {
-                  currentStatus = Eval.FALSE;
+                  currentStatus = Predicate.Eval.FALSE;
                 }
               }
             }
@@ -571,25 +571,25 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       SURROGATE("surrogate") {
         @Override
-        Eval evaluate(ArrayList<Predicate> constituents,
+        Predicate.Eval evaluate(ArrayList<Predicate> constituents,
           double[] input) {
-          Eval currentStatus = constituents.get(0).evaluate(input);
+          Predicate.Eval currentStatus = constituents.get(0).evaluate(input);
 
           int i = 1;
-          while (currentStatus == Eval.UNKNOWN) {
+          while (currentStatus == Predicate.Eval.UNKNOWN) {
             currentStatus = constituents.get(i).evaluate(input);
           }
 
           // return false if all our surrogates evaluate to unknown.
-          if (currentStatus == Eval.UNKNOWN) {
-            currentStatus = Eval.FALSE;
+          if (currentStatus == Predicate.Eval.UNKNOWN) {
+            currentStatus = Predicate.Eval.FALSE;
           }
 
           return currentStatus;
         }
       };
 
-      abstract Eval evaluate(ArrayList<Predicate> constituents,
+      abstract Predicate.Eval evaluate(ArrayList<Predicate> constituents,
         double[] input);
 
       private final String m_stringVal;
@@ -645,7 +645,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     }
 
     @Override
-    public Eval evaluate(double[] input) {
+    public Predicate.Eval evaluate(double[] input) {
       return m_booleanOperator.evaluate(m_components, input);
     }
 
@@ -695,7 +695,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     enum BooleanOperator {
       IS_IN("isIn") {
         @Override
-        Eval evaluate(double[] input, int fieldIndex, Array set,
+        Predicate.Eval evaluate(double[] input, int fieldIndex, Array set,
           Attribute nominalLookup) {
           if (set.getType() == Array.ArrayType.STRING) {
             String value = "";
@@ -717,21 +717,21 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       IS_NOT_IN("isNotIn") {
         @Override
-        Eval evaluate(double[] input, int fieldIndex, Array set,
+        Predicate.Eval evaluate(double[] input, int fieldIndex, Array set,
           Attribute nominalLookup) {
-          Eval result = IS_IN.evaluate(input, fieldIndex, set,
+          Predicate.Eval result = IS_IN.evaluate(input, fieldIndex, set,
             nominalLookup);
-          if (result == Eval.FALSE) {
-            result = Eval.TRUE;
-          } else if (result == Eval.TRUE) {
-            result = Eval.FALSE;
+          if (result == Predicate.Eval.FALSE) {
+            result = Predicate.Eval.TRUE;
+          } else if (result == Predicate.Eval.TRUE) {
+            result = Predicate.Eval.FALSE;
           }
 
           return result;
         }
       };
 
-      abstract Eval evaluate(double[] input, int fieldIndex,
+      abstract Predicate.Eval evaluate(double[] input, int fieldIndex,
         Array set, Attribute nominalLookup);
 
       private final String m_stringVal;
@@ -821,7 +821,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     }
 
     @Override
-    public Eval evaluate(double[] input) {
+    public Predicate.Eval evaluate(double[] input) {
       return m_operator.evaluate(input, m_fieldIndex, m_set, m_nominalLookup);
     }
 

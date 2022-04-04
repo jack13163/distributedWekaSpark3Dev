@@ -65,8 +65,8 @@ public interface OffscreenChartRenderer {
    * @return a BufferedImage containing the chart
    * @throws Exception if there is a problem rendering the chart
    */
-  BufferedImage renderXYLineChart(int width, int height, List<Instances> series,
-                                  String xAxis, String yAxis, List<String> optionalArgs) throws Exception;
+  BufferedImage renderXYLineChart(int width, int height, List<Instances> series, 
+      String xAxis, String yAxis, List<String> optionalArgs) throws Exception;
   
   /**
    * Render an XY scatter plot
@@ -83,8 +83,8 @@ public interface OffscreenChartRenderer {
    * @return a BufferedImage containing the chart
    * @throws Exception if there is a problem rendering the chart
    */
-  BufferedImage renderXYScatterPlot(int width, int height, List<Instances> series,
-                                    String xAxis, String yAxis, List<String> optionalArgs) throws Exception;
+  BufferedImage renderXYScatterPlot(int width, int height, List<Instances> series, 
+      String xAxis, String yAxis, List<String> optionalArgs) throws Exception;
   
   /**
    * Render histogram(s) (numeric attribute) or bar chart(s) (nominal attribute).
@@ -102,7 +102,7 @@ public interface OffscreenChartRenderer {
    * @return a BufferedImage containing the chart
    * @throws Exception if there is a problem rendering the chart
    */
-  BufferedImage renderHistogram(int width, int height, List<Instances> series,
-                                String attsToPlot, List<String> optionalArgs)
+  BufferedImage renderHistogram(int width, int height, List<Instances> series, 
+      String attsToPlot, List<String> optionalArgs)
     throws Exception;
 }

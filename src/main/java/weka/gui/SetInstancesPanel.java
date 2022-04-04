@@ -60,7 +60,7 @@ import weka.core.converters.URLSourcedLoader;
  * The client can then retrieve the instances by calling getInstances().
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 15301 $
+ * @version $Revision: 12095 $
  */
 public class SetInstancesPanel extends JPanel {
 
@@ -252,7 +252,7 @@ public class SetInstancesPanel extends JPanel {
    */
   public void closeFrame() {
     if (m_ParentFrame != null)
-      m_ParentFrame.dispose();
+      m_ParentFrame.setVisible(false);
   }
 
   /**
@@ -342,11 +342,13 @@ public class SetInstancesPanel extends JPanel {
       // load
       ((FileSourcedConverter) m_Loader).setFile(f);
       if (incremental) {
-        setInstances(m_Loader.getStructure(), m_showZeroInstancesAsUnknown);
+        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
+        setInstances(m_Loader.getStructure());
       } else {
         // If we are batch loading then we will know for sure that
         // the data has no instances
-        setInstances(m_Loader.getDataSet(), false);
+        m_Summary.setShowZeroInstancesAsUnknown(false);
+        setInstances(m_Loader.getDataSet());
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
@@ -375,9 +377,11 @@ public class SetInstancesPanel extends JPanel {
       // load
       ((URLSourcedLoader) m_Loader).setURL(u.toString());
       if (incremental) {
-        setInstances(m_Loader.getStructure(), m_showZeroInstancesAsUnknown);
+        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
+        setInstances(m_Loader.getStructure());
       } else {
-        setInstances(m_Loader.getDataSet(), false);
+        m_Summary.setShowZeroInstancesAsUnknown(false);
+        setInstances(m_Loader.getDataSet());
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this, "Couldn't read from URL:\n" + u,
@@ -387,22 +391,11 @@ public class SetInstancesPanel extends JPanel {
 
   /**
    * Updates the set of instances that is currently held by the panel.
-   *
+   * 
    * @param i a value of type 'Instances'
    */
   public void setInstances(Instances i) {
-    setInstances(i, true);
-  }
 
-  /**
-   * Updates the set of instances that is currently held by the panel.
-   * 
-   * @param i a value of type 'Instances'
-   * @param showZeroInstancesAsUnknown self-explanatory
-   */
-  public void setInstances(Instances i, boolean showZeroInstancesAsUnknown) {
-
-    m_Summary.setShowZeroInstancesAsUnknown(showZeroInstancesAsUnknown);
     m_Instances = i;
     m_Summary.setInstances(m_Instances);
 

@@ -43,5 +43,5 @@ public interface CallbackNotifierDelegate {
    * @throws Exception if a problem occurs
    */
     void notifyCallback(StepTaskCallback callback, StepTask taskExecuted,
-                        ExecutionResult result) throws Exception;
+      ExecutionResult result) throws Exception;
 }

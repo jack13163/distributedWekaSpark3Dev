@@ -32,7 +32,7 @@ import weka.core.Utils;
  * Class implementing a binary C4.5-like split on an attribute.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 14911 $
+ * @version $Revision: 10531 $
  */
 public class BinC45Split extends ClassifierSplitModel {
 
@@ -421,13 +421,17 @@ public class BinC45Split extends ClassifierSplitModel {
   public final void setSplitPoint(Instances allInstances) {
 
     double newSplitPoint = -Double.MAX_VALUE;
+    double tempValue;
+    Instance instance;
 
-    if ((allInstances.attribute(m_attIndex).isNumeric()) && (m_numSubsets > 1)) {
-      for (int i = 0; i < allInstances.numInstances(); i++) {
-        Instance instance = allInstances.instance(i);
-        double tempValue = instance.value(m_attIndex);
-        if (!Utils.isMissingValue(tempValue)) {
-          if ((tempValue > newSplitPoint) && (tempValue <= m_splitPoint)) {
+    if ((!allInstances.attribute(m_attIndex).isNominal()) && (m_numSubsets > 1)) {
+      Enumeration<Instance> enu = allInstances.enumerateInstances();
+      while (enu.hasMoreElements()) {
+        instance = enu.nextElement();
+        if (!instance.isMissing(m_attIndex)) {
+          tempValue = instance.value(m_attIndex);
+          if (Utils.gr(tempValue, newSplitPoint)
+            && Utils.smOrEq(tempValue, m_splitPoint)) {
             newSplitPoint = tempValue;
           }
         }
@@ -493,7 +497,7 @@ public class BinC45Split extends ClassifierSplitModel {
         } else {
           return 1;
         }
-      } else if (instance.value(m_attIndex) <= m_splitPoint) {
+      } else if (Utils.smOrEq(instance.value(m_attIndex), m_splitPoint)) {
         return 0;
       } else {
         return 1;
@@ -508,6 +512,6 @@ public class BinC45Split extends ClassifierSplitModel {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14911 $");
+    return RevisionUtils.extract("$Revision: 10531 $");
   }
 }

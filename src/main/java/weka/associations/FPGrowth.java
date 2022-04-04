@@ -150,7 +150,7 @@ import weka.core.Utils;
  * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 14539 $
+ * @version $Revision: 10172 $
  */
 public class FPGrowth extends AbstractAssociator implements
   AssociationRulesProducer, OptionHandler, TechnicalInformationHandler {
@@ -882,7 +882,7 @@ public class FPGrowth extends AbstractAssociator implements
             DefaultAssociationRule candidate = new DefaultAssociationRule(
               premise, consequence, metricToUse, supportPremise,
               supportConsequence, totalSupport, totalTransactions);
-            if (candidate.getPrimaryMetricValue() >= metricThreshold
+            if (candidate.getPrimaryMetricValue() > metricThreshold
               && candidate.getTotalSupport() >= lowerBoundMinSuppAsInstances
               && candidate.getTotalSupport() <= upperBoundMinSuppAsInstances) {
               // accept this rule
@@ -2411,7 +2411,7 @@ public class FPGrowth extends AbstractAssociator implements
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14539 $");
+    return RevisionUtils.extract("$Revision: 10172 $");
   }
 
   /**

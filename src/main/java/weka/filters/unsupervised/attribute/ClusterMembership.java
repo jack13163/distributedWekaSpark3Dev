@@ -28,7 +28,16 @@ import java.util.Vector;
 
 import weka.clusterers.AbstractDensityBasedClusterer;
 import weka.clusterers.DensityBasedClusterer;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -65,10 +74,10 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 14508 $
+ * @version $Revision: 10215 $
  */
 public class ClusterMembership extends Filter implements UnsupervisedFilter,
-  OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6675702504667714026L;
@@ -555,7 +564,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 10215 $");
   }
 
   /**

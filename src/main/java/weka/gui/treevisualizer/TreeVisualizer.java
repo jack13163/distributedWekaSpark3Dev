@@ -41,7 +41,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.Timer;
 
 import weka.core.Instances;
 import weka.core.Utils;
@@ -83,7 +91,7 @@ import weka.gui.visualize.VisualizeUtils;
  * Select Auto Scale to set the tree to it's optimal display size.
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 15301 $
+ * @version $Revision: 10253 $
  */
 public class TreeVisualizer extends PrintablePanel implements
   MouseMotionListener, MouseListener, ActionListener, ItemListener {
@@ -865,17 +873,9 @@ public class TreeVisualizer extends PrintablePanel implements
         if ((inst = m_nodes[m_focusNode].m_node.getInstances()) != null) {
           VisualizePanel pan = new VisualizePanel();
           pan.setInstances(inst);
-          JFrame nf = Utils.getWekaJFrame("", this);
+          JFrame nf = new JFrame();
+          nf.setSize(400, 300);
           nf.getContentPane().add(pan);
-          nf.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent e) {
-              nf.dispose();
-            }
-          });
-          nf.pack();
-          nf.setSize(800, 600);
-          nf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
           nf.setVisible(true);
         } else {
           JOptionPane.showMessageDialog(this, "Sorry, there is no "

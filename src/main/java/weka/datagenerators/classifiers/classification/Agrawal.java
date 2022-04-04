@@ -151,7 +151,7 @@ public class Agrawal extends ClassificationGenerator implements
      * @param loan
      */
     public long determineClass(double salary, double commission, int age,
-                               int elevel, int car, int zipcode, double hvalue, int hyears, double loan);
+      int elevel, int car, int zipcode, double hvalue, int hyears, double loan);
   }
 
   /**

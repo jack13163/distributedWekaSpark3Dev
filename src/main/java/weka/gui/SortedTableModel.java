@@ -21,7 +21,11 @@
 
 package weka.gui;
 
-import weka.core.InheritanceUtils;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -30,17 +34,14 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
+
+import weka.core.ClassDiscovery;
 
 /**
  * Represents a TableModel with sorting functionality.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 14293 $
+ * @version $Revision: 10216 $
  */
 
 public class SortedTableModel extends AbstractTableModel implements
@@ -388,7 +389,7 @@ public class SortedTableModel extends AbstractTableModel implements
     initializeIndices();
 
     // determine the column type: 0=string/other, 1=comparable
-    if (InheritanceUtils.hasInterface(Comparable.class,
+    if (ClassDiscovery.hasInterface(Comparable.class,
       getColumnClass(mSortColumn))) {
       columnType = 1;
     } else {

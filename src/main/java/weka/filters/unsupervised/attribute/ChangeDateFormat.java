@@ -27,8 +27,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -58,10 +67,10 @@ import weka.filters.UnsupervisedFilter;
  * <!-- options-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 14508 $
+ * @version $Revision: 12037 $
  */
 public class ChangeDateFormat extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
+  StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -1609344074013448737L;
@@ -343,9 +352,7 @@ public class ChangeDateFormat extends Filter implements UnsupervisedFilter,
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j == m_AttIndex.getIndex()) {
-        Attribute a = new Attribute(att.name(), getDateFormat().toPattern());
-        a.setWeight(att.weight());
-        newAtts.add(a);
+        newAtts.add(new Attribute(att.name(), getDateFormat().toPattern()));
       } else {
         newAtts.add((Attribute) att.copy());
       }
@@ -366,7 +373,7 @@ public class ChangeDateFormat extends Filter implements UnsupervisedFilter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 14508 $");
+    return RevisionUtils.extract("$Revision: 12037 $");
   }
 
   /**

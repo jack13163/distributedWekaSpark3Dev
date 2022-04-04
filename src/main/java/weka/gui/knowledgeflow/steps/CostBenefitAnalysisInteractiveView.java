@@ -94,8 +94,8 @@ public class CostBenefitAnalysisInteractiveView extends BaseInteractiveViewer {
         ((CostBenefitAnalysis)getStep()).getDatasets().remove(index);
       }
 
-      @Override public void entriesDeleted(List<String> names,
-                                           List<Integer> indexes) {
+      @Override public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
         List<Data> ds = ((CostBenefitAnalysis) getStep()).getDatasets();
         List<Data> toRemove = new ArrayList<Data>();
         for (int i : indexes) {

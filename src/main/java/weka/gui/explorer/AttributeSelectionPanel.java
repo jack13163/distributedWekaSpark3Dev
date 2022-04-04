@@ -21,6 +21,51 @@
 
 package weka.gui.explorer;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeEvaluator;
@@ -48,57 +93,11 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
-import weka.gui.WekaFileChooser;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.visualize.MatrixPanel;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  * This panel allows the user to select and configure an attribute evaluator and
@@ -110,7 +109,7 @@ import java.util.Vector;
  * results are accessible.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 15377 $
+ * @version $Revision: 13739 $
  */
 @PerspectiveInfo(ID = "weka.gui.explorer.attributeselectionpanel",
   title = "Select attributes",
@@ -351,7 +350,7 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
 
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeEvaluatorEditor
-                  .setValue(new CfsSubsetEval());
+                  .setValue(new weka.attributeSelection.CfsSubsetEval());
               } else {
                 // restore to what was there previously (if possible)
                 if (backup != null) {
@@ -645,11 +644,10 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
-    if (inst.classIndex() < -1) {
+    if (inst.classIndex() == -1) {
       m_ClassCombo.setSelectedIndex(attribNames.length - 1);
     } else {
-      m_ClassCombo.setSelectedIndex(inst.classIndex() + 1);
-      // m_ClassCombo.setSelectedIndex(inst.classIndex());
+      m_ClassCombo.setSelectedIndex(inst.classIndex());
     }
     m_ClassCombo.setEnabled(true);
   }
@@ -962,8 +960,9 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
       mp.setInstances(ti);
       String plotName = ti.relationName();
       final javax.swing.JFrame jf =
-              Utils.getWekaJFrame("Weka Attribute Selection Visualize: "
-                      + plotName, this);
+        new javax.swing.JFrame("Weka Attribute Selection Visualize: "
+          + plotName);
+      jf.setSize(800, 600);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(mp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -972,9 +971,6 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
-      jf.pack();
-      jf.setSize(800, 600);
-      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
       jf.setVisible(true);
     }
@@ -991,7 +987,7 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     BufferedWriter writer;
     ExtensionFileFilter filter;
 
-    fc = new WekaFileChooser();
+    fc = new JFileChooser();
     filter = new ExtensionFileFilter(".arff", "ARFF data files");
     fc.setFileFilter(filter);
     retVal = fc.showSaveDialog(this);

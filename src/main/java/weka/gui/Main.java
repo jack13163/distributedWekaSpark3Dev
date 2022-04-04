@@ -118,7 +118,7 @@ import weka.gui.visualize.VisualizePanel;
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 15257 $
+ * @version $Revision: 10434 $
  */
 public class Main extends JFrame implements OptionHandler {
 
@@ -129,7 +129,7 @@ public class Main extends JFrame implements OptionHandler {
    * DesktopPane with background image.
    * 
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15257 $
+   * @version $Revision: 10434 $
    */
   public static class BackgroundDesktopPane extends JDesktopPane {
 
@@ -181,7 +181,7 @@ public class Main extends JFrame implements OptionHandler {
    * Specialized JFrame class.
    * 
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15257 $
+   * @version $Revision: 10434 $
    */
   public static class ChildFrameSDI extends JFrame {
 
@@ -246,7 +246,7 @@ public class Main extends JFrame implements OptionHandler {
    * Specialized JInternalFrame class.
    * 
    * @author fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 15257 $
+   * @version $Revision: 10434 $
    */
   public static class ChildFrameMDI extends JInternalFrame {
 
@@ -346,19 +346,19 @@ public class Main extends JFrame implements OptionHandler {
   protected static LogWindow m_LogWindow = new LogWindow();
 
   /** filechooser for the TreeVisualizer. */
-  protected WekaFileChooser m_FileChooserTreeVisualizer = new WekaFileChooser(
+  protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for the GraphVisualizer. */
-  protected WekaFileChooser m_FileChooserGraphVisualizer = new WekaFileChooser(
+  protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for Plots. */
-  protected WekaFileChooser m_FileChooserPlot = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** filechooser for ROC curves. */
-  protected WekaFileChooser m_FileChooserROC = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooserROC = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   // GUI components
@@ -1026,7 +1026,7 @@ public class Main extends JFrame implements OptionHandler {
             filenames += filename;
             System.err.println("Loading instances from " + filename);
             try {
-              Reader r = new BufferedReader(new FileReader(filename));
+              Reader r = new java.io.BufferedReader(new FileReader(filename));
               Instances i = new Instances(r);
               i.setClassIndex(i.numAttributes() - 1);
               PlotData2D pd1 = new PlotData2D(i);
@@ -1294,7 +1294,7 @@ public class Main extends JFrame implements OptionHandler {
         @Override
         public void actionPerformed(ActionEvent evt) {
           BrowserHelper
-            .openURL(m_Self, "https://www.cs.waikato.ac.nz/~ml/weka/");
+            .openURL(m_Self, "http://www.cs.waikato.ac.nz/~ml/weka/");
         }
       });
 
@@ -1318,7 +1318,7 @@ public class Main extends JFrame implements OptionHandler {
       jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          BrowserHelper.openURL(m_Self, "https://waikato.github.io/weka-wiki/");
+          BrowserHelper.openURL(m_Self, "http://weka.wikispaces.com/");
         }
       });
 
@@ -1331,7 +1331,7 @@ public class Main extends JFrame implements OptionHandler {
         @Override
         public void actionPerformed(ActionEvent evt) {
           BrowserHelper
-            .openURL(m_Self, "https://sourceforge.net/projects/weka/");
+            .openURL(m_Self, "http://sourceforge.net/projects/weka/");
         }
       });
 
@@ -1928,7 +1928,7 @@ public class Main extends JFrame implements OptionHandler {
       }
 
       // setup splash screen
-      Main.addStartupListener(new StartUpListener() {
+      Main.addStartupListener(new weka.gui.beans.StartUpListener() {
         @Override
         public void startUpComplete() {
           m_MainCommandline = Main.getSingleton();
@@ -1949,7 +1949,7 @@ public class Main extends JFrame implements OptionHandler {
       Thread nt = new Thread() {
         @Override
         public void run() {
-          SplashWindow.invokeMethod(Main.class.getName(),
+          weka.gui.SplashWindow.invokeMethod(Main.class.getName(),
             "createSingleton", options);
         }
       };

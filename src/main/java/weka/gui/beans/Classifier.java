@@ -21,30 +21,10 @@
 
 package weka.gui.beans;
 
-import weka.classifiers.UpdateableBatchProcessor;
-import weka.classifiers.rules.ZeroR;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializationHelper;
-import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.core.xml.XStream;
-import weka.experiment.Task;
-import weka.experiment.TaskStatusInfo;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
-import weka.gui.WekaFileChooser;
-
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.beans.EventSetDescriptor;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,11 +43,32 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
+
+import weka.classifiers.UpdateableBatchProcessor;
+import weka.classifiers.rules.ZeroR;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
+import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.core.xml.XStream;
+import weka.experiment.Task;
+import weka.experiment.TaskStatusInfo;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
+
 /**
  * Bean that wraps around weka.classifiers
  * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 15230 $
+ * @version $Revision: 13476 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -150,7 +151,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   /** the extension for serialized models (binary Java serialization) */
   public final static String FILE_EXTENSION = "model";
 
-  private transient WekaFileChooser m_fileChooser = null;
+  private transient JFileChooser m_fileChooser = null;
 
   protected FileFilter m_binaryFilter = new ExtensionFileFilter("."
     + FILE_EXTENSION, "Binary serialized model file (*" + FILE_EXTENSION + ")");
@@ -296,7 +297,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   protected void setupFileChooser() {
     if (m_fileChooser == null) {
       m_fileChooser =
-        new WekaFileChooser(new File(System.getProperty("user.dir")));
+        new JFileChooser(new File(System.getProperty("user.dir")));
     }
 
     m_fileChooser.addChoosableFileFilter(m_binaryFilter);
@@ -1937,7 +1938,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       && m_log != null) {
       if (!Utils
         .getDontShowDialog("weka.gui.beans.ClassifierMultipleTestSetConnections")
-        && !GraphicsEnvironment.isHeadless()) {
+        && !java.awt.GraphicsEnvironment.isHeadless()) {
 
         String msg =
           "You have more than one incoming test set connection to \n"
@@ -2211,7 +2212,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           && saveTo.getAbsolutePath().toLowerCase()
             .endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION)) {
           SerializedModelSaver.saveKOML(saveTo, m_Classifier,
-            (m_trainingSet != null) ? m_trainingSet.stringFreeStructure() : null);
+            (m_trainingSet != null) ? new Instances(m_trainingSet, 0) : null);
           /*
            * Vector v = new Vector(); v.add(m_Classifier); if (m_trainingSet !=
            * null) { v.add(new Instances(m_trainingSet, 0)); } v.trimToSize();
@@ -2222,7 +2223,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
             .endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION)) {
 
           SerializedModelSaver.saveXStream(saveTo, m_Classifier,
-            (m_trainingSet != null) ? m_trainingSet.stringFreeStructure() : null);
+            (m_trainingSet != null) ? new Instances(m_trainingSet, 0) : null);
           /*
            * Vector v = new Vector(); v.add(m_Classifier); if (m_trainingSet !=
            * null) { v.add(new Instances(m_trainingSet, 0)); } v.trimToSize();
@@ -2234,7 +2235,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
               new FileOutputStream(saveTo)));
           os.writeObject(m_Classifier);
           if (m_trainingSet != null) {
-            Instances header = m_trainingSet.stringFreeStructure();
+            Instances header = new Instances(m_trainingSet, 0);
             os.writeObject(header);
           }
           os.close();
@@ -2328,7 +2329,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   }
 
   /**
-   * @param eventName of the event to check
+   * @param name of the event to check
    * @return true if eventName is one of the possible events that this component
    *         can generate
    */

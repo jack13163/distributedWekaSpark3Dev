@@ -42,7 +42,6 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
 import weka.gui.LookAndFeel;
-import weka.gui.WekaFileChooser;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
 
@@ -72,7 +71,6 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.JWindow;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -163,7 +161,7 @@ import java.util.Vector;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  * 
  * @author Mark Hall
- * @version $Revision: 15104 $
+ * @version $Revision: 13476 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -305,8 +303,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           while (enm.hasMoreElements()) {
             String root = enm.nextElement();
             String classes = roots.get(root);
-            HierarchyPropertyParser hpp =
-              new HierarchyPropertyParser();
+            weka.gui.HierarchyPropertyParser hpp =
+              new weka.gui.HierarchyPropertyParser();
             hpp.build(classes, ", ");
             // System.err.println(hpp.showTree());
             hpps.put(root, hpp);
@@ -436,10 +434,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       int realIndex = -1;
       int visibleIndex = -1;
-      Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(
+      @SuppressWarnings("unchecked")
+      Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(
         children);
       while (e.hasMoreElements()) {
-        InvisibleNode node = (InvisibleNode)e.nextElement();
+        InvisibleNode node = e.nextElement();
         if (node.isVisible()) {
           visibleIndex++;
         }
@@ -461,10 +460,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       }
 
       int count = 0;
-      Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(
+      @SuppressWarnings("unchecked")
+      Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(
         children);
       while (e.hasMoreElements()) {
-        InvisibleNode node = (InvisibleNode)e.nextElement();
+        InvisibleNode node = e.nextElement();
         if (node.isVisible()) {
           count++;
         }
@@ -732,7 +732,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    * Used for displaying the bean components and their visible connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 15104 $
+   * @version $Revision: 13476 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -850,7 +850,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      *
      * @param main the main KnowledgeFlow perspective.
      */
-    void setMainKFPerspective(MainKFPerspective main);
+    void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main);
   }
 
   /**
@@ -2181,7 +2181,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         // the root package for weka algorithms
         String rootPackage = "";
-        HierarchyPropertyParser hpp = null;
+        weka.gui.HierarchyPropertyParser hpp = null;
         Hashtable<String, HierarchyPropertyParser> hpps = null;
 
         // Is this a wrapper toolbar?
@@ -2391,7 +2391,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                   category = ((KFStep) ann).category();
 
                   // Does this category already exist?
-                  Enumeration<TreeNode> children = jtreeRoot.children();
+                  Enumeration<Object> children = jtreeRoot.children();
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();
                     if (child instanceof DefaultMutableTreeNode) {
@@ -2502,7 +2502,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                     + ((KFStep) ann).toolTipText() + "</font></html>";
 
                   // Does this category already exist?
-                  Enumeration<TreeNode> children = jtreeRoot.children();
+                  Enumeration<Object> children = jtreeRoot.children();
 
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();
@@ -3142,7 +3142,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   private int m_startX, m_startY;
 
   /** The file chooser for selecting layout files */
-  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
   protected class KFLogPanel extends LogPanel {
@@ -3630,7 +3630,6 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      */
 
     d.pack();
-    d.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     d.setVisible(true);
   }
 
@@ -3786,7 +3785,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               m_startX = m_oldX;
               m_startY = m_oldY;
               Graphics2D gx = (Graphics2D) layout.getGraphics();
-              gx.setXORMode(Color.white);
+              gx.setXORMode(java.awt.Color.white);
               // gx.drawRect(m_oldX, m_oldY, m_oldX, m_oldY);
               // gx.drawLine(m_startX, m_startY, m_startX, m_startY);
               gx.dispose();
@@ -4256,7 +4255,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   }
 
   private void processPackage(String tempBeanCompName,
-    HierarchyPropertyParser hpp, DefaultMutableTreeNode parentNode,
+    weka.gui.HierarchyPropertyParser hpp, DefaultMutableTreeNode parentNode,
     Map<String, DefaultMutableTreeNode> nodeTextIndex) {
     if (hpp.isLeafReached()) {
       // instantiate a bean and add it to the holderPanel
@@ -4416,13 +4415,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       }
 
       lnr.close();
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
       final JTextArea ta = new JTextArea(helpHolder.toString());
       ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
       ta.setEditable(false);
       final JScrollPane sp = new JScrollPane(ta);
-      jf.getContentPane().add(sp, BorderLayout.CENTER);
+      jf.getContentPane().add(sp, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
         public void windowClosing(java.awt.event.WindowEvent e) {
@@ -4894,10 +4893,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     }
 
     // Send to perspective menu item?
-    if (bc instanceof Loader && m_perspectives.size() > 1
+    if (bc instanceof weka.gui.beans.Loader && m_perspectives.size() > 1
       && m_perspectiveDataLoadThread == null) {
       final weka.core.converters.Loader theLoader =
-        ((Loader) bc)
+        ((weka.gui.beans.Loader) bc)
           .getLoader();
 
       boolean ok = true;
@@ -5566,7 +5565,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       BeanInstance temp = (BeanInstance) inputs.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
-          Color.red);
+          java.awt.Color.red);
       }
     }
 
@@ -5575,7 +5574,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       BeanInstance temp = (BeanInstance) outputs.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
-          Color.green);
+          java.awt.Color.green);
       }
     }
 
@@ -5839,7 +5838,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_oldY = m_startY;
 
         Graphics2D gx = (Graphics2D) m_beanLayout.getGraphics();
-        gx.setXORMode(Color.white);
+        gx.setXORMode(java.awt.Color.white);
         gx.drawLine(m_startX, m_startY, m_startX, m_startY);
         gx.dispose();
         m_mode = CONNECTING;
@@ -5960,7 +5959,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   }
 
   private void highlightSubFlow(int startX, int startY, int endX, int endY) {
-    Rectangle r = new Rectangle((startX < endX) ? startX
+    java.awt.Rectangle r = new java.awt.Rectangle((startX < endX) ? startX
       : endX, (startY < endY) ? startY : endY, Math.abs(startX - endX),
       Math.abs(startY - endY));
     // System.err.println(r);
@@ -6012,7 +6011,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     int bx = upperLeftX + ((lowerRightX - upperLeftX) / 2);
     int by = upperLeftY + ((lowerRightY - upperLeftY) / 2);
 
-    new Rectangle(upperLeftX, upperLeftY, lowerRightX, lowerRightY);
+    new java.awt.Rectangle(upperLeftX, upperLeftY, lowerRightX, lowerRightY);
 
     /*
      * BufferedImage subFlowPreview = null; try { subFlowPreview =
@@ -6335,7 +6334,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   protected void integrateFlow(Vector<Object> beans,
     Vector<BeanConnection> connections, boolean replace,
     boolean notReplaceAndSourcedFromBinary) {
-    Color bckC = getBackground();
+    java.awt.Color bckC = getBackground();
     m_bcSupport = new BeanContextSupport();
     m_bcSupport.setDesignTime(true);
 
@@ -6514,8 +6513,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         // under OS X using java.awt.TexturePaint - unfortunately
         // TexturePaint doesn't implement Serializable.
         ((Visible) (tempB.getBean())).getVisual().setBackground(
-          Color.white);
-        ((JComponent) (tempB.getBean())).setBackground(Color.white);
+          java.awt.Color.white);
+        ((JComponent) (tempB.getBean())).setBackground(java.awt.Color.white);
       }
     }
   }
@@ -6525,7 +6524,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   }
 
   protected boolean saveLayout(File sFile, int tabIndex, boolean isUndoPoint) {
-    Color bckC = getBackground();
+    java.awt.Color bckC = getBackground();
 
     Vector<Object> beans = BeanInstance.getBeanInstances(tabIndex);
     detachFromLayout(beans);
@@ -6728,7 +6727,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /*
      * if (m_UserComponentsInXML) ext = USERCOMPONENTS_XML_EXTENSION;
      */
-    File sFile = new File(WekaPackageManager.WEKA_HOME.getPath()
+    File sFile = new File(weka.core.WekaPackageManager.WEKA_HOME.getPath()
       + File.separator + "knowledgeFlow" + File.separator + "userComponents");
     /*
      * new File(System.getProperty("user.home") +File.separator +
@@ -6831,7 +6830,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           // if (VISIBLE_PERSPECTIVES.size() > 0) {
           weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
             "Saving preferences for selected perspectives...");
-          sFile = new File(WekaPackageManager.PROPERTIES_DIR
+          sFile = new File(weka.core.WekaPackageManager.PROPERTIES_DIR
             .toString() + File.separator + "VisiblePerspectives.props");
           try {
             FileWriter f = new FileWriter(sFile);
@@ -7030,8 +7029,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       // uncomment to disable the memory management:
       // m_Memory.setEnabled(false);
 
-      final JFrame jf = new JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
+      final javax.swing.JFrame jf = new javax.swing.JFrame();
+      jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
       // final KnowledgeFlowApp tm = new KnowledgeFlowApp();
       // m_knowledgeFlow = new KnowledgeFlowApp(true);
@@ -7050,7 +7049,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           .getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 
-      jf.getContentPane().add(m_knowledgeFlow, BorderLayout.CENTER);
+      jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       jf.setSize(1024, 768);

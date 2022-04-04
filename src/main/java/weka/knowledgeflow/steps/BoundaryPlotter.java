@@ -134,7 +134,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
   protected List<DensityBasedClusterer> m_clustererTemplates;
 
   /** Copies of trained classifier to use in parallel for prediction */
-  protected Classifier[] m_threadClassifiers;
+  protected weka.classifiers.Classifier[] m_threadClassifiers;
 
   /** Copies of trained clusterer to use in parallel for prediction */
   protected weka.clusterers.Clusterer[] m_threadClusterers;
@@ -394,9 +394,9 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
       if (info instanceof weka.knowledgeflow.steps.Classifier) {
         m_classifierTemplates.add(((weka.knowledgeflow.steps.Classifier) info)
           .getClassifier());
-      } else if (info instanceof Clusterer) {
+      } else if (info instanceof weka.knowledgeflow.steps.Clusterer) {
         weka.clusterers.Clusterer c =
-          ((Clusterer) info).getClusterer();
+          ((weka.knowledgeflow.steps.Clusterer) info).getClusterer();
         if (!(c instanceof DensityBasedClusterer)) {
           throw new WekaException("Clusterer "
             + c.getClass().getCanonicalName()
@@ -626,7 +626,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
       m.fillRect(0, 0, m_imageWidth, m_imageHeight);
 
       Classifier toTrainClassifier = null;
-      DensityBasedClusterer toTrainClusterer = null;
+      weka.clusterers.DensityBasedClusterer toTrainClusterer = null;
       if (classifier != null) {
         toTrainClassifier =
           (Classifier) AbstractClassifier.makeCopy(classifier);
@@ -635,7 +635,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
         int tempClassIndex = trainingData.classIndex();
         trainingData.setClassIndex(-1);
         toTrainClusterer =
-          (DensityBasedClusterer) AbstractClusterer
+          (DensityBasedClusterer) weka.clusterers.AbstractClusterer
             .makeCopy((weka.clusterers.Clusterer) clust);
         toTrainClusterer.buildClusterer(trainingData);
         trainingData.setClassIndex(tempClassIndex);
@@ -1045,8 +1045,8 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
     protected int m_imageHeight;
     protected double m_pixWidth;
     protected double m_pixHeight;
-    protected Classifier m_classifier;
-    protected DensityBasedClusterer m_clusterer;
+    protected weka.classifiers.Classifier m_classifier;
+    protected weka.clusterers.DensityBasedClusterer m_clusterer;
     protected DataGenerator m_dataGenerator;
     protected Instances m_trainingData;
     protected double m_minX;

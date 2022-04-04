@@ -74,7 +74,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision: 10210 $
- * @see Sourcable
+ * @see weka.filters.Sourcable
  */
 public class CheckSource implements OptionHandler, RevisionHandler {
 
